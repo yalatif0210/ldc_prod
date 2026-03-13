@@ -18,11 +18,11 @@ services:
       timeout: 3s
       retries: 10
 
-  backend:
+  ldc_backend:
     build:
-      context: ./backend
+      context: ./ldc_backend
       dockerfile: Dockerfile
-    container_name: backend
+    container_name: ldc_backend
     restart: unless-stopped
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://lab_db:5432/${POSTGRES_DB:-appdb}
@@ -36,11 +36,11 @@ services:
     healthcheck:
       disable: true
 
-  frontend:
+  ldc_frontend:
     build:
-      context: ./frontend
+      context: ./ldc_frontend
       dockerfile: Dockerfile
-    container_name: frontend
+    container_name: ldc_frontend
     restart: unless-stopped
     environment:
       DOMAIN: ${DOMAIN}
@@ -50,7 +50,7 @@ services:
       GRAPHQL_END_POINT: ${GRAPHQL_END_POINT}
       API_REST_END_POINT: ${API_REST_END_POINT}
     depends_on:
-      - backend
+      - ldc_backend
     healthcheck:
       disable: true
     ports:
