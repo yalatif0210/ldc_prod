@@ -32,7 +32,8 @@ docker run --rm \
     --domain "$DOMAIN" \
     --rsa-key-size 4096 \
     --agree-tos \
-    --no-eff-email
+    --no-eff-email \
+    --keep-until-expiring
 
 # ── 4. Redémarrer le conteneur stoppé ────────────────────────────────────────
 if [ -n "$PORT80" ]; then
