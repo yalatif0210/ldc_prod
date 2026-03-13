@@ -6,7 +6,7 @@ import { ErrorCode } from '@shared/components/error-code/error-code';
   template: `
     <error-code
       code="404"
-      title="Page not found!"
+      title="Page not found !"
       message="This is not the web page you are looking for."
     />
   `,
