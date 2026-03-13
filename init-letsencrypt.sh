@@ -39,7 +39,7 @@ docker run --rm \
   -p 443:443 \
   certbot/certbot:latest certonly \
     --standalone \
-    --preferred-challenges tls-sni-01,tls-alpn-01 \
+    --preferred-challenges tls-alpn-01 \
     --email "$EMAIL" \
     --domain "$DOMAIN" \
     --rsa-key-size 4096 \
