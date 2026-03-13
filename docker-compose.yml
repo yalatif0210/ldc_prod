@@ -12,6 +12,9 @@ services:
     volumes:
       - lab_db_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - default
+      - shared_db_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
       interval: 5s
@@ -64,3 +67,8 @@ volumes:
   lab_db_data:
   certbot_certs:
     external: true  # Créé par init-letsencrypt.sh — même nom partagé avec certbot
+
+networks:
+  default:
+  shared_db_net:
+    external: true  # docker network create shared_db_net  +  docker network connect shared_db_net pgadmin
