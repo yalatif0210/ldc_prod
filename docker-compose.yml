@@ -63,3 +63,4 @@ services:
 volumes:
   lab_db_data:
   certbot_certs:
+    external: true  # Créé par init-letsencrypt.sh — même nom partagé avec certbot
