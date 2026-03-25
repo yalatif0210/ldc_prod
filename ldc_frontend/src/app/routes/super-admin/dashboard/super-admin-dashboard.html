@@ -1,0 +1,120 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar">
+        <h2 class="th2">Tableau de bord Super Admin</h2>
+      </mat-card-content>
+
+      <!-- Global Stats -->
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding: 40px;">
+            <mat-spinner diameter="48" />
+          </div>
+        } @else if (error) {
+          <p style="color:red; text-align:center;">Erreur lors du chargement des statistiques.</p>
+        } @else if (stats) {
+          <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 16px; padding: 16px 0;">
+            @for (card of statCards; track card.key) {
+              <mat-card [style.border-left]="'4px solid ' + card.color">
+                <mat-card-content style="display:flex; align-items:center; gap:16px; padding:16px;">
+                  <mat-icon [style.color]="card.color" style="font-size:36px; width:36px; height:36px;">{{ card.icon }}</mat-icon>
+                  <div>
+                    <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:0.5px;">{{ card.label }}</div>
+                    <div style="font-size:28px; font-weight:700; color:#333;">{{ stats[card.key] }}</div>
+                  </div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-card-content>
+
+      <mat-divider />
+
+      <!-- Filtered Stats -->
+      <mat-card-content style="padding-top: 16px;">
+        <h3 style="margin: 0 0 16px; font-size:14px; font-weight:600; color:#555; text-transform:uppercase; letter-spacing:0.5px;">
+          Rapports par filtre
+        </h3>
+
+        <!-- Filter Bar -->
+        <div style="display:flex; flex-wrap:wrap; gap:16px; align-items:flex-end; margin-bottom:16px;">
+
+          <mat-form-field appearance="outline" style="min-width:180px;">
+            <mat-label>Période</mat-label>
+            <mat-select [(ngModel)]="selectedPeriodId">
+              <mat-option [value]="null">Toutes les périodes</mat-option>
+              @for (period of periods; track period.id) {
+                <mat-option [value]="period.id">{{ period.periodName }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" style="min-width:180px;">
+            <mat-label>Structure</mat-label>
+            <mat-select [(ngModel)]="selectedStructureId">
+              <mat-option [value]="null">Toutes les structures</mat-option>
+              @for (structure of structures; track structure.id) {
+                <mat-option [value]="structure.id">{{ structure.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" style="min-width:180px;">
+            <mat-label>Équipement</mat-label>
+            <mat-select [(ngModel)]="selectedEquipmentId">
+              <mat-option [value]="null">Tous les équipements</mat-option>
+              @for (eq of equipments; track eq.id) {
+                <mat-option [value]="eq.id">{{ eq.name }}</mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+
+          <div style="display:flex; gap:8px; padding-bottom:20px;">
+            <button mat-flat-button color="primary" (click)="applyFilters()">
+              <mat-icon>search</mat-icon>
+              Appliquer
+            </button>
+            <button mat-stroked-button (click)="resetFilters()">
+              <mat-icon>clear</mat-icon>
+              Réinitialiser
+            </button>
+          </div>
+        </div>
+
+        <!-- Filtered Result -->
+        @if (filteredLoading) {
+          <div style="display:flex; justify-content:center; padding: 24px;">
+            <mat-spinner diameter="36" />
+          </div>
+        } @else if (filteredError) {
+          <p style="color:red;">Erreur lors du chargement des statistiques filtrées.</p>
+        } @else if (filteredStats) {
+          <div style="font-size:11px; color:#888; margin-bottom:12px; line-height:1.8;">
+            <strong>Période :</strong> {{ filteredStats.periodLabel }} &nbsp;|&nbsp;
+            <strong>Structure :</strong> {{ filteredStats.structureLabel }} &nbsp;|&nbsp;
+            <strong>Équipement :</strong> {{ filteredStats.equipmentLabel }}
+          </div>
+          <div style="display:flex; gap:16px; flex-wrap:wrap;">
+            <mat-card style="border-left:4px solid #f57c00; min-width:180px;">
+              <mat-card-content style="padding:16px;">
+                <div style="font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.5px;">Rapports correspondants</div>
+                <div style="font-size:32px; font-weight:700; color:#f57c00;">{{ filteredStats.reportCount }}</div>
+              </mat-card-content>
+            </mat-card>
+            @for (entry of filteredStats.reportsByStatus | keyvalue; track entry.key) {
+              <mat-card style="border-left:4px solid #546e7a; min-width:180px;">
+                <mat-card-content style="padding:16px;">
+                  <div style="font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.5px;">{{ entry.key }}</div>
+                  <div style="font-size:32px; font-weight:700; color:#546e7a;">{{ entry.value }}</div>
+                </mat-card-content>
+              </mat-card>
+            }
+          </div>
+        }
+      </mat-card-content>
+
+    </mat-card>
+  </div>
+</div>

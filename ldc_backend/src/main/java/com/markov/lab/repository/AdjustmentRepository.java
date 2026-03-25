@@ -4,5 +4,5 @@ import com.markov.lab.entity.Adjustment;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AdjustmentRepository extends JpaRepository<Adjustment, Long> {
-
+    void deleteByIntrantMvtData_Report_Id(Long reportId);
 }

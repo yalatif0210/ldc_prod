@@ -1,0 +1,221 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar">
+        <h2 class="th2">Gestion des Rapports</h2>
+      </mat-card-content>
+
+      <mat-card-content style="padding-bottom: 8px; margin-bottom: 20px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap">
+          <select
+            [(ngModel)]="filterStatus"
+            style="
+              height: 36px;
+              padding: 0 8px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 13px;
+              min-width: 150px;
+            "
+          >
+            <option value="">Tous les statuts</option>
+            @for (s of statusOptions; track s.id) {
+            <option [value]="s.id">{{ s.label }}</option>
+            }
+          </select>
+          <form [formGroup]="form!">
+            <select
+              formControlName="region"
+              style="
+                height: 36px;
+                padding: 0 8px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                font-size: 13px;
+                min-width: 150px;
+              "
+            >
+              <option value="">Toutes les regions</option>
+              @for (st of regions; track st.id) {
+              <option [value]="st.id">{{ st.name }}</option>
+              }
+            </select>
+          </form>
+          <select
+            [(ngModel)]="filterStructureId"
+            style="
+              height: 36px;
+              padding: 0 8px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 13px;
+              min-width: 150px;
+            "
+          >
+            <option value="">Toutes les structures</option>
+            @for (st of filteredPlatforms; track st.id) {
+            <option [value]="st.id">{{ st.name }}</option>
+            }
+          </select>
+
+          <select
+            [(ngModel)]="filterPeriodId"
+            style="
+              height: 36px;
+              padding: 0 8px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              font-size: 13px;
+              min-width: 150px;
+            "
+          >
+            <option value="">Toutes les périodes</option>
+            @for (p of periods; track p.id) {
+            <option [value]="p.id">{{ p.periodName }}</option>
+            }
+          </select>
+
+          <button
+            mat-raised-button
+            color="primary"
+            (click)="applyFilter()"
+            style="height: 36px; font-size: 13px"
+          >
+            <mat-icon style="font-size: 16px; height: 16px; width: 16px; margin-right: 4px">
+              filter_list
+            </mat-icon>
+            Filtrer
+          </button>
+        </div>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+        <div style="display: flex; justify-content: center; padding: 40px">
+          <mat-spinner diameter="40" />
+        </div>
+        } @else {
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px">
+          <thead>
+            <tr style="background: #f0f0f0; text-align: left">
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">ID</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Créé le</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Mois de</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Période</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Structure</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Entité</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Account ID</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Nom utilisateur</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Téléphone</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Equipement</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Statut</th>
+              <th style="padding: 10px 8px; border-bottom: 2px solid #ddd">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (report of paginatedReports; track report.id) {
+            <tr style="border-bottom: 1px solid #eee">
+              @if (editingId === report.id) {
+              <td style="padding: 8px">{{ report.id }}</td>
+              <td style="padding: 8px">{{ report.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td style="padding: 8px">{{ report.period?.month?.month }}</td>
+              <td style="padding: 8px">{{ report.period?.periodName }}</td>
+              <td style="padding: 8px">{{ report.account?.structures[0]?.name }}</td>
+              <td style="padding: 8px">{{ report.account?.role?.role.split('_USER')[0] }}</td>
+              <td style="padding: 8px">{{ report.account?.id }}</td>
+              <td style="padding: 8px">{{ report.account?.user?.name }}</td>
+              <td style="padding: 8px">{{ report.account?.user?.phone }}</td>
+              <td style="padding: 8px">{{ report.equipment?.name }}</td>
+              <td style="padding: 8px">
+                <mat-form-field appearance="outline" style="font-size: 12px; width: 140px">
+                  <mat-select [(ngModel)]="editingData.statusId">
+                    @for (s of statusOptions; track s.id) {
+                    <mat-option [value]="s.id">{{ s.label }}</mat-option>
+                    }
+                  </mat-select>
+                </mat-form-field>
+              </td>
+              <td style="padding: 8px">
+                <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="saveStatus(report)"
+                  title="Enregistrer"
+                >
+                  <mat-icon>save</mat-icon>
+                </button>
+                <button mat-icon-button (click)="cancelEdit()" title="Annuler">
+                  <mat-icon>close</mat-icon>
+                </button>
+              </td>
+              } @else {
+              <td style="padding: 8px">{{ report.id }}</td>
+              <td style="padding: 8px">{{ report.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+              <td style="padding: 8px">{{ report.period?.month?.month }}</td>
+              <td style="padding: 8px">{{ report.period?.periodName }}</td>
+              <td style="padding: 8px">{{ report.account?.structures[0]?.name }}</td>
+              <td style="padding: 8px">{{ report.account?.role?.role.split('_USER')[0] }}</td>
+              <td style="padding: 8px">{{ report.account?.id }}</td>
+              <td style="padding: 8px">{{ report.account?.user?.name }}</td>
+              <td style="padding: 8px">{{ report.account?.user?.phone }}</td>
+              <td style="padding: 8px">{{ report.equipment?.name }}</td>
+              <td style="padding: 10px 8px">
+                <span
+                  [ngStyle]="getStatusStyle(report.status?.id ?? report.statusId)"
+                  style="padding: 2px 8px; border-radius: 12px; font-size: 11px;"
+                >
+                  {{ report.status?.status }}
+                </span>
+              </td>
+              <td style="padding: 10px 8px">
+                <button
+                  mat-icon-button
+                  color="accent"
+                  (click)="startEdit(report)"
+                  title="Modifier statut"
+                >
+                  <mat-icon>edit</mat-icon>
+                </button>
+                <!-- <button
+                  mat-icon-button
+                  color="primary"
+                  (click)="reassign(report)"
+                  title="Réassigner"
+                >
+                  <mat-icon>swap_horiz</mat-icon>
+                </button> -->
+                <button
+                  mat-icon-button
+                  color="warn"
+                  (click)="deleteReport(report)"
+                  title="Supprimer"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </td>
+              }
+            </tr>
+            } @empty {
+            <tr>
+              <td colspan="5" style="text-align: center; padding: 30px; color: #999">
+                Aucun rapport disponible
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+        <mat-paginator
+          [length]="filteredReports.length"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex"
+          [pageSizeOptions]="pageSizeOptions"
+          (page)="onPageChange($event)"
+          style="margin-top: 8px"
+          aria-label="Sélectionner une page"
+        />
+
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

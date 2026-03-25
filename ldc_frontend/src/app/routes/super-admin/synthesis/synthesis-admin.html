@@ -1,0 +1,66 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Gestion des Synthèses</h2>
+        <button mat-icon-button color="primary" (click)="loadData()" title="Rafraîchir">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Créé le</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Statut</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Compte</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Période</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (report of paginatedReports; track report.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px;">{{ report.id }}</td>
+                  <td style="padding:10px 8px;">{{ report.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                  <td style="padding:10px 8px;">
+                    <span style="padding:2px 8px; border-radius:12px; font-size:11px; background:#e3f2fd; color:#1565c0;">
+                      {{ report.status ?? report.statusId }}
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px;">{{ report.accountId ?? report.account?.id }}</td>
+                  <td style="padding:10px 8px;">{{ report.period?.periodName ?? report.periodId }}</td>
+                  <td style="padding:10px 8px;">
+                    <button mat-icon-button color="warn" (click)="deleteReport(report)" title="Supprimer">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:30px; color:#999;">Aucune synthèse disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="reports.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

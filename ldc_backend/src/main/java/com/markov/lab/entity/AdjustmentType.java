@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,6 +22,7 @@ public class AdjustmentType {
 
     private String type;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "adjustmentType")
     private List<Adjustment> adjustments;
 }

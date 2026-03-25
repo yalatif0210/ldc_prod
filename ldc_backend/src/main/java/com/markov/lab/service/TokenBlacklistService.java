@@ -30,4 +30,12 @@ public class TokenBlacklistService {
         Instant now = Instant.now();
         blacklist.entrySet().removeIf(entry -> entry.getValue().isBefore(now));
     }
+
+    public void purgeAll() {
+        blacklist.clear();
+    }
+
+    public long size() {
+        return blacklist.size();
+    }
 }

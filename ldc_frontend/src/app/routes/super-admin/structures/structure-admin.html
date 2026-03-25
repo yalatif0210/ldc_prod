@@ -1,0 +1,146 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="margin-bottom: 20px;">
+        <h2 class="th2">Gestion des Structures</h2>
+      </mat-card-content>
+
+      <mat-card-content style="padding-bottom: 8px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+          <select
+            [(ngModel)]="filterRegion"
+            (ngModelChange)="onRegionChange()"
+            style="height:36px; padding:0 8px; border:1px solid #ccc; border-radius:4px; font-size:13px; min-width:160px;"
+          >
+            <option value="">Toutes les régions</option>
+            @for (r of regions; track r.id) {
+              <option [value]="r.id">{{ r.name }}</option>
+            }
+          </select>
+
+          <select
+            [(ngModel)]="filterDistrict"
+            (ngModelChange)="applyFilter()"
+            style="height:36px; padding:0 8px; border:1px solid #ccc; border-radius:4px; font-size:13px; min-width:160px;"
+          >
+            <option value="">Tous les districts</option>
+            @for (d of filteredDistricts; track d.id) {
+              <option [value]="d.id">{{ d.name }}</option>
+            }
+          </select>
+
+          <input
+            [(ngModel)]="filterName"
+            (ngModelChange)="applyFilter()"
+            placeholder="Rechercher une structure..."
+            style="height:36px; padding:0 8px; border:1px solid #ccc; border-radius:4px; font-size:13px; min-width:200px;"
+          />
+
+          <select
+            [(ngModel)]="filterActive"
+            (ngModelChange)="applyFilter()"
+            style="height:36px; padding:0 8px; border:1px solid #ccc; border-radius:4px; font-size:13px; min-width:140px;"
+          >
+            <option value="">Tous les statuts</option>
+            <option value="true">Active</option>
+            <option value="false">Inactive</option>
+          </select>
+
+          <button
+            mat-raised-button
+            (click)="resetFilters()"
+            style="height:36px; font-size:13px;"
+          >
+            <mat-icon style="font-size:16px; height:16px; width:16px; margin-right:4px;">clear</mat-icon>
+            Réinitialiser
+          </button>
+        </div>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:80px;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:200px;">Région</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:200px;">District</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Nom</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Équipements</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:140px;">Statut</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:120px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (structure of paginatedStructures; track structure.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px;">{{ structure.id }}</td>
+                  <td style="padding:10px 8px;">{{ structure.district?.region?.name ?? 'N/A' }}</td>
+                  <td style="padding:10px 8px;">{{ structure.district?.name ?? 'N/A' }}</td>
+                  <td style="padding:10px 8px; font-weight:500;">{{ structure.name }}</td>
+                  <td style="padding:10px 8px;">
+                    <div style="display:flex; flex-wrap:wrap; gap:4px;">
+                      @for (eq of structure.equipments; track eq.id; let i = $index) {
+                        <span
+                          [ngStyle]="getEquipmentStyle(i)"
+                          style="padding:2px 8px; border-radius:12px; font-size:11px; display:inline-flex; align-items:center; gap:4px;"
+                        >
+                          {{ eq.name }}
+                          <button
+                            mat-icon-button
+                            style="width:16px; height:16px; line-height:16px; padding:0;"
+                            (click)="removeEquipment(structure, eq)"
+                            title="Retirer cet équipement"
+                          >
+                            <mat-icon style="font-size:12px; width:12px; height:12px; line-height:12px;">close</mat-icon>
+                          </button>
+                        </span>
+                      } @empty {
+                        <span style="color:#999; font-size:11px;">—</span>
+                      }
+                    </div>
+                  </td>
+                  <td style="padding:10px 8px;">
+                    <span [style.background]="structure.active ? '#e8f5e9' : '#ffebee'"
+                          [style.color]="structure.active ? '#2e7d32' : '#c62828'"
+                          style="padding:3px 12px; border-radius:12px; font-size:11px; font-weight:600;">
+                      {{ structure.active ? 'Active' : 'Inactive' }}
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px;">
+                    <button mat-raised-button
+                            [color]="structure.active ? 'warn' : 'primary'"
+                            (click)="toggle(structure)"
+                            style="font-size:11px;">
+                      <mat-icon style="font-size:16px; margin-right:4px;">
+                        {{ structure.active ? 'block' : 'check_circle' }}
+                      </mat-icon>
+                      {{ structure.active ? 'Désactiver' : 'Activer' }}
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="6" style="text-align:center; padding:30px; color:#999;">Aucune structure disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="filteredStructures.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

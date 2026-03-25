@@ -22,14 +22,18 @@ public class Equipment {
     private String name;
 
     @ManyToMany(mappedBy = "equipments")
+    @JsonIgnore
     private List<Structure> structures;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "equipment", fetch = FetchType.LAZY)
     private List<Intrant> intrants;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "equipment", fetch = FetchType.LAZY)
     private List<Information> informationList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "equipment", fetch = FetchType.LAZY)
     private List<Report> reports;
 

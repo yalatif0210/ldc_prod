@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -31,6 +32,7 @@ public class Information {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
+    @JsonIgnore
     @OneToMany(mappedBy = "information")
     private List<LabActivityData> labActivityData;
 

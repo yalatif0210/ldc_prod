@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -36,9 +37,11 @@ public class Report {
     @JoinColumn(name= "equipment_id")
     private Equipment equipment;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "report")
     private List<LabActivityData> labActivityData;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "report")
     private List<IntrantMvtData> intrantMvtData;
 

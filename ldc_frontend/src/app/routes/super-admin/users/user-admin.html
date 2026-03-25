@@ -1,0 +1,116 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="margin-bottom: 20px">
+        <h2 class="th2">Gestion des Utilisateurs</h2>
+      </mat-card-content>
+
+      <mat-card-content style="padding-bottom: 8px;">
+        <mat-form-field appearance="outline" style="min-width: 300px;">
+          <mat-label>Rechercher un utilisateur</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applyFilter()" placeholder="Nom, identifiant, rôle, structure..." />
+          @if (searchTerm) {
+            <button matSuffix mat-icon-button (click)="searchTerm = ''; applyFilter()" title="Effacer">
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </mat-form-field>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Nom</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Identifiant</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Structure</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Téléphone</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Rôle</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Statut</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (account of paginatedAccounts; track account.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px;">{{ account.id }}</td>
+                  <td style="padding:10px 8px;">{{ account.user?.name ?? account.name }}</td>
+                  <td style="padding:10px 8px;">{{ account.user?.username ?? account.username }}</td>
+                  <td style="padding:10px 8px;">{{ getAccountZone(account) }}</td>
+                  <td style="padding:10px 8px;">{{ account.user?.phone ?? account.phone }}</td>
+                  <td style="padding:10px 8px;">
+                    @if (editingId === account.id) {
+                      <mat-form-field appearance="outline" style="font-size:12px; width:200px;">
+                        <mat-select [(ngModel)]="editingRoleId">
+                          @for (role of roles; track role.id) {
+                            <mat-option [value]="role.id">{{ role.role }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                      <button mat-icon-button color="primary" (click)="saveRole(account)" title="Enregistrer">
+                        <mat-icon>save</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="cancelRoleEdit()" title="Annuler">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    } @else {
+                      <span>{{ account.role?.role }}</span>
+                      <button mat-icon-button color="accent" (click)="startRoleEdit(account)" title="Changer le rôle" style="margin-left:4px;">
+                        <mat-icon style="font-size:16px;">edit</mat-icon>
+                      </button>
+                    }
+                  </td>
+                  <td style="padding:10px 8px;">
+                    <span [style.background]="account.isActive ? '#e8f5e9' : '#ffebee'"
+                          [style.color]="account.isActive ? '#2e7d32' : '#c62828'"
+                          style="padding:2px 10px; border-radius:12px; font-size:11px; font-weight:600;">
+                      {{ account.isActive ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px; white-space:nowrap;">
+                    <button mat-icon-button
+                            [color]="account.isActive ? 'warn' : 'primary'"
+                            (click)="toggleActive(account)"
+                            [title]="account.isActive ? 'Désactiver' : 'Activer'">
+                      <mat-icon>{{ account.isActive ? 'block' : 'check_circle' }}</mat-icon>
+                    </button>
+                    <button mat-icon-button color="accent"
+                            (click)="openResetPassword(account)"
+                            title="Réinitialiser le mot de passe">
+                      <mat-icon>lock_reset</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn"
+                            (click)="deleteUser(account)"
+                            title="Supprimer">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="7" style="text-align:center; padding:30px; color:#999;">Aucun utilisateur disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="filteredAccounts.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

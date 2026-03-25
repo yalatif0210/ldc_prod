@@ -1,5 +1,6 @@
 package com.markov.lab.repository;
 
+import com.markov.lab.entity.Account;
 import com.markov.lab.entity.Report;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -64,5 +65,32 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                         @Param("start_date") LocalDate start_date,
                         @Param("end_date") LocalDate end_date,
                         @Param("status_id") long status_id);
+
+        @Query("""
+                        SELECT COUNT(DISTINCT r) FROM Report r
+                        WHERE (:periodId IS NULL OR r.period.id = :periodId)
+                          AND (:equipmentId IS NULL OR r.equipment.id = :equipmentId)
+                          AND (:structureId IS NULL OR EXISTS (
+                              SELECT 1 FROM Account a JOIN a.structures s WHERE a = r.account AND s.id = :structureId
+                          ))
+                        """)
+        long countFiltered(
+                        @Param("periodId") Long periodId,
+                        @Param("structureId") Long structureId,
+                        @Param("equipmentId") Long equipmentId);
+
+        @Query("""
+                        SELECT DISTINCT r FROM Report r
+                        LEFT JOIN FETCH r.status
+                        WHERE (:periodId IS NULL OR r.period.id = :periodId)
+                          AND (:equipmentId IS NULL OR r.equipment.id = :equipmentId)
+                          AND (:structureId IS NULL OR EXISTS (
+                              SELECT 1 FROM Account a JOIN a.structures s WHERE a = r.account AND s.id = :structureId
+                          ))
+                        """)
+        List<Report> findFiltered(
+                        @Param("periodId") Long periodId,
+                        @Param("structureId") Long structureId,
+                        @Param("equipmentId") Long equipmentId);
 
 }

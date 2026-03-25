@@ -202,7 +202,7 @@
                   >
                     @if ($index < 3) { {{intrant[key]}} } @if ($index === 3) { @if (isUserPharmUser)
                     {
-                    <div></div>
+                    <div> </div>
                     } @else {
                     <input
                       [(ngModel)]="pharmInputs['initial_qty_for_intrant_' + intrant.id]"

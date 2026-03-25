@@ -1,13 +1,19 @@
 package com.markov.lab.repository;
 
 import com.markov.lab.entity.Structure;
+import jakarta.persistence.QueryHint;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
 public interface StructureRepository extends JpaRepository<Structure, Long> {
+    @Query("SELECT DISTINCT s FROM Structure s LEFT JOIN FETCH s.district d LEFT JOIN FETCH d.region LEFT JOIN FETCH s.equipments")
+    @QueryHints(@QueryHint(name = "hibernate.query.passDistinctThrough", value = "false"))
+    List<Structure> findAllWithDistrictAndRegion();
+
     @Query("SELECT a FROM Structure a WHERE a.district.region.id = :id")
     List<Structure> findByRegion(@Param("id") Long id);
 

@@ -1,0 +1,70 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar">
+        <h2 class="th2">Gestion des Rôles</h2>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px; max-width:600px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:80px;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Nom du rôle</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:120px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (role of paginatedRoles; track role.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px;">{{ role.id }}</td>
+                  <td style="padding:8px;">
+                    @if (editingId === role.id) {
+                      <mat-form-field appearance="outline" style="font-size:12px; width:100%;">
+                        <input matInput [(ngModel)]="editingName" />
+                      </mat-form-field>
+                    } @else {
+                      <span style="font-weight:500;">{{ role.role }}</span>
+                    }
+                  </td>
+                  <td style="padding:8px;">
+                    @if (editingId === role.id) {
+                      <button mat-icon-button color="primary" (click)="saveEdit(role)" title="Enregistrer">
+                        <mat-icon>save</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="cancelEdit()" title="Annuler">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    } @else {
+                      <button mat-icon-button color="accent" (click)="startEdit(role)" title="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="3" style="text-align:center; padding:30px; color:#999;">Aucun rôle disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="roles.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

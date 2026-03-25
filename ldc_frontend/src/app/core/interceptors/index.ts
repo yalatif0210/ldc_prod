@@ -26,3 +26,15 @@ export const interceptors = [
   successInterceptor,
   loggingInterceptor
 ];
+
+//dev_interceptors
+//export const interceptors = [
+//  noopInterceptor,
+//  baseUrlInterceptor,
+//  settingsInterceptor,
+//  tokenInterceptor,
+//  apiInterceptor,
+//  errorInterceptor,
+//  successInterceptor,
+//  loggingInterceptor
+//];

@@ -24,7 +24,6 @@ public class Structure {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "district_id")
-    @JsonIgnore
     @ToString.Exclude
     private District district;
 
@@ -55,7 +54,6 @@ public class Structure {
 
     @ManyToMany
     @JoinTable(name = "structure_equipment", joinColumns = @JoinColumn(name = "structure_id"), inverseJoinColumns = @JoinColumn(name = "equipment_id"))
-    @JsonIgnore
     @ToString.Exclude
     private List<Equipment> equipments;
 

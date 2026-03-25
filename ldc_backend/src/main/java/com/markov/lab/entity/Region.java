@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,6 +19,7 @@ public class Region {
     private Long id;
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "region", cascade = CascadeType.ALL)
     private List<District> districts;
 

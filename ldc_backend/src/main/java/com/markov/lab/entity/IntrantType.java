@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,6 +16,7 @@ public class IntrantType {
     private Long id;
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "intrantType", fetch = FetchType.LAZY)
     private List<Intrant> intrants;
 }

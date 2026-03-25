@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class Status {
     private Long id;
     private String status;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "status")
     private List<Report> reports;
 

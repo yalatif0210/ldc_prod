@@ -22,6 +22,10 @@ export const routes: Routes = [
       { path: '404', component: Error404 },
       { path: '500', component: Error500 },
       {
+        path: 'zver/super-admin',
+        loadChildren: () => import('./routes/super-admin/super-admin.routes').then(m => m.routes),
+      },
+      {
         path: 'zver/admin/settings',
         loadChildren: () => import('./routes/admin/settings/settings.routes').then(m => m.routes),
       },

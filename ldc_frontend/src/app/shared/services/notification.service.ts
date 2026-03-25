@@ -12,6 +12,7 @@ export class NotificationService {
     callBack: (notif: any, id: any, isUserAdminOrSupervisor: boolean) => void
   ) {
     this.stompClient = new Client({
+      //webSocketFactory: () => new SockJS('http://localhost:8081/ws'),
       webSocketFactory: () => new SockJS('/ws'),
       reconnectDelay: 5000,
     });
@@ -38,7 +39,7 @@ export class NotificationService {
 
   requestBrowserPermission() {
     if (!('Notification' in window)) {
-      console.warn('Notifications non supportées. - notification.service.ts:44');
+      console.warn('Notifications non supportées. - notification.service.ts:42');
       return;
     }
 

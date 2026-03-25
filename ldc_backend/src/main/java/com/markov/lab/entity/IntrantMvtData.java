@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,6 +29,7 @@ public class IntrantMvtData {
     @JoinColumn(name= "intrant_id")
     private Intrant intrant;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "intrantMvtData")
     private List<Adjustment> adjustments;
 

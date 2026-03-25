@@ -41,10 +41,89 @@ export class StartupService {
   }
 
   private buildMenuByRole(role: string): Menu[] {
-    const isAdmin = [UserRole.SUPER_ADMIN, UserRole.ADMIN].includes(role as UserRole);
+    const isAdmin = [UserRole.ADMIN].includes(role as UserRole);
     const isSupervisor = role === UserRole.SUPERVISOR;
 
-    if (isAdmin || isSupervisor) {
+    if (role === UserRole.SUPER_ADMIN) {
+      return [
+        { route: 'dashboard', name: 'dashboard', type: 'link', icon: 'dashboard' },
+        {
+          route: 'zver/super-admin', name: 'super_admin', type: 'sub', icon: 'settings',
+          children: [
+            { route: '', name: 'dashboard', type: 'link', icon: 'bar_chart' },
+            { route: 'periods', name: 'periods', type: 'link', icon: 'date_range' },
+            { route: 'reports', name: 'reports', type: 'link', icon: 'assignment' },
+            { route: 'users', name: 'users', type: 'link', icon: 'manage_accounts' },
+            { route: 'roles', name: 'roles', type: 'link', icon: 'security' },
+            { route: 'structures', name: 'structures', type: 'link', icon: 'apartment' },
+            { route: 'synthesis', name: 'synthesis', type: 'link', icon: 'summarize' },
+            { route: 'intrants', name: 'intrants', type: 'link', icon: 'inventory_2' },
+            { route: 'system', name: 'system', type: 'link', icon: 'monitor_heart' },
+          ],
+        },
+        {
+          route: 'zver/admin/settings', name: 'settings', type: 'sub', icon: 'settings',
+          children: [
+            {
+              route: 'users', name: 'users', type: 'sub', icon: 'people',
+              children: [
+                { route: 'users', name: 'create_users', type: 'link', icon: 'person_add' },
+                { route: 'manage-users', name: 'manage_users', type: 'link', icon: 'manage_accounts' },
+              ],
+            },
+            {
+              route: 'platforms', name: 'platforms', type: 'sub', icon: 'apartment',
+              children: [
+                { route: 'platforms', name: 'create_platforms', type: 'link', icon: 'add_business' },
+                { route: 'platforms', name: 'manage_platforms', type: 'link', icon: 'apartment' },
+              ],
+            },
+            {
+              route: 'periods', name: 'periods', type: 'sub', icon: 'date_range',
+              children: [
+                { route: 'periods', name: 'create_periods', type: 'link', icon: 'add' },
+                { route: 'periods', name: 'manage_periods', type: 'link', icon: 'calendar_month' },
+              ],
+            },
+            {
+              route: 'factors', name: 'factors', type: 'sub', icon: 'calculate',
+              children: [
+                { route: 'factors', name: 'manage_factors', type: 'link', icon: 'calculate' },
+              ],
+            },
+          ],
+        },
+        {
+          route: 'zver/public', name: 'weekly', type: 'sub', icon: 'insert_chart',
+          children: [
+            { route: 'report/init', name: 'create-report', type: 'link', icon: 'add_chart' },
+            { route: 'report/history/overview', name: 'view-reports', type: 'link', icon: 'history' },
+          ],
+        },
+        {
+          route: "zver/public",
+          name: "synthese",
+          type: "sub",
+          icon: "all_inbox",
+          children: [
+            {
+              route: "synthesis",
+              name: "rapport-synthese",
+              type: "link",
+              icon: "edit"
+            },
+            {
+              route: "synthesis-c",
+              name: "rapport-synthese-c",
+              type: "link",
+              icon: "edit"
+            }
+          ]
+        }
+      ];
+    }
+
+    if (isAdmin) {
       return [
         { route: 'dashboard', name: 'dashboard', type: 'link', icon: 'dashboard' },
         {
@@ -79,6 +158,64 @@ export class StartupService {
             },
           ],
         },
+        {
+          route: 'zver/public', name: 'weekly', type: 'sub', icon: 'insert_chart',
+          children: [
+            { route: 'report/history/overview', name: 'view-reports', type: 'link', icon: 'history' },
+          ],
+        },
+        {
+          route: "zver/public",
+          name: "synthese",
+          type: "sub",
+          icon: "all_inbox",
+          children: [
+            {
+              route: "synthesis",
+              name: "rapport-synthese",
+              type: "link",
+              icon: "edit"
+            },
+            {
+              route: "synthesis-c",
+              name: "rapport-synthese-c",
+              type: "link",
+              icon: "edit"
+            }
+          ]
+        }
+      ];
+    }
+
+    if (isSupervisor) {
+      return [
+        { route: 'dashboard', name: 'dashboard', type: 'link', icon: 'dashboard' },
+        {
+          route: 'zver/public', name: 'weekly', type: 'sub', icon: 'insert_chart',
+          children: [
+            { route: 'report/history/overview', name: 'view-reports', type: 'link', icon: 'history' },
+          ],
+        },
+        {
+          route: "zver/public",
+          name: "synthese",
+          type: "sub",
+          icon: "all_inbox",
+          children: [
+            {
+              route: "synthesis",
+              name: "rapport-synthese",
+              type: "link",
+              icon: "edit"
+            },
+            {
+              route: "synthesis-c",
+              name: "rapport-synthese-c",
+              type: "link",
+              icon: "edit"
+            }
+          ]
+        }
       ];
     }
 
@@ -92,6 +229,26 @@ export class StartupService {
           { route: 'report/history/overview', name: 'view-reports', type: 'link', icon: 'history' },
         ],
       },
+      {
+        route: "zver/public",
+        name: "synthese",
+        type: "sub",
+        icon: "all_inbox",
+        children: [
+          {
+            route: "synthesis",
+            name: "rapport-synthese",
+            type: "link",
+            icon: "edit"
+          },
+          {
+            route: "synthesis-c",
+            name: "rapport-synthese-c",
+            type: "link",
+            icon: "edit"
+          }
+        ]
+      }
     ];
   }
 

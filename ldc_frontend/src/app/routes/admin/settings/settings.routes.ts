@@ -9,8 +9,13 @@ import { adminGuard } from '@core/authentication/role-guard';
 
 export const routes: Routes = [
   { path: 'users', component: Users, canActivate: [adminGuard] },
-  { path: 'platforms', component: Platform, canActivate: [adminGuard] },
-  { path: 'periods', component: Period, canActivate: [adminGuard] },
-  { path: 'factors', component: Factor, canActivate: [adminGuard] },
+  { path: 'users/users', component: Users, canActivate: [adminGuard] },
   { path: 'manage-users', component: ManageUsers, canActivate: [adminGuard] },
+  { path: 'users/manage-users', component: ManageUsers, canActivate: [adminGuard] },
+  { path: 'platforms', component: Platform, canActivate: [adminGuard] },
+  { path: 'platforms/platforms', component: Platform, canActivate: [adminGuard] },
+  { path: 'periods', component: Period, canActivate: [adminGuard] },
+  { path: 'periods/periods', component: Period, canActivate: [adminGuard] },
+  { path: 'factors', component: Factor, canActivate: [adminGuard] },
+  { path: 'factors/factors', component: Factor, canActivate: [adminGuard] },
 ];

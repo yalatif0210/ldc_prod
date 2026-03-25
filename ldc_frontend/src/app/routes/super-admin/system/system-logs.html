@@ -1,0 +1,104 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12" style="display:flex; flex-direction:column; gap:16px;">
+
+    <!-- Section : Blacklist tokens -->
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Blacklist des tokens</h2>
+        <button mat-raised-button color="warn"
+                (click)="purgeBlacklist()"
+                [disabled]="purgingBlacklist"
+                title="Purger la blacklist">
+          <mat-icon>delete_sweep</mat-icon>
+          {{ purgingBlacklist ? 'Purge en cours...' : 'Purger la blacklist' }}
+        </button>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loadingBlacklist) {
+          <div style="display:flex; justify-content:center; padding:20px;">
+            <mat-spinner diameter="32" />
+          </div>
+        } @else if (blacklistStats) {
+          <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(180px, 1fr)); gap:12px;">
+            @for (entry of (blacklistStats | keyvalue); track entry.key) {
+              <div style="background:#fff3e0; padding:12px 16px; border-radius:6px; border-left:3px solid #f57c00;">
+                <div style="font-size:11px; color:#666; text-transform:uppercase;">{{ entry.key }}</div>
+                <div style="font-size:22px; font-weight:700; color:#e65100;">{{ entry.value }}</div>
+              </div>
+            }
+          </div>
+        } @else {
+          <p style="color:#999; text-align:center;">Aucune donnée de blacklist disponible.</p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Section : Tentatives de connexion -->
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Tentatives de connexion</h2>
+        <button mat-icon-button color="primary" (click)="loadAttempts()" title="Rafraîchir">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Identifiant</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:120px;">Résultat</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:180px;">Date</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">IP</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (attempt of loginAttempts; track $index) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px; font-family:monospace;">{{ attempt.username }}</td>
+                  <td style="padding:10px 8px;">
+                    @if (attempt.success) {
+                      <span style="display:inline-flex; align-items:center; gap:4px; color:#2e7d32; font-weight:600; font-size:12px;">
+                        <mat-icon style="font-size:16px; width:16px; height:16px;">check_circle</mat-icon>
+                        Succès
+                      </span>
+                    } @else {
+                      <span style="display:inline-flex; align-items:center; gap:4px; color:#c62828; font-weight:600; font-size:12px;">
+                        <mat-icon style="font-size:16px; width:16px; height:16px;">cancel</mat-icon>
+                        Échec
+                      </span>
+                    }
+                  </td>
+                  <td style="padding:10px 8px; color:#555;">{{ attempt.createdAt | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td style="padding:10px 8px; font-family:monospace; color:#555;">{{ attempt.ip ?? '—' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="4" style="text-align:center; padding:30px; color:#999;">Aucune tentative de connexion enregistrée</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div style="display:flex; justify-content:flex-end; align-items:center; gap:8px; padding-top:12px;">
+            <button mat-icon-button (click)="prevPage()" [disabled]="page <= 1">
+              <mat-icon>chevron_left</mat-icon>
+            </button>
+            <span style="font-size:13px; color:#555;">Page {{ page }}</span>
+            <button mat-icon-button (click)="nextPage()" [disabled]="loginAttempts.length < 20">
+              <mat-icon>chevron_right</mat-icon>
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+  </div>
+</div>

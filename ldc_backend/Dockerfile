@@ -3,7 +3,7 @@ FROM maven:3.9.6-eclipse-temurin-21 AS build
 WORKDIR /app
 COPY pom.xml .
 # Télécharger les dépendances (cache Maven)
-RUN mvn -B -q -e -DskipTests dependency:go-offline
+RUN mvn -B -e -DskipTests dependency:go-offline
 # Copier le code et packager
 COPY src ./src
 RUN mvn -B -DskipTests package
@@ -23,8 +23,8 @@ USER app
 # Copier le jar
 COPY --from=build /app/target/*.jar app.jar
 
-EXPOSE 8081
+EXPOSE 8080
 # Healthcheck simple
-HEALTHCHECK CMD wget -qO- http://localhost:8081/actuator/health || exit 1
+HEALTHCHECK CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java","-jar","/app/app.jar"]

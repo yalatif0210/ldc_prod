@@ -55,6 +55,10 @@ export class ReportHistoryService extends SharedService {
     return structures.map(s => Number(s.id));
   }
 
+  getAllReports(): Observable<any> {
+    return this.query(ReportModel.getAllReports);
+  }
+
   getReportsByAccountAndEquipmentWithinDateRange(form_value: any): Observable<any> {
     return this.query(ReportModel.reportsByAccountAndEquipmentWithinDateRange, {
       request: {

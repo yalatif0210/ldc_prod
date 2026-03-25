@@ -40,9 +40,11 @@ public class Transaction {
     @JoinColumn(name = "destination_id")
     private Structure destination;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "transaction")
     private List<SanguineProductTransaction> sanguineProductTransactions;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "transaction")
     private List<MedicinesTransaction> medicinesTransaction;
 

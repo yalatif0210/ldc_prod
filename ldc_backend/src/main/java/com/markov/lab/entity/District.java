@@ -1,6 +1,7 @@
 package com.markov.lab.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -23,6 +24,7 @@ public class District {
     @JoinColumn(name = "region_id")
     private Region region;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "district", cascade = CascadeType.ALL)
     private List<Structure> structures;
 

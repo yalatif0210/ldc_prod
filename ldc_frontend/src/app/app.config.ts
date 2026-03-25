@@ -1,4 +1,4 @@
-import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
+import { HttpClient, provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import {
   ApplicationConfig,
   importProvidersFrom,
@@ -18,7 +18,6 @@ import { FORMLY_CONFIG, provideFormlyCore } from '@ngx-formly/core';
 import { withFormlyMaterial } from '@ngx-formly/material';
 import { provideTranslateService, TranslateLoader, TranslateService } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader';
-import { InMemoryWebApiModule } from 'angular-in-memory-web-api';
 import { NgxPermissionsModule } from 'ngx-permissions';
 import { provideToastr } from 'ngx-toastr';
 
@@ -31,7 +30,6 @@ import {
 } from '@core';
 import { environment } from '@env/environment';
 import { formlyConfigFactory, PaginatorI18nService } from '@shared';
-import { InMemDataService } from '@shared/in-mem/in-mem-data.service';
 import { routes } from './app.routes';
 import {
   API_BASE_URL,
@@ -39,7 +37,6 @@ import {
   API_GRAPHQL_END_POINT,
   API_REST_END_POINT,
 } from '@core/api-token';
-import { AppDataService } from '@core/ssr/internal-api';
 import { provideServiceWorker } from '@angular/service-worker';
 
 export const appConfig: ApplicationConfig = {
@@ -52,7 +49,7 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() => inject(TranslateLangService).load()),
     provideAppInitializer(() => inject(StartupService).load()),
     provideAnimationsAsync(),
-    provideHttpClient(withInterceptors(interceptors)),
+    provideHttpClient(withFetch(), withInterceptors(interceptors)),
     provideRouter(
       routes,
       withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
@@ -68,11 +65,6 @@ export const appConfig: ApplicationConfig = {
     }),
     importProvidersFrom(
       NgxPermissionsModule.forRoot(),
-      // 👇 ❌ This is only used for demo purpose, remove it in the realworld application
-      InMemoryWebApiModule.forRoot(AppDataService, {
-        dataEncapsulation: false,
-        passThruUnknownUrl: true,
-      })
     ),
     provideFormlyCore([...withFormlyMaterial()]),
     {

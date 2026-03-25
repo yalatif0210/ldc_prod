@@ -1,6 +1,73 @@
 {
   "menu": [
     {
+      "route": "zver/super-admin",
+      "name": "super_admin",
+      "type": "sub",
+      "icon": "settings",
+      "permissions": {
+        "only": [
+          "SUPER_ADMIN"
+        ]
+      },
+      "children": [
+        {
+          "route": "",
+          "name": "dashboard",
+          "type": "link",
+          "icon": "bar_chart"
+        },
+        {
+          "route": "periods",
+          "name": "periods",
+          "type": "link",
+          "icon": "date_range"
+        },
+        {
+          "route": "reports",
+          "name": "reports",
+          "type": "link",
+          "icon": "assignment"
+        },
+        {
+          "route": "users",
+          "name": "users",
+          "type": "link",
+          "icon": "manage_accounts"
+        },
+        {
+          "route": "roles",
+          "name": "roles",
+          "type": "link",
+          "icon": "security"
+        },
+        {
+          "route": "structures",
+          "name": "structures",
+          "type": "link",
+          "icon": "apartment"
+        },
+        {
+          "route": "synthesis",
+          "name": "synthesis",
+          "type": "link",
+          "icon": "summarize"
+        },
+        {
+          "route": "intrants",
+          "name": "intrants",
+          "type": "link",
+          "icon": "inventory_2"
+        },
+        {
+          "route": "system",
+          "name": "system",
+          "type": "link",
+          "icon": "monitor_heart"
+        }
+      ]
+    },
+    {
       "route": "/dashboard",
       "name": "dashboard",
       "type": "link",
@@ -116,6 +183,7 @@
           "icon": "edit",
           "permissions": {
             "only": [
+              "SUPER_ADMIN",
               "LABORATORY_USER",
               "PHARMACY_USER"
             ]
@@ -128,8 +196,8 @@
           "icon": "business",
           "permissions": {
             "only": [
-              "ADMIN",
               "SUPER_ADMIN",
+              "ADMIN",
               "SUPERVISOR",
               "LABORATORY_USER",
               "PHARMACY_USER"

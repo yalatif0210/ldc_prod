@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -25,6 +26,7 @@ public class Period {
     @JoinColumn(name = "month_id")
     private Month month;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "period")
     private List<Report> reports;
 

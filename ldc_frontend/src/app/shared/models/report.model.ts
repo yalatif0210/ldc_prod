@@ -19,6 +19,50 @@ class ReportModel {
     }
   }`;
 
+  static getAllReports = `query{
+  reports{
+    id
+    createdAt
+    period {
+      id
+      month {
+        month
+      }
+      periodName
+      startDate
+      endDate
+    }
+    equipment {
+      id
+      name
+    }
+    account {
+      id
+      role{
+        role
+      }
+      user{
+        name
+        phone
+      }
+      structures {
+        id
+        name
+        code
+        district {
+          name
+          region {
+            name
+          }
+        }
+      }
+    }
+    status {
+      id
+      status
+    }
+  }
+}`;
 
   static reportByAccountAndEquipmentAndPeriodAlso = `query ($request: ReportByEquipmentAccountPeriodInput) {
     reportByAccountAndEquipmentAndPeriodAlso(request: $request) {

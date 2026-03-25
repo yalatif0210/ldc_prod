@@ -11,7 +11,7 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-apppassword}
     volumes:
       - lab_db_data:/var/lib/postgresql/data
-      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+      - ./ldc_db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
     networks:
       - default
       - shared_db_net
@@ -39,6 +39,23 @@ services:
     healthcheck:
       disable: true
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD}
+      GF_SERVER_ROOT_URL: https://${DOMAIN}/grafana/
+      GF_SERVER_SERVE_FROM_SUB_PATH: "true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      lab_db:
+        condition: service_healthy
+    networks:
+      - default
+
   ldc_frontend:
     build:
       context: ./ldc_frontend
@@ -65,6 +82,7 @@ services:
 
 volumes:
   lab_db_data:
+  grafana_data:
   certbot_certs:
     external: true  # Créé par init-letsencrypt.sh — même nom partagé avec certbot
 

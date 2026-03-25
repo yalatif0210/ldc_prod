@@ -1,5 +1,6 @@
 package com.markov.lab.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +19,7 @@ public class SanguineProduct {
     private Long id;
     private String name;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "sanguineProduct")
     private List<SanguineProductTransaction>  transactions;
 

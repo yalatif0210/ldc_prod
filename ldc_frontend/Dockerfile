@@ -10,15 +10,13 @@ COPY . .
 RUN npm run build -- --configuration production
 
 # === Runtime stage (Nginx) ===
-FROM nginx:1.25-alpine
-# gettext fournit envsubst (substitution du domaine dans nginx.conf)
-RUN apk add --no-cache gettext
+FROM nginx:1.27-alpine
 # Supprimer la conf par défaut
 RUN rm /etc/nginx/conf.d/default.conf
 # Copier le template nginx (${DOMAIN} sera substitué au démarrage via env.sh)
 COPY nginx.conf /etc/nginx/conf.d/default.conf.template
 # Copier le build Angular
-COPY --from=build /app/dist/lhspla-ldc/* /usr/share/nginx/html/
+COPY --from=build /app/dist/lhspla-ldc/browser /usr/share/nginx/html
 # Copier le script d'injection des variables d'environnement Angular
 COPY env.sh /env.sh
 RUN chmod +x /env.sh

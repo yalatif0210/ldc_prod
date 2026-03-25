@@ -6,7 +6,7 @@ declare global {
   interface Window {
     __env: any;
   }
-}
+};
 
 export const environment = {
   production: false,
@@ -17,6 +17,17 @@ export const environment = {
   apiRestEndPoint: window.__env?.API_REST_END_POINT,
   useHash: false,
 };
+
+
+//export const environment = {
+//  production: false,
+//  baseUrl: '',
+//  apiBaseUrl: 'http://localhost',
+//  apiBasePort: 8081,
+//  graphqlEndPoint: '/graphql',
+//  apiRestEndPoint: '/api',
+//  useHash: false,
+//};
 
 /*
  * For easier debugging in development mode, you can import the following file

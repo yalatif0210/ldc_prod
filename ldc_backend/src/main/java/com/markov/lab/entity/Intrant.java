@@ -36,12 +36,15 @@ public class Intrant {
     @JoinColumn(name = "equipment_id")
     private Equipment equipment;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "intrant")
     private List<IntrantMvtData> intrantMvtData;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "intrant")
     private List<IntrantCmmConfig> intrant_cmm_config;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "intrant")
     private List<MedicinesTransaction> medicinesTransaction;
 

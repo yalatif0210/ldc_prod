@@ -1,0 +1,69 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Référentiel Intrants</h2>
+        <button mat-icon-button color="primary" (click)="loadIntrants()" title="Rafraîchir">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </mat-card-content>
+
+      <mat-card-content style="padding-bottom:8px;">
+        <mat-form-field appearance="outline" style="min-width:280px;">
+          <mat-label>Rechercher un intrant</mat-label>
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput [(ngModel)]="searchTerm" (ngModelChange)="applySearch()" placeholder="Nom ou code..." />
+        </mat-form-field>
+      </mat-card-content>
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <p style="font-size:12px; color:#666; margin-bottom:8px;">
+            {{ filtered.length }} intrant(s) affiché(s) sur {{ intrants.length }} au total
+          </p>
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:80px;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:140px;">Code</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Nom</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Unité</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Catégorie</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (intrant of paginatedFiltered; track intrant.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px;">{{ intrant.id }}</td>
+                  <td style="padding:10px 8px; font-family:monospace; color:#555;">{{ intrant.code ?? '—' }}</td>
+                  <td style="padding:10px 8px; font-weight:500;">{{ intrant.name ?? intrant.nom ?? '—' }}</td>
+                  <td style="padding:10px 8px;">{{ intrant.unit ?? intrant.unite ?? '—' }}</td>
+                  <td style="padding:10px 8px;">{{ intrant.category ?? intrant.categorie ?? '—' }}</td>
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" style="text-align:center; padding:30px; color:#999;">
+                    {{ searchTerm ? 'Aucun résultat pour "' + searchTerm + '"' : 'Aucun intrant disponible' }}
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="filtered.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

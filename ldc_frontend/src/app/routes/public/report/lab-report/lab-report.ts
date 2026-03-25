@@ -73,6 +73,8 @@ interface Intrant {
 
 type IntrantsKeys = keyof Intrant;
 
+const CONSOMMABLES_GENERAUX_ID = 8;
+
 @Component({
   selector: '[app-public-home]',
   templateUrl: './lab-report.html',
@@ -92,7 +94,6 @@ type IntrantsKeys = keyof Intrant;
     TranslateModule,
     MatStepperModule,
     MtxGridModule,
-    MtxAlert,
     MatRadioModule,
     InfoBox,
     MatTabsModule,
@@ -553,7 +554,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
                   if (!this.isUserPharmUser) {
                     this.createLabFormFromEquipmentInformations();
                   }
-                  if (this.isUserPharmUser || this.equipmentId === 5) {
+                  if (this.isUserPharmUser || this.equipmentId === CONSOMMABLES_GENERAUX_ID) {
                     if (report?.IntrantMvtData.length) {
                       this.createPharmFromReportInformations();
                     } else {
@@ -710,14 +711,17 @@ export class AdjustmentDialog implements OnInit {
   onConfirm() {
     const datas = this.data.adjustments;
     if (datas[this.data.index]) {
-      datas[this.data.index].push({
+      if(this.selected_adjustment_type && this.adjustment_quantity) {
+        datas[this.data.index].push({
         id: 0,
         type: this.selected_adjustment_type,
         quantity: this.adjustment_quantity,
         comment: this.comment,
       });
+      }
     } else {
-      datas[this.data.index] = [
+      if (this.selected_adjustment_type && this.adjustment_quantity) {
+        datas[this.data.index] = [
         {
           id: 0,
           type: this.selected_adjustment_type,
@@ -725,6 +729,7 @@ export class AdjustmentDialog implements OnInit {
           comment: this.comment,
         },
       ];
+      }
     }
     this.dialogRef.close(datas);
   }

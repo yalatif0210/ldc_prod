@@ -1,5 +1,16 @@
 {
   "menu": {
+    "super_admin": "Super Admin",
+    "super_admin.dashboard": "Dashboard",
+    "super_admin.periods": "Periods",
+    "super_admin.reports": "Reports",
+    "super_admin.users": "Users",
+    "super_admin.roles": "Roles",
+    "super_admin.structures": "Structures",
+    "super_admin.synthesis": "Synthesis",
+    "super_admin.intrants": "Intrants",
+    "super_admin.system": "System",
+
     "dashboard": "Dashboard",
     "settings": "Configurations",
     "settings.users": "Utilisateurs",
