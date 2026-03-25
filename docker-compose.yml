@@ -56,6 +56,52 @@ services:
     networks:
       - default
 
+  support_db:
+    image: postgres:16-alpine
+    container_name: support_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${SUPPORT_POSTGRES_DB:-support_db}
+      POSTGRES_USER: ${SUPPORT_POSTGRES_USER:-support_user}
+      POSTGRES_PASSWORD: ${SUPPORT_POSTGRES_PASSWORD:-support_pass}
+    volumes:
+      - support_db_data:/var/lib/postgresql/data
+    networks:
+      - support_internal
+      - default
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  support_bot:
+    build:
+      context: ./support_ldc
+      dockerfile: Dockerfile
+    container_name: support_bot
+    restart: unless-stopped
+    depends_on:
+      support_db:
+        condition: service_healthy
+    env_file:
+      - ./support_ldc/.env
+    environment:
+      DATABASE_URL: postgresql://${SUPPORT_POSTGRES_USER:-support_user}:${SUPPORT_POSTGRES_PASSWORD:-support_pass}@support_db:5432/${SUPPORT_POSTGRES_DB:-support_db}
+    expose:
+      - "5000"
+    volumes:
+      - support_qr_codes:/app/qr_codes
+    networks:
+      - support_internal
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   ldc_frontend:
     build:
       context: ./ldc_frontend
@@ -71,6 +117,7 @@ services:
       API_REST_END_POINT: ${API_REST_END_POINT}
     depends_on:
       - ldc_backend
+      - support_bot
     healthcheck:
       disable: true
     ports:
@@ -83,10 +130,15 @@ services:
 volumes:
   lab_db_data:
   grafana_data:
+  support_db_data:
+  support_qr_codes:
   certbot_certs:
     external: true  # Créé par init-letsencrypt.sh — même nom partagé avec certbot
 
 networks:
   default:
+  support_internal:
+    driver: bridge
+    internal: true              # DB support isolée d'internet
   shared_db_net:
     external: true  # docker network create shared_db_net  +  docker network connect shared_db_net pgadmin

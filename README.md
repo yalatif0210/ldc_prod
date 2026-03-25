@@ -14,11 +14,12 @@ Elle couvre la saisie hebdomadaire des rapports d'activité, le suivi des stocks
 5. [Rôles et permissions](#5-rôles-et-permissions)
 6. [Frontend — routing et menus](#6-frontend--routing-et-menus)
 7. [Notifications temps réel](#7-notifications-temps-réel)
-8. [Infrastructure Docker](#8-infrastructure-docker)
-9. [Variables d'environnement](#9-variables-denvironnement)
-10. [Déploiement local](#10-déploiement-local)
-11. [Déploiement production (VPS)](#11-déploiement-production-vps)
-12. [Prérequis VPS — premier démarrage](#12-prérequis-vps--premier-démarrage)
+8. [Bot support Telegram](#8-bot-support-telegram)
+9. [Infrastructure Docker](#9-infrastructure-docker)
+10. [Variables d'environnement](#10-variables-denvironnement)
+11. [Déploiement local](#11-déploiement-local)
+12. [Déploiement production (VPS)](#12-déploiement-production-vps)
+13. [Prérequis VPS — premier démarrage](#13-prérequis-vps--premier-démarrage)
 
 ---
 
@@ -27,28 +28,32 @@ Elle couvre la saisie hebdomadaire des rapports d'activité, le suivi des stocks
 ```
 Internet / HTTPS (443)
         │
-   ┌────▼─────────────────────┐
-   │  ldc_frontend            │  Nginx 1.27 (reverse proxy + SPA Angular)
-   │  Angular 17 (standalone) │
-   └──┬──────────┬────────────┘
-      │ /api/*   │ /ws/*  /graphql  /grafana/  /support/
-      │          │
-   ┌──▼──────────▼────────────┐
-   │  ldc_backend             │  Spring Boot 3.5 — Java 21
-   │  REST + GraphQL + WS     │
-   └──────────────┬───────────┘
-                  │ JDBC
-   ┌──────────────▼───────────┐
-   │  lab_db                  │  PostgreSQL 15
-   └──────────────────────────┘
-
-   ┌──────────────────────────┐
-   │  grafana                 │  Monitoring (accessible via /grafana/)
-   └──────────────────────────┘
+   ┌────▼──────────────────────────────────────────┐
+   │  ldc_frontend  (Nginx 1.27)                   │
+   │  Angular 17 — SPA standalone                  │
+   └──┬──────┬────────┬────────────┬───────────────┘
+      │/api/ │/graphql│ /ws/       │/grafana/ /support/
+      │      │        │            │
+   ┌──▼──────▼────────▼────┐   ┌──▼────────────────┐
+   │  ldc_backend           │   │  grafana           │
+   │  Spring Boot 3.5 / J21 │   │  (monitoring)      │
+   │  REST + GraphQL + WS   │   └───────────────────┘
+   └──────────┬─────────────┘
+              │ JDBC                      ┌────────────────────┐
+   ┌──────────▼──────────┐               │  support_bot        │
+   │  lab_db             │               │  Flask (Python)     │
+   │  PostgreSQL 15      │               └──────────┬──────────┘
+   └─────────────────────┘                          │ SQLAlchemy
+                                         ┌──────────▼──────────┐
+                                         │  support_db          │
+                                         │  PostgreSQL 16       │
+                                         └─────────────────────┘
 ```
 
-Tous les services communiquent sur le réseau Docker interne `default`.
-Un réseau externe `shared_db_net` permet à des outils tiers (pgAdmin…) d'accéder à la base.
+**Réseaux Docker :**
+- `default` — réseau principal : tous les services sauf `support_db`
+- `support_internal` — réseau interne isolé : `support_bot` ↔ `support_db` uniquement
+- `shared_db_net` — réseau externe : accès pgAdmin / outils tiers à `lab_db`
 
 ---
 
@@ -65,7 +70,9 @@ Un réseau externe `shared_db_net` permet à des outils tiers (pgAdmin…) d'acc
 | ORM | Spring Data JPA / Hibernate 6 | — |
 | API | REST + GraphQL (`spring-graphql`) | — |
 | Sécurité | Spring Security + JWT (jjwt 0.13) | — |
-| Base de données | PostgreSQL | 15 |
+| Base de données principale | PostgreSQL | 15 |
+| Base de données support | PostgreSQL | 16 |
+| Bot support | Python Flask + Telegram Bot API | — |
 | Reverse proxy | Nginx | 1.27 |
 | Conteneurisation | Docker + Docker Compose | — |
 | Monitoring | Grafana | latest |
@@ -276,7 +283,37 @@ Les notifications sont déclenchées lors de la création de transactions entre 
 
 ---
 
-## 8. Infrastructure Docker
+## 8. Bot support Telegram
+
+Le service `support_bot` est un bot Telegram en Python (Flask) qui gère les tickets de support utilisateur.
+
+### Architecture
+
+```
+Telegram API ──► support_bot (Flask :5000)
+                      │
+                      ├── /support/dashboard/  → Interface web de gestion des tickets
+                      ├── /support/webhook/    → Webhook Telegram entrant
+                      └── support_db (PostgreSQL 16)
+```
+
+Nginx proxifie tout `/support/*` vers `support_bot:5000`. Flask gère lui-même le préfixe `/support/` dans ses routes.
+
+### Fonctionnalités
+
+- Réception des messages Telegram des utilisateurs
+- Création et suivi de tickets de support
+- Interface web (`/support/dashboard/`) accessible aux managers
+- Génération de QR codes (stockés dans le volume `support_qr_codes`)
+- Notifications automatiques au manager via Telegram
+
+### Configuration requise
+
+Remplir `support_ldc/.env` avec les tokens Telegram (voir section [Variables d'environnement](#10-variables-denvironnement)).
+
+---
+
+## 9. Infrastructure Docker
 
 ### Services
 
@@ -286,13 +323,17 @@ Les notifications sont déclenchées lors de la création de transactions entre 
 | `ldc_backend` | Maven → JRE 21 | 8081 | — |
 | `ldc_frontend` | Node 20 → Nginx 1.27 | 80 | 443 |
 | `grafana` | grafana/grafana | 3000 | — |
+| `support_db` | postgres:16-alpine | — | — |
+| `support_bot` | Python Flask | — | — (via `/support/`) |
 
 ### Volumes
 
 | Volume | Usage |
 |--------|-------|
-| `lab_db_data` | Données PostgreSQL (persistantes) |
+| `lab_db_data` | Données PostgreSQL principale (persistantes) |
 | `grafana_data` | Dashboards Grafana (persistants) |
+| `support_db_data` | Données PostgreSQL support bot (persistantes) |
+| `support_qr_codes` | QR codes générés par le bot (persistants) |
 | `certbot_certs` | Certificats Let's Encrypt (externe, prod uniquement) |
 
 ### Build multi-étapes Backend
@@ -335,16 +376,16 @@ L'Angular build de production lit ces valeurs via `window.__env` dans `environme
 
 ---
 
-## 9. Variables d'environnement
+## 10. Variables d'environnement
 
-Créer un fichier `.env` à la racine du projet (ne pas commiter) :
+### `.env` (racine du projet — ne pas commiter)
 
 ```dotenv
 # Domaine & SSL
 DOMAIN=ldc.example.org
 LETSENCRYPT_EMAIL=admin@example.org
 
-# Base de données
+# Base de données principale
 POSTGRES_DB=lab_db
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<mot_de_passe_fort>
@@ -369,11 +410,37 @@ API_REST_END_POINT=/api
 # Grafana
 GRAFANA_ADMIN_USER=admin
 GRAFANA_ADMIN_PASSWORD=<mot_de_passe_fort>
+
+# Support Bot — base de données dédiée
+SUPPORT_POSTGRES_DB=support_db
+SUPPORT_POSTGRES_USER=support_user
+SUPPORT_POSTGRES_PASSWORD=<mot_de_passe_fort>
 ```
+
+### `support_ldc/.env` (bot Telegram/Flask — ne pas commiter)
+
+Copier depuis `support_ldc/.env.example` puis remplir :
+
+```dotenv
+# Telegram
+TELEGRAM_BOT_TOKEN=<token_obtenu_via_BotFather>
+TELEGRAM_BOT_USERNAME=<nom_du_bot>
+MANAGER_TELEGRAM_CHAT_ID=<chat_id_du_manager>
+BASE_URL=https://ldc.example.org/support
+
+# Flask
+FLASK_DEBUG=false
+SECRET_KEY=<clé_secrète_aléatoire>
+
+# JWT partagé avec ldc_backend
+JWT_SECRET=<même_valeur_que_dans_.env>
+```
+
+> `DATABASE_URL` est injecté automatiquement par le `docker-compose.yml` — ne pas le définir dans ce fichier.
 
 ---
 
-## 10. Déploiement local
+## 11. Déploiement local
 
 ### Prérequis
 
@@ -416,7 +483,7 @@ L'application tourne sur `http://localhost:4200` et pointe vers le backend sur `
 
 ---
 
-## 11. Déploiement production (VPS)
+## 12. Déploiement production (VPS)
 
 ```bash
 # Sur le VPS, depuis le dossier du projet
@@ -438,7 +505,7 @@ Utilise uniquement `docker-compose.yml` (pas d'override local). Le frontend éco
 
 ---
 
-## 12. Prérequis VPS — premier démarrage
+## 13. Prérequis VPS — premier démarrage
 
 ### 1. Réseau Docker externe
 
@@ -457,9 +524,16 @@ docker volume create certbot_certs
 # Puis copier les certs dans le volume ou utiliser un conteneur certbot dédié
 ```
 
-### 3. Fichier `.env`
+### 3. Fichiers `.env`
 
-Copier et remplir le fichier `.env` (voir section 9).
+```bash
+# .env à la racine (voir section 9 pour le contenu complet)
+cp .env.example .env   # si disponible, sinon créer manuellement
+
+# .env du bot support
+cp support_ldc/.env.example support_ldc/.env
+# → remplir TELEGRAM_BOT_TOKEN, TELEGRAM_BOT_USERNAME, MANAGER_TELEGRAM_CHAT_ID, SECRET_KEY
+```
 
 ### 4. Rendre les scripts exécutables
 
@@ -504,7 +578,19 @@ app_v3_claude_production/
 │       └── shared/            # Services, modèles, composants partagés
 ├── ldc_db/
 │   └── init.sql               # Données initiales (régions, rôles…)
-├── docker-compose.yml         # Configuration production
+├── support_ldc/               # Bot support Telegram (Flask)
+│   ├── Dockerfile
+│   ├── app.py                 # Point d'entrée Flask
+│   ├── bot_handler.py         # Logique Telegram
+│   ├── database.py            # Connexion SQLAlchemy
+│   ├── models.py              # Modèles de données
+│   ├── scheduler.py           # Tâches planifiées
+│   ├── ticket_service.py      # Gestion des tickets
+│   ├── dashboard/             # Interface web du bot
+│   ├── requirements.txt
+│   ├── entrypoint.sh
+│   └── .env                   # Variables Telegram/Flask (non versionné)
+├── docker-compose.yml         # Configuration production (tous les services)
 ├── docker-compose.local.yml   # Overrides développement local
 ├── deploy-local.sh            # Script de déploiement local
 ├── deploy-prod.sh             # Script de déploiement VPS
