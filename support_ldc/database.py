@@ -5,7 +5,13 @@ db = SQLAlchemy()
 
 def init_db():
     from models import Agent, Ticket, Conversation, AgentRole
+    from sqlalchemy import text
     db.create_all()
+    # Migration idempotente — ajout des colonnes si absentes (PostgreSQL)
+    with db.engine.connect() as conn:
+        conn.execute(text("ALTER TABLE tickets ADD COLUMN IF NOT EXISTS client_service VARCHAR(100)"))
+        conn.execute(text("ALTER TABLE tickets ADD COLUMN IF NOT EXISTS client_phone VARCHAR(30)"))
+        conn.commit()
 
     if Agent.query.count() == 0:
         agents_data = [

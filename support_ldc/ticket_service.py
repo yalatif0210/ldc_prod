@@ -26,13 +26,16 @@ class TicketService:
 
     # ── Création ──────────────────────────────────────────────────────────────
 
-    def create_ticket(self, client_name, client_chat_id, category, description) -> Ticket:
+    def create_ticket(self, client_name, client_chat_id, category, description,
+                      client_service=None, client_phone=None) -> Ticket:
         agent = self._get_available_agent()
 
         ticket = Ticket(
             ticket_ref=generate_ticket_ref(),
             client_name=client_name,
             client_whatsapp=str(client_chat_id),
+            client_service=client_service,
+            client_phone=client_phone,
             category=category,
             description=description,
             priority=assign_priority(category),
@@ -135,11 +138,15 @@ class TicketService:
             TicketPriority.MEDIUM: '🟡',
             TicketPriority.LOW: '🟢'
         }.get(ticket.priority, '⚪')
+        service_line = f"🏥 Service : {ticket.client_service}\n" if ticket.client_service else ""
+        phone_line = f"📞 Téléphone : {ticket.client_phone}\n" if ticket.client_phone else ""
         msg = (
             f"🆕 <b>Nouveau Ticket Assigné</b>\n"
             f"{'─'*28}\n"
             f"🔖 Réf : <code>{ticket.ticket_ref}</code>\n"
             f"👤 Établissement : {ticket.client_name}\n"
+            f"{service_line}"
+            f"{phone_line}"
             f"📂 Catégorie : {ticket.category}\n"
             f"{p_emoji} Priorité : {ticket.priority.value.upper()}\n"
             f"{'─'*28}\n"

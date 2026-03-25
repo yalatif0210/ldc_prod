@@ -646,6 +646,8 @@ function viewTicket(id) {
   document.getElementById('m-body').innerHTML = `
     ${t.queued?'<div style="background:rgba(167,139,250,.1);border:1px solid rgba(167,139,250,.2);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:13px;color:var(--purple)">📬 Ce ticket est en file d\'attente — aucun agent disponible au moment de la création.</div>':''}
     <div class="dr"><div class="dl">CLIENT</div><div class="dv">${t.client_name}</div></div>
+    ${t.client_service ? `<div class="dr"><div class="dl">SERVICE</div><div class="dv">${t.client_service}</div></div>` : ''}
+    ${t.client_phone ? `<div class="dr"><div class="dl">TÉLÉPHONE</div><div class="dv" style="font-family:var(--mono);font-size:12px">${t.client_phone}</div></div>` : ''}
     <div class="dr"><div class="dl">WHATSAPP</div><div class="dv" style="font-family:var(--mono);font-size:11px">${t.client_whatsapp.replace('whatsapp:','')}</div></div>
     <div class="dr"><div class="dl">CATÉGORIE</div><div class="dv">${t.category}</div></div>
     <div class="dr"><div class="dl">PRIORITÉ</div><div class="dv"><span class="badge b-${t.priority}">${t.priority}</span></div></div>

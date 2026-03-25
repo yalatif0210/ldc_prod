@@ -192,8 +192,21 @@ class BotHandler:
     def _step_ask_name(self, conv, message, user_name=''):
         if len(message) < 2:
             return "❌ Merci d'entrer un nom valide (au moins 2 caractères)."
-        self._update_conv(conv, 'ask_category', {'client_name': message})
-        return f"Merci <b>{message}</b> ! 😊\n\n" + CATEGORY_MENU
+        self._update_conv(conv, 'ask_service', {'client_name': message})
+        return f"Merci <b>{message}</b> ! 😊\n\nQuel est votre <b>Service</b> (ex : Laboratoire, Pharmacie, Direction…) ?"
+
+    def _step_ask_service(self, conv, message, user_name=''):
+        if len(message) < 2:
+            return "❌ Merci d'entrer un service valide (au moins 2 caractères)."
+        self._update_conv(conv, 'ask_phone', {'client_service': message})
+        return "Quel est votre <b>numéro de téléphone</b> ?"
+
+    def _step_ask_phone(self, conv, message, user_name=''):
+        digits = ''.join(filter(str.isdigit, message))
+        if len(digits) < 8:
+            return "❌ Numéro invalide. Merci d'entrer un numéro valide (ex : 07 12 34 56 78)."
+        self._update_conv(conv, 'ask_category', {'client_phone': message})
+        return f"Parfait ! 📞\n\n" + CATEGORY_MENU
 
     def _step_ask_category(self, conv, message, user_name=''):
         if message not in CATEGORIES:
@@ -214,6 +227,8 @@ class BotHandler:
         return (
             "📋 <b>Récapitulatif de votre demande :</b>\n\n"
             f"👤 Établissement : <b>{data.get('client_name')}</b>\n"
+            f"🏥 Service : <b>{data.get('client_service')}</b>\n"
+            f"📞 Téléphone : <b>{data.get('client_phone')}</b>\n"
             f"📂 Catégorie : <b>{data.get('category')}</b>\n"
             f"📝 Description : {data.get('description')}\n\n"
             "Confirmez-vous cette demande ?\n"
@@ -233,7 +248,9 @@ class BotHandler:
                 client_name=data['client_name'],
                 client_chat_id=conv.client_whatsapp,
                 category=data['category'],
-                description=data['description']
+                description=data['description'],
+                client_service=data.get('client_service'),
+                client_phone=data.get('client_phone'),
             )
             self._update_conv(conv, 'done', {})
             if ticket.queued:

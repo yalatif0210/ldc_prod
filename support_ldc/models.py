@@ -108,6 +108,8 @@ class Ticket(db.Model):
     ticket_ref = db.Column(db.String(20), unique=True, nullable=False)
     client_name = db.Column(db.String(100), nullable=False)
     client_whatsapp = db.Column(db.String(30), nullable=False)
+    client_service = db.Column(db.String(100), nullable=True)
+    client_phone = db.Column(db.String(30), nullable=True)
     category = db.Column(db.String(50), nullable=False)
     description = db.Column(db.Text, nullable=False)
     priority = db.Column(db.Enum(TicketPriority), default=TicketPriority.MEDIUM)
@@ -123,6 +125,7 @@ class Ticket(db.Model):
         return {
             'id': self.id, 'ticket_ref': self.ticket_ref,
             'client_name': self.client_name, 'client_whatsapp': self.client_whatsapp,
+            'client_service': self.client_service, 'client_phone': self.client_phone,
             'category': self.category, 'description': self.description,
             'priority': self.priority.value, 'status': self.status.value,
             'agent': self.agent.to_dict() if self.agent else None,
