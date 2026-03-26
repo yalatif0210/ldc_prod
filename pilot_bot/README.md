@@ -819,8 +819,9 @@ bot_handler.py
 # Éditer pilot_bot/.env
 TELEGRAM_BOT_TOKEN=<token_botfather>
 BASE_URL=https://ldc.lhspla-ci.org/pilot
-AUTHORIZED_CHAT_IDS=<chat_id_chef1>,<chat_id_chef2>
 ADMIN_SECRET_KEY=<cle_admin_forte_32chars>
+# AUTHORIZED_CHAT_IDS est optionnel — laisser vide et gérer via le dashboard admin
+# AUTHORIZED_CHAT_IDS=
 ```
 
 ```bash
