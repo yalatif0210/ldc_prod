@@ -31,7 +31,7 @@ def add_cors_headers(response):
     return response
 
 
-@admin_bp.route('/admin/')
+@admin_bp.route('/admin/', strict_slashes=False)
 def admin_index():
     static_dir = os.path.join(os.path.dirname(__file__), 'static/admin')
     return send_from_directory(static_dir, 'index.html')
