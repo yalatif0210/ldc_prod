@@ -102,6 +102,34 @@ services:
       retries: 3
       start_period: 20s
 
+  pilot_bot:
+    build:
+      context: ./pilot_bot
+      dockerfile: Dockerfile
+    container_name: pilot_bot
+    restart: unless-stopped
+    depends_on:
+      lab_db:
+        condition: service_healthy
+    env_file:
+      - ./pilot_bot/.env
+    environment:
+      LAB_DB_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@lab_db:5432/${POSTGRES_DB:-lab_db}
+      ADMIN_DB_PATH: /app/data/admin.db
+      ADMIN_SECRET_KEY: ${PILOT_ADMIN_SECRET}
+    expose:
+      - "5001"
+    volumes:
+      - pilot_admin_data:/app/data
+    networks:
+      - default
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
   ldc_frontend:
     build:
       context: ./ldc_frontend
@@ -118,6 +146,7 @@ services:
     depends_on:
       - ldc_backend
       - support_bot
+      - pilot_bot
     healthcheck:
       disable: true
     ports:
@@ -132,6 +161,7 @@ volumes:
   grafana_data:
   support_db_data:
   support_qr_codes:
+  pilot_admin_data:
   certbot_certs:
     external: true  # Créé par init-letsencrypt.sh — même nom partagé avec certbot
 

@@ -1,0 +1,1109 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>pilot_bot — Admin</title>
+  <style>
+    /* ===== RESET & BASE ===== */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0f1117;
+      --card:      #1a1d27;
+      --border:    #2d3148;
+      --accent:    #6c63ff;
+      --success:   #22c55e;
+      --danger:    #ef4444;
+      --warning:   #f59e0b;
+      --text:      #e2e8f0;
+      --text-muted:#8892a4;
+      --radius:    10px;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 14px;
+      line-height: 1.5;
+      min-height: 100vh;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    /* ===== LAYOUT ===== */
+    .page { max-width: 1280px; margin: 0 auto; padding: 0 20px 40px; }
+
+    /* ===== HEADER ===== */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 0 14px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+    .header-title {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+    .header-title span { color: var(--accent); }
+    .header-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .header-right {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    #btn-logout {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 12px;
+      transition: border-color .2s, color .2s;
+    }
+    #btn-logout:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ===== AUTH BAR ===== */
+    #auth-bar {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    #auth-bar label {
+      font-size: 13px;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    #auth-key-input {
+      flex: 1;
+      min-width: 220px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 12px;
+      color: var(--text);
+      font-size: 14px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    #auth-key-input:focus { border-color: var(--accent); }
+    #auth-key-input::placeholder { color: var(--text-muted); }
+    #btn-login {
+      background: var(--accent);
+      border: none;
+      border-radius: 6px;
+      color: #fff;
+      padding: 8px 20px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+      white-space: nowrap;
+    }
+    #btn-login:hover { opacity: .85; }
+    #auth-error {
+      color: var(--danger);
+      font-size: 12px;
+      width: 100%;
+      display: none;
+    }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title .dot {
+      width: 4px; height: 4px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: inline-block;
+    }
+
+    /* ===== CARDS STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    @media (max-width: 768px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 400px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--text-muted);
+    }
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .stat-card.accent  { border-top: 2px solid var(--accent); }
+    .stat-card.success { border-top: 2px solid var(--success); }
+    .stat-card.warning { border-top: 2px solid var(--warning); }
+    .stat-card.danger  { border-top: 2px solid var(--danger); }
+
+    /* ===== HEALTH PANEL ===== */
+    .health-panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 32px;
+      flex-wrap: wrap;
+    }
+    .health-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .health-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--text-muted);
+      transition: background .3s;
+      flex-shrink: 0;
+    }
+    .health-dot.ok      { background: var(--success); box-shadow: 0 0 6px var(--success); }
+    .health-dot.ko      { background: var(--danger);  box-shadow: 0 0 6px var(--danger); }
+    .health-dot.unknown { background: var(--warning);  box-shadow: 0 0 6px var(--warning); }
+    .health-label { color: var(--text-muted); }
+    .health-status { font-weight: 600; }
+
+    /* ===== PANEL (generic container) ===== */
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    /* ===== TOP COMMANDS ===== */
+    .cmd-list { display: flex; flex-direction: column; gap: 10px; }
+    .cmd-row { display: flex; align-items: center; gap: 12px; }
+    .cmd-name {
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      font-size: 13px;
+      color: var(--accent);
+      min-width: 160px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .cmd-bar-wrap {
+      flex: 1;
+      background: var(--bg);
+      border-radius: 4px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .cmd-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 4px;
+      transition: width .4s ease;
+    }
+    .cmd-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      min-width: 36px;
+      text-align: right;
+    }
+
+    /* ===== FORM INLINE ===== */
+    .form-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      margin-bottom: 16px;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .form-group label {
+      font-size: 11px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .form-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 11px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--text-muted); }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      border: none;
+      border-radius: 6px;
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s;
+      white-space: nowrap;
+    }
+    .btn:hover { opacity: .82; }
+    .btn-accent  { background: var(--accent); color: #fff; }
+    .btn-danger  { background: var(--danger);  color: #fff; font-size: 12px; padding: 4px 10px; }
+    .btn-outline {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+    .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ===== TABLES ===== */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 6px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    thead th {
+      text-align: left;
+      padding: 10px 12px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      color: var(--text-muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover { background: rgba(108,99,255,.06); }
+    tbody td {
+      padding: 9px 12px;
+      color: var(--text);
+      vertical-align: middle;
+    }
+    .empty-state {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 32px;
+      font-size: 13px;
+    }
+
+    /* ===== CODE / MONOSPACE ===== */
+    code {
+      font-family: 'SFMono-Regular', Consolas, monospace;
+      background: rgba(108,99,255,.15);
+      color: var(--accent);
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-size: 12px;
+    }
+
+    /* ===== BADGES ===== */
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .3px;
+      white-space: nowrap;
+    }
+    .badge-success { background: rgba(34,197,94,.15);  color: var(--success); }
+    .badge-danger  { background: rgba(239,68,68,.15);  color: var(--danger); }
+    .badge-warning { background: rgba(245,158,11,.15); color: var(--warning); }
+    .badge-blue    { background: rgba(59,130,246,.15); color: #60a5fa; }
+    .badge-muted   { background: rgba(136,146,164,.12); color: var(--text-muted); }
+
+    /* ===== STATUS USER ===== */
+    .status-active   { color: var(--success); font-size: 11px; font-weight: 600; }
+    .status-revoked  { color: var(--danger);  font-size: 11px; font-weight: 600; }
+
+    /* ===== FILTER ROW ===== */
+    .filter-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+    .filter-label { font-size: 12px; color: var(--text-muted); }
+    .filter-input {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 11px;
+      color: var(--text);
+      font-size: 13px;
+      outline: none;
+      transition: border-color .2s;
+      width: 180px;
+    }
+    .filter-input:focus { border-color: var(--accent); }
+    .filter-input::placeholder { color: var(--text-muted); }
+    .filter-count { font-size: 12px; color: var(--text-muted); margin-left: auto; }
+
+    /* ===== NOTIFICATION TOAST ===== */
+    #toast {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 20px;
+      font-size: 13px;
+      box-shadow: 0 8px 24px rgba(0,0,0,.5);
+      z-index: 9999;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity .25s, transform .25s;
+      pointer-events: none;
+      max-width: 340px;
+    }
+    #toast.show { opacity: 1; transform: translateY(0); }
+    #toast.toast-ok  { border-left: 3px solid var(--success); }
+    #toast.toast-err { border-left: 3px solid var(--danger); }
+
+    /* ===== SPINNER ===== */
+    .spinner {
+      display: inline-block;
+      width: 14px; height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ===== REFRESH INDICATOR ===== */
+    #refresh-dot {
+      display: inline-block;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--success);
+      margin-right: 6px;
+      opacity: 0;
+      transition: opacity .3s;
+    }
+    #refresh-dot.active { opacity: 1; }
+
+    /* ===== FOOTER ===== */
+    footer {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 11px;
+      padding: 24px 0 8px;
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    /* ===== CONTENT HIDDEN UNTIL AUTH ===== */
+    #main-content { display: none; }
+
+    /* ===== TOGGLE ADD FORM ===== */
+    #add-user-form {
+      background: rgba(108,99,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+    #add-user-form.open { display: block; }
+    .add-form-title {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 12px;
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- HEADER -->
+  <header>
+    <div class="header-title">🤖 <span>pilot_bot</span> — Admin</div>
+    <div class="header-right">
+      <div class="header-meta">
+        <span id="refresh-dot"></span>
+        <span id="last-update">—</span>
+      </div>
+      <button id="btn-logout" onclick="logout()">Déconnexion</button>
+    </div>
+  </header>
+
+  <!-- AUTH BAR -->
+  <div id="auth-bar">
+    <label for="auth-key-input">Clé admin :</label>
+    <input
+      id="auth-key-input"
+      type="password"
+      class=""
+      placeholder="Saisir la clé d'administration…"
+      autocomplete="current-password"
+    />
+    <button id="btn-login" class="btn btn-accent" onclick="login()">Connexion</button>
+    <div id="auth-error">Clé invalide ou accès refusé. Vérifiez votre clé admin.</div>
+  </div>
+
+  <!-- MAIN CONTENT (hidden until auth) -->
+  <div id="main-content">
+
+    <!-- STATS CARDS -->
+    <div class="section-title"><span class="dot"></span>Vue d'ensemble</div>
+    <div class="stats-grid">
+      <div class="stat-card accent">
+        <div class="stat-label">Utilisateurs actifs</div>
+        <div class="stat-value" id="stat-active-users">—</div>
+        <div class="stat-sub" id="stat-total-users">— au total</div>
+      </div>
+      <div class="stat-card success">
+        <div class="stat-label">Interactions aujourd'hui</div>
+        <div class="stat-value" id="stat-interactions-today">—</div>
+        <div class="stat-sub" id="stat-total-interactions">— au total</div>
+      </div>
+      <div class="stat-card warning">
+        <div class="stat-label">Utilisateurs actifs aujourd'hui</div>
+        <div class="stat-value" id="stat-users-today">—</div>
+        <div class="stat-sub">utilisateurs distincts</div>
+      </div>
+      <div class="stat-card danger">
+        <div class="stat-label">Accès refusés</div>
+        <div class="stat-value" id="stat-denied">—</div>
+        <div class="stat-sub">depuis le démarrage</div>
+      </div>
+    </div>
+
+    <!-- HEALTH PANEL -->
+    <div class="section-title"><span class="dot"></span>État du système</div>
+    <div class="health-panel">
+      <div class="health-item">
+        <div class="health-dot unknown" id="health-db-dot"></div>
+        <span class="health-label">Base de données :</span>
+        <span class="health-status" id="health-db-status">—</span>
+      </div>
+      <div class="health-item">
+        <div class="health-dot unknown" id="health-webhook-dot"></div>
+        <span class="health-label">Webhook :</span>
+        <span class="health-status" id="health-webhook-status">—</span>
+      </div>
+      <div class="health-item">
+        <div class="health-dot unknown" id="health-bot-dot"></div>
+        <span class="health-label">Bot :</span>
+        <span class="health-status" id="health-bot-status">—</span>
+      </div>
+      <div style="margin-left:auto; font-size:11px; color:var(--text-muted)" id="health-hostname"></div>
+    </div>
+
+    <!-- TOP COMMANDES -->
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:16px"><span class="dot"></span>Top commandes</div>
+      <div class="cmd-list" id="top-commands">
+        <div class="empty-state">Chargement…</div>
+      </div>
+    </div>
+
+    <!-- UTILISATEURS AUTORISES -->
+    <div class="panel">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px">
+        <div class="section-title" style="margin-bottom:0"><span class="dot"></span>Utilisateurs autorisés</div>
+        <button class="btn btn-accent" onclick="toggleAddForm()">+ Ajouter</button>
+      </div>
+
+      <div id="add-user-form">
+        <div class="add-form-title">Nouvel utilisateur</div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="new-chat-id">Chat ID *</label>
+            <input type="text" id="new-chat-id" class="form-input" placeholder="ex: 123456789" style="width:160px" />
+          </div>
+          <div class="form-group">
+            <label for="new-username">Username</label>
+            <input type="text" id="new-username" class="form-input" placeholder="@username" style="width:160px" />
+          </div>
+          <div class="form-group" style="flex:1; min-width:180px">
+            <label for="new-note">Note</label>
+            <input type="text" id="new-note" class="form-input" placeholder="Note optionnelle…" />
+          </div>
+          <div class="form-group" style="justify-content:flex-end">
+            <label style="opacity:0">.</label>
+            <div style="display:flex; gap:8px">
+              <button class="btn btn-accent" onclick="addUser()">Enregistrer</button>
+              <button class="btn btn-outline" onclick="toggleAddForm()">Annuler</button>
+            </div>
+          </div>
+        </div>
+        <div id="add-user-error" style="color:var(--danger); font-size:12px; display:none; margin-top:-4px"></div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Chat ID</th>
+              <th>Username</th>
+              <th>Note</th>
+              <th>Ajouté le</th>
+              <th>Statut</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <tr><td colspan="6" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- INTERACTIONS RECENTES -->
+    <div class="panel">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:10px">
+        <div class="section-title" style="margin-bottom:0"><span class="dot"></span>Interactions récentes <span style="font-size:11px; color:var(--text-muted); font-weight:400">(50 dernières)</span></div>
+      </div>
+      <div class="filter-row">
+        <span class="filter-label">Filtrer par chat_id :</span>
+        <input type="text" id="filter-chat-id" class="filter-input" placeholder="ex: 123456789" oninput="filterInteractions()" />
+        <button class="btn btn-outline" style="font-size:12px; padding:5px 12px" onclick="clearFilter()">Effacer</button>
+        <span class="filter-count" id="interactions-count"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Chat ID</th>
+              <th>Username</th>
+              <th>Commande</th>
+              <th>Menu</th>
+            </tr>
+          </thead>
+          <tbody id="interactions-tbody">
+            <tr><td colspan="5" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- EVENEMENTS BOT -->
+    <div class="panel">
+      <div class="section-title" style="margin-bottom:14px"><span class="dot"></span>Événements bot <span style="font-size:11px; color:var(--text-muted); font-weight:400">(30 derniers)</span></div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Timestamp</th>
+              <th>Type</th>
+              <th>Détails</th>
+            </tr>
+          </thead>
+          <tbody id="events-tbody">
+            <tr><td colspan="3" class="empty-state">Chargement…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+
+  <footer>pilot_bot admin — LDC &copy; 2026</footer>
+</div><!-- /page -->
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+/* ===================================================================
+   CONFIG
+   =================================================================== */
+const API_BASE = '/pilot';
+let adminKey = localStorage.getItem('pilot_admin_key') || '';
+
+/* Cache interactions pour le filtre côté client */
+let allInteractions = [];
+
+/* ===================================================================
+   API HELPER
+   =================================================================== */
+async function api(endpoint, options = {}) {
+  options.headers = {
+    ...(options.headers || {}),
+    'X-Admin-Key': adminKey,
+    'Content-Type': 'application/json'
+  };
+  try {
+    const r = await fetch(`${API_BASE}${endpoint}`, options);
+    if (r.status === 401) {
+      showAuthError();
+      return null;
+    }
+    return r;
+  } catch (err) {
+    console.error('API error:', err);
+    return null;
+  }
+}
+
+/* ===================================================================
+   AUTH
+   =================================================================== */
+function showAuthError() {
+  document.getElementById('auth-error').style.display = 'block';
+  document.getElementById('auth-bar').style.display = 'flex';
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('btn-logout').style.display = 'none';
+  adminKey = '';
+  localStorage.removeItem('pilot_admin_key');
+}
+
+async function login() {
+  const input = document.getElementById('auth-key-input');
+  const key = input.value.trim();
+  if (!key) {
+    document.getElementById('auth-error').style.display = 'block';
+    document.getElementById('auth-error').textContent = 'Veuillez saisir la clé admin.';
+    return;
+  }
+  adminKey = key;
+
+  const btn = document.getElementById('btn-login');
+  btn.textContent = 'Connexion…';
+  btn.disabled = true;
+
+  const r = await api('/admin/api/health');
+  btn.textContent = 'Connexion';
+  btn.disabled = false;
+
+  if (!r) return; /* showAuthError déjà appelé */
+  if (!r.ok) {
+    document.getElementById('auth-error').style.display = 'block';
+    document.getElementById('auth-error').textContent = 'Clé invalide ou accès refusé.';
+    adminKey = '';
+    return;
+  }
+
+  localStorage.setItem('pilot_admin_key', adminKey);
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-bar').style.display = 'none';
+  document.getElementById('main-content').style.display = 'block';
+  document.getElementById('btn-logout').style.display = 'inline-block';
+  input.value = '';
+  await loadAll();
+}
+
+function logout() {
+  adminKey = '';
+  localStorage.removeItem('pilot_admin_key');
+  document.getElementById('auth-bar').style.display = 'flex';
+  document.getElementById('main-content').style.display = 'none';
+  document.getElementById('btn-logout').style.display = 'none';
+  document.getElementById('auth-error').style.display = 'none';
+  document.getElementById('auth-key-input').value = '';
+  document.getElementById('last-update').textContent = '—';
+}
+
+/* Connexion auto si clé en localStorage */
+(function autoLogin() {
+  if (adminKey) {
+    document.getElementById('auth-key-input').value = adminKey;
+    login();
+  }
+})();
+
+/* Enter dans le champ clé */
+document.getElementById('auth-key-input').addEventListener('keydown', e => {
+  if (e.key === 'Enter') login();
+});
+
+/* ===================================================================
+   LOAD ALL
+   =================================================================== */
+async function loadAll() {
+  flashRefreshDot();
+  await Promise.all([
+    loadHealth(),
+    loadStats(),
+    loadUsers(),
+    loadInteractions(),
+    loadEvents()
+  ]);
+  document.getElementById('last-update').textContent =
+    'MàJ : ' + fmtTs(new Date().toISOString());
+}
+
+/* Auto-refresh 30s silencieux */
+setInterval(async () => {
+  if (adminKey && document.getElementById('main-content').style.display !== 'none') {
+    await loadAll();
+  }
+}, 30000);
+
+function flashRefreshDot() {
+  const dot = document.getElementById('refresh-dot');
+  dot.classList.add('active');
+  setTimeout(() => dot.classList.remove('active'), 800);
+}
+
+/* ===================================================================
+   HEALTH
+   =================================================================== */
+async function loadHealth() {
+  const r = await api('/admin/api/health');
+  if (!r || !r.ok) return;
+  const data = await r.json();
+
+  setHealth('db', data.db_connected === true, data.db_connected !== false);
+  setHealth('webhook', data.webhook_configured === true, data.webhook_configured !== false);
+  /* Bot considéré OK si la requête répond */
+  setHealth('bot', true, true);
+
+  if (data.uptime_info) {
+    document.getElementById('health-hostname').textContent = data.uptime_info;
+  }
+}
+
+function setHealth(key, isOk, isKnown) {
+  const dot    = document.getElementById(`health-${key}-dot`);
+  const status = document.getElementById(`health-${key}-status`);
+  dot.className = 'health-dot';
+  if (!isKnown) {
+    dot.classList.add('unknown');
+    status.textContent = 'Inconnu';
+    status.style.color = 'var(--warning)';
+  } else if (isOk) {
+    dot.classList.add('ok');
+    status.textContent = 'OK';
+    status.style.color = 'var(--success)';
+  } else {
+    dot.classList.add('ko');
+    status.textContent = 'KO';
+    status.style.color = 'var(--danger)';
+  }
+}
+
+/* ===================================================================
+   STATS
+   =================================================================== */
+async function loadStats() {
+  const r = await api('/admin/api/stats');
+  if (!r || !r.ok) return;
+  const d = await r.json();
+
+  setText('stat-active-users',      d.active_users       ?? '—');
+  setText('stat-total-users',       `${d.total_users ?? '—'} au total`);
+  setText('stat-interactions-today',d.interactions_today ?? '—');
+  setText('stat-total-interactions',`${d.total_interactions ?? '—'} au total`);
+  setText('stat-users-today',       d.active_users_today ?? '—');
+  setText('stat-denied',            d.access_denied_count ?? '—');
+
+  renderTopCommands(d.top_commands || []);
+}
+
+function renderTopCommands(cmds) {
+  const el = document.getElementById('top-commands');
+  if (!cmds.length) {
+    el.innerHTML = '<div class="empty-state">Aucune commande enregistrée</div>';
+    return;
+  }
+  const max = Math.max(...cmds.map(c => c.count), 1);
+  el.innerHTML = cmds.map(c => {
+    const pct = Math.round((c.count / max) * 100);
+    return `
+      <div class="cmd-row">
+        <div class="cmd-name"><code>${esc(c.command)}</code></div>
+        <div class="cmd-bar-wrap">
+          <div class="cmd-bar-fill" style="width:${pct}%"></div>
+        </div>
+        <div class="cmd-count">${c.count}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ===================================================================
+   UTILISATEURS
+   =================================================================== */
+async function loadUsers() {
+  const r = await api('/admin/api/users');
+  if (!r || !r.ok) return;
+  const users = await r.json();
+  renderUsers(users);
+}
+
+function renderUsers(users) {
+  const tbody = document.getElementById('users-tbody');
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="empty-state">Aucun utilisateur</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(u => {
+    const active = u.is_active === 1 || u.is_active === true;
+    return `
+      <tr>
+        <td><code>${esc(u.chat_id)}</code></td>
+        <td>${u.username ? esc(u.username) : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${u.note     ? esc(u.note)     : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td style="color:var(--text-muted); font-size:12px">${u.added_at ? fmtTs(u.added_at) : '—'}</td>
+        <td>${active
+          ? '<span class="status-active">● Actif</span>'
+          : '<span class="status-revoked">● Révoqué</span>'}</td>
+        <td>${active
+          ? `<button class="btn btn-danger" onclick="revokeUser('${esc(u.chat_id)}')">Révoquer</button>`
+          : '<span style="color:var(--text-muted); font-size:12px">—</span>'}</td>
+      </tr>`;
+  }).join('');
+}
+
+function toggleAddForm() {
+  const form = document.getElementById('add-user-form');
+  form.classList.toggle('open');
+  if (form.classList.contains('open')) {
+    document.getElementById('new-chat-id').focus();
+  }
+  document.getElementById('add-user-error').style.display = 'none';
+}
+
+async function addUser() {
+  const chatId   = document.getElementById('new-chat-id').value.trim();
+  const username = document.getElementById('new-username').value.trim();
+  const note     = document.getElementById('new-note').value.trim();
+  const errEl    = document.getElementById('add-user-error');
+
+  errEl.style.display = 'none';
+  if (!chatId) {
+    errEl.textContent = 'Le Chat ID est obligatoire.';
+    errEl.style.display = 'block';
+    return;
+  }
+  if (!/^\d+$/.test(chatId)) {
+    errEl.textContent = 'Le Chat ID doit être numérique.';
+    errEl.style.display = 'block';
+    return;
+  }
+
+  const r = await api('/admin/api/users', {
+    method: 'POST',
+    body: JSON.stringify({ chat_id: chatId, username, note })
+  });
+  if (!r) return;
+  const data = await r.json();
+  if (data.success) {
+    toast('Utilisateur ajouté avec succès.', 'ok');
+    document.getElementById('new-chat-id').value = '';
+    document.getElementById('new-username').value = '';
+    document.getElementById('new-note').value = '';
+    document.getElementById('add-user-form').classList.remove('open');
+    await loadUsers();
+    await loadStats();
+  } else {
+    errEl.textContent = data.message || data.error || 'Erreur lors de l\'ajout.';
+    errEl.style.display = 'block';
+  }
+}
+
+async function revokeUser(chatId) {
+  if (!confirm(`Révoquer l'accès pour chat_id ${chatId} ?`)) return;
+  const r = await api(`/admin/api/users/${encodeURIComponent(chatId)}`, { method: 'DELETE' });
+  if (!r) return;
+  const data = await r.json();
+  if (data.success) {
+    toast(`Utilisateur ${chatId} révoqué.`, 'ok');
+    await loadUsers();
+    await loadStats();
+  } else {
+    toast(data.error || 'Erreur lors de la révocation.', 'err');
+  }
+}
+
+/* ===================================================================
+   INTERACTIONS
+   =================================================================== */
+async function loadInteractions() {
+  const r = await api('/admin/api/interactions?limit=50');
+  if (!r || !r.ok) return;
+  allInteractions = await r.json();
+  filterInteractions();
+}
+
+function filterInteractions() {
+  const filter = document.getElementById('filter-chat-id').value.trim();
+  const filtered = filter
+    ? allInteractions.filter(i => String(i.chat_id).includes(filter))
+    : allInteractions;
+  renderInteractions(filtered);
+  document.getElementById('interactions-count').textContent =
+    `${filtered.length} / ${allInteractions.length} ligne${allInteractions.length > 1 ? 's' : ''}`;
+}
+
+function clearFilter() {
+  document.getElementById('filter-chat-id').value = '';
+  filterInteractions();
+}
+
+function renderInteractions(rows) {
+  const tbody = document.getElementById('interactions-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="empty-state">Aucune interaction</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(i => `
+    <tr>
+      <td style="color:var(--text-muted); font-size:12px; white-space:nowrap">${fmtTs(i.timestamp)}</td>
+      <td><code>${esc(i.chat_id)}</code></td>
+      <td>${i.username ? esc(i.username) : '<span style="color:var(--text-muted)">—</span>'}</td>
+      <td><code>${esc(i.command || '—')}</code></td>
+      <td style="color:var(--text-muted)">${i.menu ? esc(i.menu) : '—'}</td>
+    </tr>`).join('');
+}
+
+/* ===================================================================
+   EVENEMENTS
+   =================================================================== */
+async function loadEvents() {
+  const r = await api('/admin/api/events?limit=30');
+  if (!r || !r.ok) return;
+  const events = await r.json();
+  renderEvents(events);
+}
+
+function renderEvents(events) {
+  const tbody = document.getElementById('events-tbody');
+  if (!events.length) {
+    tbody.innerHTML = '<tr><td colspan="3" class="empty-state">Aucun événement</td></tr>';
+    return;
+  }
+  tbody.innerHTML = events.map(e => `
+    <tr>
+      <td style="color:var(--text-muted); font-size:12px; white-space:nowrap">${fmtTs(e.timestamp)}</td>
+      <td>${eventBadge(e.event_type)}</td>
+      <td style="color:var(--text-muted); font-size:12px">${e.details ? esc(e.details) : '—'}</td>
+    </tr>`).join('');
+}
+
+function eventBadge(type) {
+  const map = {
+    'access_denied': ['badge-danger',  'Accès refusé'],
+    'startup':       ['badge-success', 'Démarrage'],
+    'user_added':    ['badge-blue',    'Utilisateur ajouté'],
+    'user_removed':  ['badge-warning', 'Utilisateur révoqué'],
+    'db_error':      ['badge-danger',  'Erreur DB'],
+  };
+  const [cls, label] = map[type] || ['badge-muted', esc(type)];
+  return `<span class="badge ${cls}">${label}</span>`;
+}
+
+/* ===================================================================
+   UTILITAIRES
+   =================================================================== */
+
+/**
+ * Formate un timestamp ISO en DD/MM/YYYY HH:MM:SS (heure locale).
+ */
+function fmtTs(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso.endsWith('Z') ? iso : iso + 'Z');
+    if (isNaN(d)) return iso;
+    const p = n => String(n).padStart(2, '0');
+    return `${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()} `
+         + `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`;
+  } catch { return iso; }
+}
+
+function esc(str) {
+  if (str == null) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function setText(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value;
+}
+
+/* ===================================================================
+   TOAST
+   =================================================================== */
+let toastTimer = null;
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show toast-${type}`;
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    el.classList.remove('show');
+  }, 3500);
+}
+</script>
+</body>
+</html>

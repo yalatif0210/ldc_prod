@@ -8,7 +8,9 @@
       "Bash(python3 -c \"import json; d=json.load\\(open\\(''c:/DEV_APP_LAB/DEPLOY/app_v3_claude_optimus/frontend/public/i18n/en-US.json''\\)\\); print\\(json.dumps\\(d[''menu''], indent=2\\)\\)\")",
       "Bash(npx tsc --noEmit --project tsconfig.app.json)",
       "Bash(find /c/DEV_APP_LAB/DEPLOY/app_v3_claude_optimus/frontend/src -name form-base* -o -name *form-base*)",
-      "Bash(find C:DEV_APP_LABDEPLOYapp_v3_claude_production/ldc_backend -iname *RoleGuard* -o -iname *role-guard*our)"
+      "Bash(find C:DEV_APP_LABDEPLOYapp_v3_claude_production/ldc_backend -iname *RoleGuard* -o -iname *role-guard*our)",
+      "Bash(xargs grep:*)",
+      "Bash(python3 -c \":*)"
     ]
   }
 }
