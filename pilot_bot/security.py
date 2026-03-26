@@ -7,7 +7,7 @@ import functools
 
 UNAUTHORIZED_MSG = (
     "🔒 <b>Accès refusé.</b>\n\n"
-    "Ce bot est réservé aux chefs de projet LDC.\n\n"
+    "Ce bot est réservé aux chefs de projet LHSPLA.\n\n"
     "Votre identifiant Telegram : <code>{chat_id}</code>\n\n"
     "<i>Transmettez cet identifiant à l'administrateur pour demander l'accès.</i>"
 )
