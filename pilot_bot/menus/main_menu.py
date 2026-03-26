@@ -1,12 +1,15 @@
 """
 menus/main_menu.py — Menu principal du bot pilot_bot.
 
-Propose 5 choix numérotés :
+Propose 8 choix numérotés :
   1 → Rapports
-  2 → Stocks
+  2 → Stocks d'intrants (global)
   3 → Structures
   4 → Utilisateurs
   5 → Tableau de bord complet
+  6 → Stocks par équipement
+  7 → Données labo (par équipement)
+  8 → Dashboard équipements
 
 Les handlers de sous-menus sont importés ici pour le dispatch interne.
 La session est gérée via session.py (pas de circular import).
@@ -21,7 +24,10 @@ MAIN_MENU_TEXT = (
     "2️⃣  Stocks d'intrants\n"
     "3️⃣  Structures\n"
     "4️⃣  Utilisateurs\n"
-    "5️⃣  Tableau de bord\n\n"
+    "5️⃣  Tableau de bord\n"
+    "6️⃣  Stocks par équipement\n"
+    "7️⃣  Données labo (par équipement)\n"
+    "8️⃣  Dashboard équipements\n\n"
     "<i>Tapez le numéro de votre choix.</i>"
 )
 
@@ -43,6 +49,7 @@ def handle_main_menu(chat_id: str, msg: str, session_data: dict) -> list[str]:
     from menus.stocks_menu     import STOCKS_MENU_TEXT
     from menus.structures_menu import STRUCTURES_MENU_TEXT
     from menus.users_menu      import USERS_MENU_TEXT
+    from menus.dashboard_equipment_menu import DASHBOARD_EQUIPMENT_MENU_TEXT
 
     if msg == '1':
         set_session(chat_id, 'reports')
@@ -61,9 +68,33 @@ def handle_main_menu(chat_id: str, msg: str, session_data: dict) -> list[str]:
         return [USERS_MENU_TEXT]
 
     if msg == '5':
-        # Le dashboard est construit dans bot_handler pour centraliser la logique
+        # Le dashboard global est construit dans bot_handler
         from bot_handler import _build_dashboard
         return _build_dashboard()
+
+    if msg == '6':
+        from queries.equipment_queries import EquipmentQueries
+        from formatters.equipment_formatter import fmt_equipment_list
+        equipments = EquipmentQueries.get_all_equipment()
+        set_session(chat_id, 'stocks_equipment', {
+            'state': 'pick_equipment',
+            'equipments': equipments,
+        })
+        return [fmt_equipment_list(equipments)]
+
+    if msg == '7':
+        from queries.equipment_queries import EquipmentQueries
+        from formatters.equipment_formatter import fmt_equipment_list
+        equipments = EquipmentQueries.get_all_equipment()
+        set_session(chat_id, 'lab', {
+            'state': 'pick_equipment',
+            'equipments': equipments,
+        })
+        return [fmt_equipment_list(equipments)]
+
+    if msg == '8':
+        set_session(chat_id, 'dashboard_equipment')
+        return [DASHBOARD_EQUIPMENT_MENU_TEXT]
 
     # Entrée non reconnue → réafficher le menu
     return [MAIN_MENU_TEXT]

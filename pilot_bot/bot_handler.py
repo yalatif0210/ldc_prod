@@ -15,11 +15,14 @@ Architecture anti-import-circulaire :
 from security import require_authorized
 from session import get_session, set_session, clear_session
 
-from menus.main_menu       import handle_main_menu,    MAIN_MENU_TEXT
-from menus.reports_menu    import handle_reports_menu,  REPORTS_MENU_TEXT
-from menus.stocks_menu     import handle_stocks_menu,   STOCKS_MENU_TEXT
-from menus.structures_menu import handle_structures_menu, STRUCTURES_MENU_TEXT
-from menus.users_menu      import handle_users_menu,    USERS_MENU_TEXT
+from menus.main_menu                import handle_main_menu,    MAIN_MENU_TEXT
+from menus.reports_menu             import handle_reports_menu,  REPORTS_MENU_TEXT
+from menus.stocks_menu              import handle_stocks_menu,   STOCKS_MENU_TEXT
+from menus.structures_menu          import handle_structures_menu, STRUCTURES_MENU_TEXT
+from menus.users_menu               import handle_users_menu,    USERS_MENU_TEXT
+from menus.stocks_equipment_menu    import handle_stocks_equipment_menu
+from menus.lab_menu                 import handle_lab_menu
+from menus.dashboard_equipment_menu import handle_dashboard_equipment_menu, DASHBOARD_EQUIPMENT_MENU_TEXT
 
 from queries.report_queries import ReportQueries
 from queries.stock_queries  import StockQueries
@@ -28,18 +31,16 @@ from formatters.telegram_formatter import fmt_dashboard
 
 
 # ── Table de dispatch : menu actif → handler ──────────────────────────────────
-#
-# Les clés correspondent aux valeurs possibles du champ 'menu' en session.
-# 'reports_period' et 'structures_region' sont des sous-états des menus parents ;
-# ils sont routés vers le même handler, qui lit session_data['state'] pour
-# discriminer le comportement.
 
 DISPATCH: dict = {
-    'main':               handle_main_menu,
-    'reports':            handle_reports_menu,
-    'stocks':             handle_stocks_menu,
-    'structures':         handle_structures_menu,
-    'users':              handle_users_menu,
+    'main':                 handle_main_menu,
+    'reports':              handle_reports_menu,
+    'stocks':               handle_stocks_menu,
+    'structures':           handle_structures_menu,
+    'users':                handle_users_menu,
+    'stocks_equipment':     handle_stocks_equipment_menu,
+    'lab':                  handle_lab_menu,
+    'dashboard_equipment':  handle_dashboard_equipment_menu,
 }
 
 
@@ -51,9 +52,12 @@ HELP_TEXT = (
     "/start, /menu   — Menu principal\n"
     "/dashboard      — Tableau de bord complet\n"
     "/rapports       — Menu Rapports\n"
-    "/stocks         — Menu Stocks\n"
+    "/stocks         — Menu Stocks d'intrants\n"
     "/structures     — Menu Structures\n"
-    "/users          — Menu Utilisateurs\n\n"
+    "/users          — Menu Utilisateurs\n"
+    "/equipements    — Stocks par équipement\n"
+    "/labo           — Données labo par équipement\n"
+    "/dashboard_eq   — Dashboard équipements\n\n"
     "<b>Raccourcis</b>\n"
     "/retard         — Structures en retard (période courante)\n"
     "/rupture        — Intrants en rupture (période courante)\n\n"
@@ -148,6 +152,48 @@ def handle_message(chat_id: str, text: str, user_name: str = '') -> list[str]:
     if msg in ('/users', '/utilisateurs'):
         set_session(chat_id, 'users')
         result = [USERS_MENU_TEXT]
+        try:
+            from admin_db import log_interaction
+            log_interaction(chat_id, user_name, msg, 'global', len(result))
+        except Exception:
+            pass
+        return result
+
+    if msg == '/equipements':
+        from queries.equipment_queries import EquipmentQueries
+        from formatters.equipment_formatter import fmt_equipment_list
+        equipments = EquipmentQueries.get_all_equipment()
+        set_session(chat_id, 'stocks_equipment', {
+            'state': 'pick_equipment',
+            'equipments': equipments,
+        })
+        result = [fmt_equipment_list(equipments)]
+        try:
+            from admin_db import log_interaction
+            log_interaction(chat_id, user_name, msg, 'global', len(result))
+        except Exception:
+            pass
+        return result
+
+    if msg == '/labo':
+        from queries.equipment_queries import EquipmentQueries
+        from formatters.equipment_formatter import fmt_equipment_list
+        equipments = EquipmentQueries.get_all_equipment()
+        set_session(chat_id, 'lab', {
+            'state': 'pick_equipment',
+            'equipments': equipments,
+        })
+        result = [fmt_equipment_list(equipments)]
+        try:
+            from admin_db import log_interaction
+            log_interaction(chat_id, user_name, msg, 'global', len(result))
+        except Exception:
+            pass
+        return result
+
+    if msg == '/dashboard_eq':
+        set_session(chat_id, 'dashboard_equipment')
+        result = [DASHBOARD_EQUIPMENT_MENU_TEXT]
         try:
             from admin_db import log_interaction
             log_interaction(chat_id, user_name, msg, 'global', len(result))
