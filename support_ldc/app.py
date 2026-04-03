@@ -1,16 +1,21 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
-import jwt, os, datetime as dt, httpx, atexit
+import jwt
+import os
+import datetime as dt
+import httpx
+import atexit
+
+from database import db, init_db
+from models import Ticket, Agent, AgentStatus, TicketStatus, TicketPriority, AgentRole
+from ticket_service import TicketService
+from bot_handler import BotHandler
+from scheduler import ReminderScheduler
 
 # Client HTTP partagé avec connection pooling (évite de créer une connexion par requête)
 _http_client = httpx.Client(timeout=10)
 atexit.register(_http_client.close)
-from database import db, init_db
-from models import Ticket, Agent, AgentStatus, Conversation, TicketStatus, TicketPriority, AgentRole
-from ticket_service import TicketService
-from bot_handler import BotHandler
-from scheduler import ReminderScheduler
 
 app = Flask(__name__)
 CORS(app)
@@ -298,6 +303,5 @@ def health():
 
 if __name__ == '__main__':
     reminder_scheduler.start()
-    import atexit
     atexit.register(reminder_scheduler.stop)
     app.run(debug=os.getenv('FLASK_DEBUG', 'false').lower() == 'true', port=5000)

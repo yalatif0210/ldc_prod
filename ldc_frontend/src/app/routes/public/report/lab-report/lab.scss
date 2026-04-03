@@ -1,5 +1,4 @@
 :host {
-  --gradiant--3: #6366f1;
   --secondary: #4f46e5;
   --accent: #818cf8;
   --text: #1f2937;
@@ -64,6 +63,8 @@ body {
   position: relative;
   color: var(--text);
   overflow: hidden;
+  will-change: transform;
+  -webkit-font-smoothing: antialiased;
 }
 
 .underline-tabs .tab-btn::before {
@@ -172,12 +173,12 @@ body {
   margin-top: 1rem;
   opacity: 0;
   transform: translateY(10px);
-  animation: fadeIn 0.4s ease forwards;
+  animation: fade-in 0.4s ease forwards;
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
 }
 
-@keyframes fadeIn {
+@keyframes fade-in {
   0% {
     opacity: 0;
     transform: translateY(10px);
@@ -218,11 +219,6 @@ body {
 .tab-btn:focus {
   outline: none;
   box-shadow: 0 0 0 3px var(--accent), 0 0 0 6px rgba(99, 102, 241, 0.2);
-}
-
-.tab-btn {
-  will-change: transform;
-  -webkit-font-smoothing: antialiased;
 }
 
 

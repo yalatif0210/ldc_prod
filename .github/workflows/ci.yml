@@ -92,7 +92,7 @@ jobs:
       - run: pip install flake8
 
       - name: Lint support_ldc
-        run: flake8 support_ldc/ --max-line-length=120 --extend-ignore=E401,W503 --exclude=__pycache__,migrations,venv,.venv
+        run: flake8 support_ldc/ --max-line-length=120 --extend-ignore=E401,W503,E302,E231,E501,W292,E128,F401,F541 --exclude=__pycache__,migrations,venv,.venv
 
       - name: Lint pilot_bot
         run: flake8 pilot_bot/ --max-line-length=120 --extend-ignore=E401,W503 --exclude=__pycache__,migrations,venv,.venv

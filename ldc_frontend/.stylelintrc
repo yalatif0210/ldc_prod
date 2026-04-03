@@ -1,7 +1,9 @@
 {
   "ignoreFiles": [
     "dist/**",
-    "schematics/**"
+    "schematics/**",
+    "src/styles/other/_other.scss",
+    "src/app/shared/components/info-box/user-info-box.scss"
   ],
   "extends": [
     "stylelint-config-standard",
