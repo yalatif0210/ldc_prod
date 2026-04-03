@@ -1,0 +1,24 @@
+# ─────────────────────────────────────────────────────────────
+# CI/CD override — utilise les images pre-buildées depuis ghcr.io
+# au lieu de builder localement.
+#
+# Usage sur VPS :
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml pull
+#   docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --no-build
+#
+# Variables requises :
+#   CI_IMAGE_OWNER  : nom du compte GitHub (ex: monorg)
+#   IMAGE_TAG       : tag de l'image (ex: sha-a1b2c3d ou latest)
+# ─────────────────────────────────────────────────────────────
+services:
+  ldc_backend:
+    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_backend:${IMAGE_TAG:-latest}
+
+  ldc_frontend:
+    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_frontend:${IMAGE_TAG:-latest}
+
+  support_bot:
+    image: ghcr.io/${CI_IMAGE_OWNER}/support_bot:${IMAGE_TAG:-latest}
+
+  pilot_bot:
+    image: ghcr.io/${CI_IMAGE_OWNER}/pilot_bot:${IMAGE_TAG:-latest}

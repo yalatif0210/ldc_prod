@@ -1,0 +1,37 @@
+# ─────────────────────────────────────────────────────────────
+# Staging override — HTTP sur le port 8080, sans SSL/certbot.
+#
+# Usage (avec project name pour isoler des conteneurs prod) :
+#   docker compose -p ldc_staging \
+#     -f docker-compose.yml \
+#     -f docker-compose.staging.yml \
+#     -f docker-compose.ci.yml \
+#     up -d --no-build
+#
+# Prérequis VPS :
+#   - Fichier .env.staging dans le même dossier (copié depuis .env et adapté)
+#   - Port 8080 ouvert dans le firewall
+# ─────────────────────────────────────────────────────────────
+services:
+
+  ldc_frontend:
+    ports:
+      - "8080:80"       # HTTP staging — pas de SSL
+    volumes:
+      # Nginx HTTP-only pour staging (remplace le template SSL)
+      - ./ldc_frontend/nginx.staging.conf:/etc/nginx/conf.d/default.conf.template:ro
+    environment:
+      DOMAIN: ${STAGING_DOMAIN:-staging.localhost}
+
+  grafana:
+    environment:
+      GF_SERVER_ROOT_URL: http://${STAGING_DOMAIN:-localhost:8080}/grafana/
+
+# Overrides des ressources externes non disponibles en staging
+volumes:
+  certbot_certs:
+    external: false   # Pas de Let's Encrypt en staging (HTTP only)
+
+networks:
+  shared_db_net:
+    external: false   # Pas besoin de PgAdmin en staging

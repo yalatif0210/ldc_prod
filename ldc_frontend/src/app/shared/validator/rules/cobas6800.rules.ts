@@ -1,7 +1,7 @@
 import { ValidationTargets } from '../validation.service';
 
 export const cobas6800Rules = {
-  target: 'OPP (BRUKER)',
+  target: 'COBAS 6800',
   rules: [
     {
       subject: 'Vl Plasma VIH1',

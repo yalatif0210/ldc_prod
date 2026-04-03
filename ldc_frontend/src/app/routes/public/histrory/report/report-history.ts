@@ -115,7 +115,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
   transfer_mvt_in: any[] = [];
   adjustment_mvt: Record<string, any> = {};
   transactionByDateRange: any;
-  pending_last_week: any;
+  pending_last_week: Record<string, any> | null = {};
 
   Tabs: Tab[] = [
     { label: 'Données de laboratoire', content: 'lab' },
@@ -148,7 +148,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
     'instock',
   ];
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
   totalPages = 1;
 
   constructor() {
@@ -246,12 +246,16 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
     });
     this.lab_form = this.buildFormFromArray(labformControls);
     //mapping des données labo précédentes dans le formulaire
-    this.lastFinalizedReport?.labActivityData?.forEach((data: any, i: number) => {
+    const lastFinalizedReport = this.lastFinalizedReport.find(
+      (report: any) => report.id != this.report.id
+    );
+    lastFinalizedReport?.labActivityData?.forEach((data: any, i: number) => {
       pending_last_week_controls.push({
         key: `unit_${data.information.id}`,
         value: data.value,
       });
     });
+    console.log('pending_last_week_controls - report-history.ts:258', pending_last_week_controls);
     this.setPending_last_week(pending_last_week_controls);
   }
 
@@ -265,9 +269,9 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
         key: `initial_qty_for_intrant_${data.intrant.id}`,
         value: lastFinalizedReport
           ? this.service.get_last_report_pharm_data(
-              lastFinalizedReport?.IntrantMvtData,
-              data.intrant.id
-            )
+            lastFinalizedReport?.IntrantMvtData,
+            data.intrant.id
+          )
           : 0,
       });
       pharmFormControls.push({
@@ -294,7 +298,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
   setPending_last_week(items: any) {
     if (items && items.length > 0) {
       for (const obj of items) {
-        this.pending_last_week[obj.key] = obj.value;
+        this.pending_last_week![obj.key] = obj.value;
       }
     } else {
       this.pending_last_week = null;
@@ -344,6 +348,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
           .findLastsFinalizedReportByEquipmentAndAccount(data.equipment)
           .subscribe(res => {
             this.lastFinalizedReport = res;
+            console.log('lastFinalizedReport - report-history.ts:351', this.lastFinalizedReport);
           });
         this.service.findReportById(data.id).subscribe(response => {
           const report = response.data.report;
@@ -383,7 +388,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
     const dialogRef = this.validationDialog.open(SanguinProductAdjustmentDialog, { data });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void { }
 }
 
 @Component({

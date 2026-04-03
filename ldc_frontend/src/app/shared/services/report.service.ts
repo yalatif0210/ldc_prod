@@ -52,7 +52,7 @@ export class ReportService extends SharedService {
       const labActivityData_id =
         (report &&
           report.labActivityData.find((elmt: any) => elmt.information.id === key.split('unit_')[1])
-            .id) ||
+            ?.id) ||
         false;
       informationsDTO.push({
         id: labActivityData_id ? labActivityData_id : key.split('unit_')[1],
@@ -100,8 +100,8 @@ export class ReportService extends SharedService {
       );
       const transfer_mvt_in = transactionByDateRange.filter(
         (e: any) =>
-          e.destination.id === res.structures[0].id &&
-          e.equipment_destinataire.name === equipment_name &&
+          e.destination?.id === res.structures[0].id &&
+          e.equipment_destinataire?.name === equipment_name &&
           this.compareFeedBackDate(e.feedbackAt, period) &&
           e.approved == true
       );
@@ -134,10 +134,10 @@ export class ReportService extends SharedService {
       let in_mvt_qty = 0;
       let out_mvt_qty = 0;
       const in_mvt = transfer_mvt_in.filter(
-        (e: any) => e.sanguineProduct.name.trim() === item.trim()
+        (e: any) => e.sanguineProduct?.name?.trim() === item.trim()
       );
       const out_mvt = transfer_mvt_out.filter(
-        (e: any) => e.sanguineProduct.name.trim() === item.trim()
+        (e: any) => e.sanguineProduct?.name?.trim() === item.trim()
       );
       in_mvt.forEach((e: any) => {
         in_mvt_qty += e!.quantity || 0;

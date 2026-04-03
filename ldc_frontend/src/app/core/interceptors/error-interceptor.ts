@@ -34,11 +34,13 @@ export function errorInterceptor(req: HttpRequest<unknown>, next: HttpHandlerFn)
 
   return next(req).pipe(
     catchError((error: HttpErrorResponse) => {
-      if (errorPages.includes(error.status)) {
+      const isLogout = req.url.includes('/auth/logout');
+
+      if (!isLogout && errorPages.includes(error.status)) {
         router.navigateByUrl(`/${error.status}`, {
           skipLocationChange: true,
         });
-      } else {
+      } else if (!isLogout) {
         toast.error(getMessage(error));
         if (error.status === STATUS.UNAUTHORIZED) {
           router.navigateByUrl('/auth/login');

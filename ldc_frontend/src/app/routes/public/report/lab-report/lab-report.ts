@@ -75,6 +75,13 @@ type IntrantsKeys = keyof Intrant;
 
 const CONSOMMABLES_GENERAUX_ID = 8;
 
+const STATUS = {
+  DRAFT: 1,
+  SUGGESTED: 2,
+  SUBMITTED: 3,
+  APPROVED: 4
+};
+
 @Component({
   selector: '[app-public-home]',
   templateUrl: './lab-report.html',
@@ -122,7 +129,12 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
 
   transfer_mvt_out: any[] = [];
   transfer_mvt_in: any[] = [];
-  adjustment_mvt: Record<string, any> = {};
+  adjustment_mvt: Record<string, any> = {
+    'Vl Plasma VIH1': 0,
+    'Vl Plasma VIH2': 0,
+    'Vl PSC': 0,
+    'EID Sample': 0,
+  };
 
   disable = false;
   adjustment_types: any;
@@ -160,7 +172,8 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     'instock',
   ];
   page = 1;
-  pageSize = 5;
+  pageSize = 10;
+  pageSizeList = [5, 10, 15, 20, 25, 30];
   totalPages = 1;
   pharmInputs: Record<string, number> = {};
   labInputs: Record<string, number> = {};
@@ -207,7 +220,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
       Number(this.pharmInputs[`used_qty_for_intrant_${intrant_id}`]),
       (this.adjustments['somme_' + intrant_id] &&
         Number(this.adjustments['somme_' + intrant_id])) ||
-        0,
+      0,
       Number(this.pharmInputs[`instock_qty_for_intrant_${intrant_id}`])
     );
   }
@@ -231,6 +244,11 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
 
   calculateTotalPages() {
     this.totalPages = Math.ceil(this.equipmentIntrants.length / this.pageSize);
+  }
+
+  onPageSizeChange() {
+    this.page = 1;
+    this.calculateTotalPages();
   }
 
   get arrayFromTotalPages() {
@@ -338,9 +356,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         key: `initial_qty_for_intrant_${intrant.id}`,
         value: this.lastFinalizedReport
           ? this.service.get_last_report_pharm_data(
-              this.lastFinalizedReport?.IntrantMvtData,
-              intrant.id
-            )
+            this.lastFinalizedReport?.IntrantMvtData,
+            intrant.id
+          )
           : 0,
       });
       pharmFormControls.push({
@@ -379,9 +397,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         key: `initial_qty_for_intrant_${data.intrant.id}`,
         value: this.lastFinalizedReport
           ? this.service.get_last_report_pharm_data(
-              this.lastFinalizedReport?.IntrantMvtData,
-              data.intrant.id
-            )
+            this.lastFinalizedReport?.IntrantMvtData,
+            data.intrant.id
+          )
           : 0,
       });
       pharmFormControls.push({
@@ -413,7 +431,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         ? this.report
         : false
     );
-    if (!this.isUserPharmUser && this.equipmentId !== 8) {
+    if (!this.isUserPharmUser && this.equipmentId !== CONSOMMABLES_GENERAUX_ID) {
       const informationDTO = this.service.createInformationsDTO(
         this.labInputs,
         this.report?.IntrantMvtData?.length || this.report?.labActivityData?.length
@@ -427,9 +445,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         .procedToValidation(
           this.report?.IntrantMvtData?.length || this.report?.labActivityData?.length
             ? [
-                ...this.service.getInformationDTOForValidation(this.labInputs),
-                ...adjustment_mvt_dto,
-              ]
+              ...this.service.getInformationDTOForValidation(this.labInputs),
+              ...adjustment_mvt_dto,
+            ]
             : [...informationDTO, ...adjustment_mvt_dto],
           validatorRules[this.equipmentName as keyof typeof validatorRules],
           this.auth.userAccountId!,
@@ -462,7 +480,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         intrantsDTO,
         this.report?.IntrantMvtData?.length ? true : false
       );
-      this.disableRegisterButton();
+      if(status_id !== STATUS.SUGGESTED){
+        this.disableRegisterButton();
+      }
     }
   }
 
@@ -613,7 +633,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     };
     const dialogRef = this.validationDialog.open(SanguinProductAdjustmentDialog, { data });
   }
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void { }
 }
 
 @Component({
@@ -643,16 +663,18 @@ export class ValidationDialog implements OnInit {
   }
 
   get actionStatus(): number {
-    if (this.data.status_id === 2) {
+    if (this.data.status_id === STATUS.SUGGESTED) {
       return this.data.status_id;
     }
 
-    return this.allValid ? this.data.status_id : 3;
+    return this.allValid ? this.data.status_id : STATUS.SUBMITTED;
   }
 
   onConfirm() {
     this.disable = true;
-    this.data.disableAction();
+    if (this.actionStatus !== STATUS.SUGGESTED) {
+      this.data.disableAction();
+    }
     this.reportService.createReportDetails(
       this.data.report.id,
       this.actionStatus,
@@ -711,24 +733,24 @@ export class AdjustmentDialog implements OnInit {
   onConfirm() {
     const datas = this.data.adjustments;
     if (datas[this.data.index]) {
-      if(this.selected_adjustment_type && this.adjustment_quantity) {
-        datas[this.data.index].push({
-        id: 0,
-        type: this.selected_adjustment_type,
-        quantity: this.adjustment_quantity,
-        comment: this.comment,
-      });
-      }
-    } else {
       if (this.selected_adjustment_type && this.adjustment_quantity) {
-        datas[this.data.index] = [
-        {
+        datas[this.data.index].push({
           id: 0,
           type: this.selected_adjustment_type,
           quantity: this.adjustment_quantity,
           comment: this.comment,
-        },
-      ];
+        });
+      }
+    } else {
+      if (this.selected_adjustment_type && this.adjustment_quantity) {
+        datas[this.data.index] = [
+          {
+            id: 0,
+            type: this.selected_adjustment_type,
+            quantity: this.adjustment_quantity,
+            comment: this.comment,
+          },
+        ];
       }
     }
     this.dialogRef.close(datas);

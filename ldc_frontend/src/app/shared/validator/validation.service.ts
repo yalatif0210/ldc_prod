@@ -43,9 +43,7 @@ export class ValidationService extends SharedService {
     const values: Record<string, any> = {};
     control.forEach((ctrl: any) => {
       const found = form_value.find((f: any) => f.id === `${ctrl}` || f.id === ctrl);
-      if (found) {
-        values[ctrl] = Number(found.value);
-      }
+      values[ctrl] = found ? Number(found.value) : 0;
     });
     return values;
   }
@@ -78,7 +76,6 @@ export class ValidationService extends SharedService {
       map(response => {
         const last_report = response.data.lastFinalizedReportByEquipmentAndAccount;
         const validation_data = this.validationData(form_value, validator_schema, last_report);
-
         for (const rule of validation_data.results) {
           for (const value of rule.values) {
             value.isValid = this.evaluateRule(value);

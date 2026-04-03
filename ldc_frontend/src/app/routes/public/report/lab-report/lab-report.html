@@ -105,7 +105,7 @@
                     <input
                       [(ngModel)]="labInputs['unit_'+sub.id]"
                       [ngModelOptions]="{standalone: true}"
-                      style="text-align: center; width: 70px;"
+                      style="text-align: center; width: 70px"
                       matInput
                       type="number"
                       min="0"
@@ -202,7 +202,7 @@
                   >
                     @if ($index < 3) { {{intrant[key]}} } @if ($index === 3) { @if (isUserPharmUser)
                     {
-                    <div> </div>
+                    <div></div>
                     } @else {
                     <input
                       [(ngModel)]="pharmInputs['initial_qty_for_intrant_' + intrant.id]"
@@ -282,6 +282,17 @@
               </tbody>
             </table>
             <div class="pagination">
+              <div style="margin-right: 15px">
+                <select
+                  [ngModelOptions]="{standalone: true}"
+                  [(ngModel)]="pageSize"
+                  (ngModelChange)="onPageSizeChange()"
+                >
+                  @for(item of pageSizeList; track $index){
+                  <option [value]="item">{{item}}</option>
+                  }
+                </select>
+              </div>
               <button (click)="changePage(-1)" [disabled]="page === 1">◀</button>
               @for(item of arrayFromTotalPages; track $index){
               <button

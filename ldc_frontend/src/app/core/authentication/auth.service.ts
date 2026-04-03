@@ -144,6 +144,7 @@ export class AuthService {
   logout() {
     this.resetSettings();
     return this.loginService.logout().pipe(
+      catchError(() => of(null)),
       tap(() => this.tokenService.clear()),
       map(() => !this.check())
     );
