@@ -25,7 +25,7 @@ public class TokenBlacklistService {
         return blacklist.containsKey(token);
     }
 
-    @Scheduled(fixedRate = 3_600_000) // toutes les heures
+    @Scheduled(fixedRate = 300_000) // toutes les 5 minutes
     public void purgeExpired() {
         Instant now = Instant.now();
         blacklist.entrySet().removeIf(entry -> entry.getValue().isBefore(now));

@@ -1,7 +1,11 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from functools import wraps
-import jwt, os, datetime as dt, httpx
+import jwt, os, datetime as dt, httpx, atexit
+
+# Client HTTP partagé avec connection pooling (évite de créer une connexion par requête)
+_http_client = httpx.Client(timeout=10)
+atexit.register(_http_client.close)
 from database import db, init_db
 from models import Ticket, Agent, AgentStatus, Conversation, TicketStatus, TicketPriority, AgentRole
 from ticket_service import TicketService
@@ -88,10 +92,9 @@ def telegram_webhook():
 
     # Envoyer la réponse via API Telegram
     try:
-        httpx.post(
+        _http_client.post(
             f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage",
             json={'chat_id': chat_id, 'text': reply, 'parse_mode': 'HTML'},
-            timeout=10
         )
     except Exception as e:
         print(f"❌ Erreur envoi réponse Telegram: {e} - app.py:97")
@@ -281,7 +284,7 @@ def setup_webhook():
     if not base_url:
         return jsonify({'error': 'base_url requis'}), 400
     webhook_url = f"{base_url}/webhook/telegram/{TELEGRAM_BOT_TOKEN}"
-    resp = httpx.post(
+    resp = _http_client.post(
         f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/setWebhook",
         json={'url': webhook_url}
     )

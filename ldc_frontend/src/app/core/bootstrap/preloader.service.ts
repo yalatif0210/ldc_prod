@@ -17,7 +17,7 @@ export class PreloaderService {
     if (el) {
       el.addEventListener('transitionend', () => {
         el.className = 'global-loader-hidden';
-      });
+      }, { once: true });
 
       if (!el.classList.contains('global-loader-hidden')) {
         el.className += ' global-loader-fade-out';

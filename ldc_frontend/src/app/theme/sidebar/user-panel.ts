@@ -1,8 +1,10 @@
-import { Component, OnInit, ViewEncapsulation, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewEncapsulation, inject } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterLink } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 import { AuthService, User } from '@core/authentication';
 import { TranslateModule } from '@ngx-translate/core';
 
@@ -21,12 +23,20 @@ import { TranslateModule } from '@ngx-translate/core';
   encapsulation: ViewEncapsulation.None,
   imports: [RouterLink, MatButtonModule, MatIconModule, MatTooltipModule, TranslateModule],
 })
-export class UserPanel implements OnInit {
+export class UserPanel implements OnInit, OnDestroy {
   private readonly auth = inject(AuthService);
+  private readonly destroy$ = new Subject<void>();
 
   user!: User;
 
   ngOnInit(): void {
-    this.auth.user().subscribe(user => (this.user = user));
+    this.auth.user()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => (this.user = user));
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

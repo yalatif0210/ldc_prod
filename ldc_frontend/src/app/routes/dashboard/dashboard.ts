@@ -8,7 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { forkJoin } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { AuthService } from '@core/authentication/auth.service';
 import { UserRole } from '@core/bootstrap';
@@ -83,6 +84,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   hasBreakdownData                      = false;
   loading                               = false;
 
+  // ── Lifecycle ─────────────────────────────────────────────────────────────
+  private readonly destroy$ = new Subject<void>();
+  private renderTimeout: ReturnType<typeof setTimeout> | null = null;
+
   // ── Charts ────────────────────────────────────────────────────────────────
   private charts: Record<string, ApexCharts | undefined> = {};
 
@@ -104,12 +109,16 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Init ──────────────────────────────────────────────────────────────────
   ngOnInit(): void {
-    this.authService.userRole().subscribe(role => {
-      this.isAdmin      = [UserRole.SUPER_ADMIN, UserRole.ADMIN].includes(role as UserRole);
-      this.isSupervisor = role === UserRole.SUPERVISOR;
-    });
+    this.authService.userRole()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(role => {
+        this.isAdmin      = [UserRole.SUPER_ADMIN, UserRole.ADMIN].includes(role as UserRole);
+        this.isSupervisor = role === UserRole.SUPERVISOR;
+      });
 
-    forkJoin([this.historyService.getEquipments()]).subscribe(([accountRes]: [any]) => {
+    forkJoin([this.historyService.getEquipments()])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([accountRes]: [any]) => {
       if (accountRes?.data) {
         this.account = accountRes.data.account;
         const eqList = this.equipmentList;
@@ -176,7 +185,9 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       this.account.structures ?? []
     );
 
-    this.dashService.loadReports(structureIds, Number(this.selectedEquipmentId)).subscribe({
+    this.dashService.loadReports(structureIds, Number(this.selectedEquipmentId))
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
       next: (reports: any[]) => {
         this.allReports = reports;
         this.allPeriods = this.dashService.extractPeriods(reports);
@@ -224,7 +235,10 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       this.selectedPeriod
     );
 
-    this.ngZone.runOutsideAngular(() => setTimeout(() => this.renderAllCharts(), 0));
+    if (this.renderTimeout) clearTimeout(this.renderTimeout);
+    this.ngZone.runOutsideAngular(() => {
+      this.renderTimeout = setTimeout(() => this.renderAllCharts(), 0);
+    });
   }
 
   private renderAllCharts(): void {
@@ -260,7 +274,12 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.charts = {};
   }
 
-  ngOnDestroy(): void { this.destroyAllCharts(); }
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    if (this.renderTimeout) clearTimeout(this.renderTimeout);
+    this.destroyAllCharts();
+  }
 
   // ── Helpers template ──────────────────────────────────────────────────────
   alertIcon(level: string): string {

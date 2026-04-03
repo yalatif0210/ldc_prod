@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule, KeyValuePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatCardModule } from '@angular/material/card';
@@ -9,7 +9,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
 import { AppStats, FilteredStats, SuperAdminService } from '@shared/services/super-admin.service';
-import { forkJoin } from 'rxjs';
+import { Subject, forkJoin } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 @Component({
   selector: 'app-super-admin-dashboard',
@@ -28,8 +29,9 @@ import { forkJoin } from 'rxjs';
     MatDividerModule,
   ],
 })
-export class SuperAdminDashboard implements OnInit {
+export class SuperAdminDashboard implements OnInit, OnDestroy {
   private readonly superAdminService = inject(SuperAdminService);
+  private readonly destroy$ = new Subject<void>();
 
   stats: AppStats | null = null;
   loading = true;
@@ -65,7 +67,7 @@ export class SuperAdminDashboard implements OnInit {
       periods: this.superAdminService.getPeriods(),
       structures: this.superAdminService.getStructures(),
       equipments: this.superAdminService.getEquipments(),
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: ({ stats, periods, structures, equipments }) => {
         this.stats = stats;
         this.periods = periods;
@@ -91,7 +93,7 @@ export class SuperAdminDashboard implements OnInit {
       periodId: this.selectedPeriodId,
       structureId: this.selectedStructureId,
       equipmentId: this.selectedEquipmentId,
-    }).subscribe({
+    }).pipe(takeUntil(this.destroy$)).subscribe({
       next: data => {
         this.filteredStats = data;
         this.filteredLoading = false;
@@ -108,5 +110,10 @@ export class SuperAdminDashboard implements OnInit {
     this.selectedStructureId = null;
     this.selectedEquipmentId = null;
     this.applyFilters();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 }

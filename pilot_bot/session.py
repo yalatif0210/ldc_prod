@@ -10,12 +10,22 @@ Ce module est importé à la fois par bot_handler.py et les modules de menus,
 ce qui évite tout import circulaire entre eux.
 """
 import time
+import random
 
 # Durée de vie d'une session inactive (30 minutes)
 SESSION_TTL: int = 1800
 
 # Stockage en mémoire : {chat_id: {'menu': str, 'data': dict, 'ts': float}}
 _sessions: dict = {}
+
+
+def cleanup_expired_sessions() -> int:
+    """Supprime toutes les sessions expirées. Retourne le nombre supprimé."""
+    now = time.time()
+    expired = [k for k, v in _sessions.items() if now - v['ts'] > SESSION_TTL]
+    for k in expired:
+        del _sessions[k]
+    return len(expired)
 
 
 def get_session(chat_id: str) -> dict | None:
@@ -43,6 +53,10 @@ def set_session(chat_id: str, menu: str, data: dict | None = None) -> None:
         menu    : clé du menu actif (ex: 'main', 'reports', 'stocks').
         data    : données contextuelles optionnelles à stocker dans la session.
     """
+    # Nettoyage périodique (~1% des appels) pour éviter l'accumulation de sessions orphelines
+    if random.random() < 0.01:
+        cleanup_expired_sessions()
+
     _sessions[chat_id] = {
         'menu': menu,
         'data': data if data is not None else {},

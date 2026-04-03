@@ -79,6 +79,7 @@ export class AdminLayout implements OnDestroy {
   private isCollapsedWidthFixed = false;
 
   private layoutChangesSubscription = Subscription.EMPTY;
+  private routerEventsSubscription = Subscription.EMPTY;
 
   constructor() {
     this.layoutChangesSubscription = this.breakpointObserver
@@ -92,16 +93,19 @@ export class AdminLayout implements OnDestroy {
         this.isContentWidthFixed = state.breakpoints[MONITOR_MEDIAQUERY];
       });
 
-    this.router.events.pipe(filter(event => event instanceof NavigationEnd)).subscribe(e => {
-      if (this.isOver) {
-        this.sidenav.close();
-      }
-      this.content.scrollTo({ top: 0 });
-    });
+    this.routerEventsSubscription = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this.isOver) {
+          this.sidenav.close();
+        }
+        this.content.scrollTo({ top: 0 });
+      });
   }
 
   ngOnDestroy() {
     this.layoutChangesSubscription.unsubscribe();
+    this.routerEventsSubscription.unsubscribe();
   }
 
   toggleCollapsed() {

@@ -1,10 +1,11 @@
 import { Injectable } from '@angular/core';
-import { Client } from '@stomp/stompjs';
+import { Client, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
   private stompClient!: Client;
+  private subscriptions: StompSubscription[] = [];
 
   connect(
     strucuteId: string,
@@ -20,18 +21,22 @@ export class NotificationService {
     this.stompClient.onConnect = () => {
       // 🟢 Notifications privées
       const url = isUserAdminOrSupervisor ? '/topic/admin' : `/topic/notifications/${strucuteId}`;
-      this.stompClient.subscribe(url, (message: any) => {
-        const notif = JSON.parse(message.body);
-        //this.showBrowserNotification('📢 LDC Notification', notif.message);
-        callBack(notif, strucuteId, isUserAdminOrSupervisor);
-      });
+      this.subscriptions.push(
+        this.stompClient.subscribe(url, (message: any) => {
+          const notif = JSON.parse(message.body);
+          //this.showBrowserNotification('📢 LDC Notification', notif.message);
+          callBack(notif, strucuteId, isUserAdminOrSupervisor);
+        })
+      );
 
       // 🔵 Notifications globales
-      this.stompClient.subscribe(`/topic/broadcast`, (message: any) => {
-        const notif = JSON.parse(message.body);
-        //this.showBrowserNotification('📢 LDC Notification', notif.message);
-        callBack(notif, strucuteId, isUserAdminOrSupervisor);
-      });
+      this.subscriptions.push(
+        this.stompClient.subscribe(`/topic/broadcast`, (message: any) => {
+          const notif = JSON.parse(message.body);
+          //this.showBrowserNotification('📢 LDC Notification', notif.message);
+          callBack(notif, strucuteId, isUserAdminOrSupervisor);
+        })
+      );
     };
     // 🟢 Très important → **Activer la connexion ici**
     this.stompClient.activate();
@@ -60,6 +65,8 @@ export class NotificationService {
   }
 
   disconnect() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+    this.subscriptions = [];
     if (this.stompClient) {
       this.stompClient.deactivate();
     }
