@@ -130,6 +130,13 @@ jobs:
               -f docker-compose.yml \
               -f docker-compose.staging.yml \
               -f docker-compose.ci.yml \
+              down --remove-orphans || true
+
+            docker compose \
+              -p ldc_staging \
+              -f docker-compose.yml \
+              -f docker-compose.staging.yml \
+              -f docker-compose.ci.yml \
               up -d --no-build
 
             docker image prune -f
