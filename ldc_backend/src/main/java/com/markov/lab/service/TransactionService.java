@@ -77,8 +77,8 @@ public class TransactionService {
 
     @Transactional
     public Transaction update(TransactionUpdateInput input){
-        Transaction transaction = transactionRepository.findById(input.id()).orElse(null);
-        assert transaction != null;
+        Transaction transaction = transactionRepository.findById(input.id())
+            .orElseThrow(() -> new IllegalArgumentException("Transaction introuvable : " + input.id()));
         transaction.setApproved(input.isApproved());
         transaction.setIsRejected(input.isRejected());
         transaction.setFeedbackAt(Instant.now());

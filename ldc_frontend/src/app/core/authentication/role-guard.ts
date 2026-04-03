@@ -28,7 +28,10 @@ export const synthesisGuard = () => {
   const router = inject(Router);
   if (!auth.check()) return router.parseUrl(AUTH_ROUTE);
   const role = auth.userRoleByToken;
-  const allowed = [UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.SUPERVISOR, UserRole.LAB_USER, UserRole.PHARM_USER];
+  const allowed = [
+    UserRole.SUPER_ADMIN, UserRole.ADMIN, UserRole.SUPERVISOR,
+    UserRole.LAB_USER, UserRole.PHARM_USER,
+  ];
   return allowed.includes(role) ? true : router.parseUrl('/403');
 };
 

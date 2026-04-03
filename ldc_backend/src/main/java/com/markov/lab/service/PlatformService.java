@@ -25,8 +25,8 @@ public class PlatformService {
     }
 
     private Structure createPlatform(PlatformInput request){
-        Structure platform = structureRepository.findById(request.structure()).orElse(null);
-        assert platform != null;
+        Structure platform = structureRepository.findById(request.structure())
+            .orElseThrow(() -> new IllegalArgumentException("Structure introuvable : " + request.structure()));
         for (Equipment equipment: equipmentRepository.findByIdList(request.equipments()) ) {
             platform.addEquipment(equipment);
         }

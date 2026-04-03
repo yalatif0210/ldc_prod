@@ -259,7 +259,7 @@ export class SynthesisClaude extends FormBaseComponent implements OnInit, OnDest
         ec.alignment = { vertical: 'middle', horizontal: 'center', wrapText: true };
         const span  = cell.colSpan || 1;
         if (span > 1) {
-          try { ws.mergeCells(ri + 1, col, ri + 1, col + span - 1); } catch {}
+          try { ws.mergeCells(ri + 1, col, ri + 1, col + span - 1); } catch { /* cellules déjà fusionnées */ }
         }
         col += span;
       });

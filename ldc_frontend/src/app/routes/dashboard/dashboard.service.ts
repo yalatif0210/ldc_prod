@@ -173,14 +173,24 @@ export class DashboardService extends SharedService {
         const ssu = lad.information?.informationSubSubUnit?.name ?? 'Total';
         const v   = lad.value ?? 0;
 
-        if (su === SU.VL_PENDING)   { vlPending   += v; vlPndMap.set(ssu,  (vlPndMap.get(ssu)  ?? 0) + v); }
+        if (su === SU.VL_PENDING) {
+          vlPending += v; vlPndMap.set(ssu, (vlPndMap.get(ssu) ?? 0) + v);
+        }
         if (su === SU.EID_PENDING)  eidPending  += v;
-        if (su === SU.EID_RECEIVED) { eidReceived += v; eidRecMap.set(ssu, (eidRecMap.get(ssu) ?? 0) + v); }
-        if ([SU.EID_TESTED, SU.EID_TESTED_POC].includes(su)) { eidTested += v; eidTstMap.set(ssu, (eidTstMap.get(ssu) ?? 0) + v); }
+        if (su === SU.EID_RECEIVED) {
+          eidReceived += v; eidRecMap.set(ssu, (eidRecMap.get(ssu) ?? 0) + v);
+        }
+        if ([SU.EID_TESTED, SU.EID_TESTED_POC].includes(su)) {
+          eidTested += v; eidTstMap.set(ssu, (eidTstMap.get(ssu) ?? 0) + v);
+        }
         if (TAT_SU.includes(su) && v > 0) { tatSum += v; tatCount++; }
 
-        if (su === SU.VL_RECEIVED) { vlReceived += v; vlRecMap.set(ssu, (vlRecMap.get(ssu) ?? 0) + v); }
-        if (su === SU.VL_TESTED)   { vlTested   += v; vlTstMap.set(ssu, (vlTstMap.get(ssu) ?? 0) + v); }
+        if (su === SU.VL_RECEIVED) {
+          vlReceived += v; vlRecMap.set(ssu, (vlRecMap.get(ssu) ?? 0) + v);
+        }
+        if (su === SU.VL_TESTED) {
+          vlTested += v; vlTstMap.set(ssu, (vlTstMap.get(ssu) ?? 0) + v);
+        }
       });
     });
 
@@ -213,7 +223,9 @@ export class DashboardService extends SharedService {
   private latestPeriodName(reports: any[]): string {
     let latest = '', latestDate = '';
     reports.forEach(r => {
-      if (r.period.startDate > latestDate) { latestDate = r.period.startDate; latest = r.period.periodName; }
+      if (r.period.startDate > latestDate) {
+        latestDate = r.period.startDate; latest = r.period.periodName;
+      }
     });
     return latest;
   }
@@ -305,7 +317,8 @@ export class DashboardService extends SharedService {
   // ── Chart 1: Activité Reçus / Testés ─────────────────────────────────────
   buildActivityChart(reports: any[], selectedPeriod: string): any {
     const periodReports = reports.filter(r => r.period.periodName === selectedPeriod);
-    const siteMap = new Map<string, { name: string; vlR: number; vlT: number; eidR: number; eidT: number }>();
+    type SiteEntry = { name: string; vlR: number; vlT: number; eidR: number; eidT: number };
+    const siteMap = new Map<string, SiteEntry>();
 
     periodReports.forEach(r => {
       const s = this.siteOf(r);
@@ -340,7 +353,9 @@ export class DashboardService extends SharedService {
   }
 
   // ── Chart 2: Tendance en attente ──────────────────────────────────────────
-  buildTrendChart(reports: any[], allPeriods: PeriodInfo[], startName: string, endName: string): any {
+  buildTrendChart(
+    reports: any[], allPeriods: PeriodInfo[], startName: string, endName: string
+  ): any {
     const filtered = this.periodSlice(allPeriods, startName, endName);
     const pData = new Map<string, { vl: number; eid: number }>();
     filtered.forEach(p => pData.set(p, { vl: 0, eid: 0 }));
@@ -477,7 +492,9 @@ export class DashboardService extends SharedService {
   }
 
   // ── Chart 6: Testés vs En attente de retest ───────────────────────────────
-  buildRetestChart(reports: any[], allPeriods: PeriodInfo[], startName: string, endName: string): any {
+  buildRetestChart(
+    reports: any[], allPeriods: PeriodInfo[], startName: string, endName: string
+  ): any {
     const filtered = this.periodSlice(allPeriods, startName, endName);
     const pData = new Map<string, { tested: number; retest: number }>();
     filtered.forEach(p => pData.set(p, { tested: 0, retest: 0 }));

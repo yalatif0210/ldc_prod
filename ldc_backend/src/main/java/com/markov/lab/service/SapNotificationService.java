@@ -39,8 +39,8 @@ public class SapNotificationService {
 
     @Transactional
     public SapNotification update(SapNotificationUpdateInput input) {
-        SapNotification sapNotification = sapNotificationRepository.findById(input.id()).orElse(null);
-        assert sapNotification != null;
+        SapNotification sapNotification = sapNotificationRepository.findById(input.id())
+            .orElseThrow(() -> new IllegalArgumentException("SapNotification introuvable : " + input.id()));
         sapNotification.setResolved(input.isResolved());
         sapNotification.setRejected(input.isRejected());
         return sapNotificationRepository.save(sapNotification);
