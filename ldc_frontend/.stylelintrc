@@ -31,6 +31,7 @@
     "selector-class-pattern": null,
     "selector-type-no-unknown": null,
     "value-keyword-case": null,
+    "declaration-block-single-line-max-declarations": null,
     "scss/at-extend-no-missing-placeholder": null,
     "scss/comment-no-empty": null,
     "scss/operator-no-unspaced": null
