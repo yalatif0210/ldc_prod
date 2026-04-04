@@ -60,10 +60,25 @@ public class ReportService {
 
     @Transactional
     public Report createReportDetails(ReportDetailInput input) {
-        Report report = reportRepository.findById(input.report_id()).orElse(null);
-        assert report != null;
+        Report report = reportRepository.findById(input.report_id())
+                .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
         statusRepository.findById(input.status_id()).ifPresent(report::setStatus);
-        //create lab activity data
+
+        // Idempotence : supprime les données existantes avant de recréer
+        if (!report.getIntrantMvtData().isEmpty()) {
+            List<Adjustment> existingAdjustments = report.getIntrantMvtData().stream()
+                    .flatMap(d -> d.getAdjustments().stream())
+                    .collect(Collectors.toList());
+            adjustmentRepository.deleteAll(existingAdjustments);
+            intrantMvtDataRepository.deleteAll(report.getIntrantMvtData());
+            report.getIntrantMvtData().clear();
+        }
+        if (!report.getLabActivityData().isEmpty()) {
+            labActivityDataRepository.deleteAll(report.getLabActivityData());
+            report.getLabActivityData().clear();
+        }
+
+        // Création lab activity data
         if (!input.lab_information_data_inputs().isEmpty()) {
             for (LabInformation labInformation : input.lab_information_data_inputs()) {
                 LabActivityData labActivityData = new LabActivityData();
@@ -73,7 +88,7 @@ public class ReportService {
                 report.addLabActivityData(labActivityData);
             }
         }
-        //create intrant activity data
+        // Création intrant activity data
         for (IntrantInformation intrantInformation : input.intrant_information_data_inputs()) {
             IntrantMvtData intrantMvtData = new IntrantMvtData();
             intrantMvtData.setReport(report);
@@ -81,8 +96,8 @@ public class ReportService {
             intrantMvtData.setDistributionStock(intrantInformation.used());
             intrantMvtData.setAvailableStock(intrantInformation.stock());
             intrantMvtData.setEntryStock(intrantInformation.entry());
-            if(!intrantInformation.adjustments().isEmpty()){
-                for (AdjustmentInput adjustmentInput : intrantInformation.adjustments()){
+            if (!intrantInformation.adjustments().isEmpty()) {
+                for (AdjustmentInput adjustmentInput : intrantInformation.adjustments()) {
                     Adjustment adjustment = new Adjustment();
                     adjustmentTypeRepository.findById(adjustmentInput.type()).ifPresent(adjustment::setAdjustmentType);
                     adjustment.setQuantity(adjustmentInput.quantity());
@@ -90,7 +105,6 @@ public class ReportService {
                     intrantMvtData.addAdjustment(adjustment);
                 }
             }
-
             report.addIntrantMvtData(intrantMvtData);
         }
         labActivityDataRepository.saveAll(new ArrayList<>(report.getLabActivityData()));
@@ -109,8 +123,8 @@ public class ReportService {
         }
         intrantMvtDataRepository.saveAll(updateIntrantMvtData(input));
         adjustmentRepository.saveAll(updateAdjustments(input.intrant_information_data_inputs()));
-        Report report = reportRepository.findById(input.report_id()).orElse(null);
-        assert report != null;
+        Report report = reportRepository.findById(input.report_id())
+                .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
         reportRepository.save(updateReportStatus(report, input.status_id()));
     }
 

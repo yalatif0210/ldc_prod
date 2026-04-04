@@ -477,14 +477,12 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         this.isUpdated || !!this.report?.IntrantMvtData?.length
       ).subscribe({
         next: () => {
-          if (status_id === STATUS.SUGGESTED) {
-            this.isUpdated = true;
+          this.isUpdated = true;
+          if (status_id !== STATUS.SUGGESTED) {
+            this.disableRegisterButton();
           }
         },
       });
-      if (status_id !== STATUS.SUGGESTED) {
-        this.disableRegisterButton();
-      }
     }
   }
 
@@ -672,22 +670,18 @@ export class ValidationDialog implements OnInit {
 
   onConfirm() {
     this.disable = true;
-    if (this.actionStatus !== STATUS.SUGGESTED) {
-      this.isUpdated = false;
-    }
+    const forUpdate = this.isUpdated ||
+      !!(this.data.report?.IntrantMvtData?.length || this.data.report?.labActivityData?.length);
     this.reportService.createReportDetails(
       this.data.report.id,
       this.actionStatus,
       this.data.informationDTO,
       this.data.intrantsDTO,
-      this.isUpdated ||
-      !!(this.data.report?.IntrantMvtData?.length || this.data.report?.labActivityData?.length)
+      forUpdate
     ).subscribe({
       next: () => {
-        if (this.actionStatus === STATUS.SUGGESTED) {
-          this.isUpdated = true;
-        } else {
-          this.isUpdated = false;
+        this.isUpdated = true;
+        if (this.actionStatus !== STATUS.SUGGESTED) {
           this.data.disableAction();
         }
       },
