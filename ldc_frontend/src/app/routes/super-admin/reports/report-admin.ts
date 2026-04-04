@@ -53,12 +53,19 @@ export class ReportAdmin extends FormBaseComponent implements OnInit, OnDestroy 
   filteredReports: any[] = [];
   periods: any[] = [];
   structures: any[] = [];
+  equipments: any[] = [];
+  entities: any[] = [
+    { id: 'LABORATORY', name: 'LABORATORY' },
+    { id: 'PHARMACY', name: 'PHARMACY' },
+  ];
   filteredPlatforms: any[] = [];
   regions: RegionInterface[] = [];
   loading = true;
   filterStatus: any = '';
   filterPeriodId: any = '';
   filterStructureId: any = '';
+  filterEquipmentId: any = '';
+  filterEntityName: any = '';
   editingId: number | null = null;
   editingData: any = {};
 
@@ -92,19 +99,22 @@ export class ReportAdmin extends FormBaseComponent implements OnInit, OnDestroy 
       periods: this.service.getPeriods(),
       structures: this.users_service.getStructure(),
       regions: this.users_service.getRegion(),
+      equipments: this.reportService.getEquipments(),
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (
         { reports,
           periods,
           regions,
-          structures
-        }: { reports: any; periods: any[]; regions: any, structures: any }) => {
+          structures,
+          equipments,
+        }: { reports: any; periods: any[]; regions: any, structures: any; equipments: any }) => {
 
         this.allReports = reports.data.reports as any[];
         this.filteredReports = reports;
         this.periods = periods;
         this.regions = regions.data.regions;
         this.structures = structures.data.structures as StructureInterface[];
+        this.equipments = equipments.data.equipments as any[];
         this.loading = false;
         this.applyFilter();
       },
@@ -133,6 +143,16 @@ export class ReportAdmin extends FormBaseComponent implements OnInit, OnDestroy 
     if (this.filterPeriodId) {
       result = result.filter(
         r => String(r.period?.id ?? r.periodId) === String(this.filterPeriodId));
+    }
+
+    if (this.filterEquipmentId) {
+      result = result.filter(
+        r => String(r.equipment?.id ?? r.equipmentId) === String(this.filterEquipmentId));
+    }
+
+    if (this.filterEntityName) {
+      result = result.filter(
+        r => String(r.account?.role?.role.split('_USER')[0]) === String(this.filterEntityName));
     }
 
     this.filteredReports = result;
