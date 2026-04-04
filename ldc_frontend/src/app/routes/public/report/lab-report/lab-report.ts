@@ -674,7 +674,6 @@ export class ValidationDialog implements OnInit {
     this.disable = true;
     if (this.actionStatus !== STATUS.SUGGESTED) {
       this.isUpdated = false;
-      this.data.disableAction();
     }
     this.reportService.createReportDetails(
       this.data.report.id,
@@ -687,6 +686,9 @@ export class ValidationDialog implements OnInit {
       next: () => {
         if (this.actionStatus === STATUS.SUGGESTED) {
           this.isUpdated = true;
+        } else {
+          this.isUpdated = false;
+          this.data.disableAction();
         }
       },
     });
