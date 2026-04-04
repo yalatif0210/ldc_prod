@@ -214,17 +214,13 @@ export class ReportService extends SharedService {
     this.rest.setRestEndpoint(
       for_update ? '/api/report/update-report-details' : '/api/report/create-report-details'
     );
-    this.rest
-      .query({
-        report_id,
-        status_id,
-        lab_information_data_inputs,
-        intrant_information_data_inputs,
-      })
-      .subscribe({
-        next: response => {},
-        error: error => {},
-      });
+
+    return this.rest.query({
+      report_id,
+      status_id,
+      lab_information_data_inputs,
+      intrant_information_data_inputs,
+    });
   }
 
   getUserInfo() {

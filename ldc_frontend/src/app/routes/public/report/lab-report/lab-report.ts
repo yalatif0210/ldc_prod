@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 import { MtxAlert } from '@ng-matero/extensions/alert';
 import { AuthService, UserRole } from '@core';
 import { MatDivider } from '@angular/material/divider';
-import { takeUntil } from 'rxjs';
+import { forkJoin, takeUntil } from 'rxjs';
 import { ValidationService } from '@shared/validator/validation.service';
 import { validatorRules } from '@shared/validator/rules';
 import {
@@ -332,7 +332,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     const labformControls: any[] = [];
     const pending_last_week_controls: any[] = [];
     //mapping des données labo précédentes dans le formulaire
-    this.lastFinalizedReport?.labActivityData.forEach((data: any, i: number) => {
+    this.lastFinalizedReport?.labActivityData?.forEach((data: any, i: number) => {
       pending_last_week_controls.push({
         key: `unit_${data.information.id}`,
         value: data.value,
@@ -423,6 +423,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     this.disable = true;
   }
 
+  //pivot params for update check in backend
+  isUpdated = false;
+
   onRegister(status_id: any) {
     const intrantsDTO = this.service.createIntrantDTO(
       this.pharmInputs,
@@ -464,13 +467,6 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
             disableAction: this.disableRegisterButton.bind(this),
             adjustment_type: this.adjustment_types,
           });
-          /*this.service.createReportDetails(
-            this.report.id,
-            status_id,
-            informationDTO,
-            intrantsDTO,
-            this.report?.IntrantMvtData.length || this.report?.labActivityData.length ? true : false
-          );*/
         });
     } else {
       this.service.createReportDetails(
@@ -478,9 +474,15 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         status_id,
         [],
         intrantsDTO,
-        this.report?.IntrantMvtData?.length ? true : false
-      );
-      if(status_id !== STATUS.SUGGESTED){
+        this.isUpdated || !!this.report?.IntrantMvtData?.length
+      ).subscribe({
+        next: () => {
+          if (status_id === STATUS.SUGGESTED) {
+            this.isUpdated = true;
+          }
+        },
+      });
+      if (status_id !== STATUS.SUGGESTED) {
         this.disableRegisterButton();
       }
     }
@@ -492,7 +494,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     }
     return Object.values(
       data.reduce((acc: any, item: any) => {
-        const key = item.sanguineProduct.id;
+        const key = item.sanguineProduct?.id;
 
         if (!acc[key]) {
           acc[key] = {
@@ -519,95 +521,90 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
       .subscribe(information_unit_label => {
         this.onInformationUnitChange(information_unit_label);
       });
-    //Recuperation des types d'ajustement
-    this.service.get_adjustment_type().subscribe(res => {
-      this.adjustment_types = res.data?.adjustmentTypes;
-    });
-    // Récupération de l'état
-    this.router.queryParamMap.subscribe(params => {
-      const data = JSON.parse(params.get('data')!);
-      if (data) {
+
+    this.router.queryParamMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const data = JSON.parse(params.get('data')!);
+        if (!data) return;
+
         this.service.getEquipmentId(data.equipment).subscribe(equipRes => {
-          const equipmentId = equipRes.data.equipmentByNameOther.id;
-          this.equipmentId = Number(equipmentId);
+          this.equipmentId = Number(equipRes.data.equipmentByNameOther.id);
           this.equipmentName = data.equipment;
         });
+
         this.service.findPeriodByName(data.period).subscribe(res => {
           if (res) {
             this.service
-              .findTransactionByDateRange({
-                start_date: res.startDate,
-                end_date: res.endDate,
-              })
+              .findTransactionByDateRange({ start_date: res.startDate, end_date: res.endDate })
               .subscribe(response => {
                 this.transactionByDateRange = response;
                 this.service.handleTransactions(
                   data.equipment,
                   this.transactionByDateRange,
                   this.adjustment_mvt,
-                  {
-                    start_date: res.startDate,
-                    end_date: res.endDate,
-                  },
+                  { start_date: res.startDate, end_date: res.endDate },
                   this.handleTransactionCallBack.bind(this)
                 );
               });
           }
         });
-        this.service.findLastFinalizedReportByEquipmentAndAccount(data.equipment).subscribe(res => {
-          this.lastFinalizedReport = res;
-        });
-        this.service
-          .findReportByAccountAndEquipmentAndPeriodAlso(data.equipment, data.period)
-          .subscribe(response => {
-            const report = response.data.reportByAccountAndEquipmentAndPeriodAlso;
-            if (report) {
-              this.report = report;
-              this.adjustments = this.service.compileAdjustments(
-                this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
-                this.adjustment_types
-              );
-              this.service.getEquipmentInfo(data.equipment).subscribe(equipRes => {
-                const equipmentInfo = equipRes.data.equipmentInformationByName;
-                this.equipmentInfo = equipmentInfo;
-                if (!report?.IntrantMvtData.length || !report?.labActivityData.length) {
-                  if (!this.isUserPharmUser) {
-                    this.createLabFormFromEquipmentInformations();
-                  }
-                  if (this.isUserPharmUser || this.equipmentId === CONSOMMABLES_GENERAUX_ID) {
-                    if (report?.IntrantMvtData.length) {
-                      this.createPharmFromReportInformations();
-                    } else {
-                      this.createPharmFormEquipmentIntrants();
-                    }
+
+        forkJoin({
+          adjustmentTypes: this.service.get_adjustment_type(),
+          lastFinalized: this.service.findLastFinalizedReportByEquipmentAndAccount(data.equipment),
+          reportRes: this.service.findReportByAccountAndEquipmentAndPeriodAlso(
+            data.equipment, data.period
+          ),
+        }).subscribe(({ adjustmentTypes, lastFinalized, reportRes }) => {
+          this.adjustment_types = adjustmentTypes.data?.adjustmentTypes;
+          this.lastFinalizedReport = lastFinalized;
+
+          const report = reportRes.data.reportByAccountAndEquipmentAndPeriodAlso;
+          if (report) {
+            this.report = report;
+            this.adjustments = this.service.compileAdjustments(
+              this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
+              this.adjustment_types
+            );
+            this.service.getEquipmentInfo(data.equipment).subscribe(equipRes => {
+              this.equipmentInfo = equipRes.data.equipmentInformationByName;
+              if (!report?.IntrantMvtData.length || !report?.labActivityData.length) {
+                if (!this.isUserPharmUser) {
+                  this.createLabFormFromEquipmentInformations();
+                }
+                if (this.isUserPharmUser || this.equipmentId === CONSOMMABLES_GENERAUX_ID) {
+                  if (report?.IntrantMvtData.length) {
+                    this.createPharmFromReportInformations();
                   } else {
                     this.createPharmFormEquipmentIntrants();
                   }
                 } else {
+                  this.createPharmFormEquipmentIntrants();
+                }
+              } else {
+                if (!this.isUserPharmUser) {
+                  this.createLabFromReportInformations();
+                }
+                this.createPharmFromReportInformations();
+              }
+            });
+          } else {
+            this.service.createReport(data.equipment, data.period).subscribe(res => {
+              if (res.data.createReport) {
+                this.report = res.data.createReport;
+                this.service.getEquipmentInfo(data.equipment).subscribe(equipRes => {
+                  this.equipmentInfo = equipRes.data.equipmentInformationByName;
                   if (!this.isUserPharmUser) {
-                    this.createLabFromReportInformations();
+                    this.createLabFormFromEquipmentInformations();
                   }
-                  this.createPharmFromReportInformations();
-                }
-              });
-            } else {
-              this.service.createReport(data.equipment, data.period).subscribe(res => {
-                if (res.data.createReport) {
-                  this.report = res.data.createReport;
-                  this.service.getEquipmentInfo(data.equipment).subscribe(equipRes => {
-                    const equipmentInfo = equipRes.data.equipmentInformationByName;
-                    this.equipmentInfo = equipmentInfo;
-                    if (!this.isUserPharmUser) {
-                      this.createLabFormFromEquipmentInformations();
-                    }
-                    this.createPharmFormEquipmentIntrants();
-                  });
-                }
-              });
-            }
-          });
-      }
-    });
+                  this.createPharmFormEquipmentIntrants();
+                });
+              }
+            });
+          }
+        });
+      });
   }
 
   openValidationDialog(data: any) {
@@ -633,7 +630,9 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
     };
     const dialogRef = this.validationDialog.open(SanguinProductAdjustmentDialog, { data });
   }
-  ngOnDestroy(): void { }
+  ngOnDestroy(): void {
+    super.ngOnDestroy();
+  }
 }
 
 @Component({
@@ -646,6 +645,7 @@ export class ValidationDialog implements OnInit {
   public readonly validationService = inject(ValidationService);
   public readonly reportService = inject(ReportService);
   disable = false;
+  isUpdated = false;
 
   ngOnInit(): void {
   }
@@ -673,6 +673,7 @@ export class ValidationDialog implements OnInit {
   onConfirm() {
     this.disable = true;
     if (this.actionStatus !== STATUS.SUGGESTED) {
+      this.isUpdated = false;
       this.data.disableAction();
     }
     this.reportService.createReportDetails(
@@ -680,10 +681,15 @@ export class ValidationDialog implements OnInit {
       this.actionStatus,
       this.data.informationDTO,
       this.data.intrantsDTO,
-      this.data.report?.IntrantMvtData?.length || this.data.report?.labActivityData?.length
-        ? true
-        : false
-    );
+      this.isUpdated ||
+      !!(this.data.report?.IntrantMvtData?.length || this.data.report?.labActivityData?.length)
+    ).subscribe({
+      next: () => {
+        if (this.actionStatus === STATUS.SUGGESTED) {
+          this.isUpdated = true;
+        }
+      },
+    });
   }
 }
 
@@ -727,7 +733,7 @@ export class AdjustmentDialog implements OnInit {
   }
 
   getAdjustmentName(index: any): string {
-    return this.adjustment_type?.find((item: any) => item.id === index).name;
+    return this.adjustment_type?.find((item: any) => item.id === index)?.name;
   }
 
   onConfirm() {
@@ -804,6 +810,6 @@ export class SanguinProductAdjustmentDialog implements OnInit {
       .filter((r: any) => r.sanguineProductTransactions.length > 0);
     this.mvt_out = out_mvt;
     this.mvt_in = in_mvt;
-    this.equipment = data.sanguin_product_transfert_mvt_out[0]?.equipment!.name || '';
+    this.equipment = data.sanguin_product_transfert_mvt_out[0]?.equipment?.name || '';
   }
 }

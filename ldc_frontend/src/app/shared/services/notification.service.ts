@@ -44,7 +44,7 @@ export class NotificationService {
 
   requestBrowserPermission() {
     if (!('Notification' in window)) {
-      console.warn('Notifications non supportées. - notification.service.ts:42');
+      console.warn('Notifications non supportées. - notification.service.ts:47');
       return;
     }
 

@@ -142,7 +142,7 @@ class ReportController {
         return ResponseEntity.ok(new ApiSuccessResponse(200, "Report details created"));
     }
 
-    @Operation(summary = "Create report details", description = "Returns a created user based on the provided credentials")
+    @Operation(summary = "Update report details", description = "Returns a created user based on the provided credentials")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = ApiSuccessResponse.class)))
     @ApiResponse(responseCode = "404", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     @ApiResponse(responseCode = "409", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))

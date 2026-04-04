@@ -18,7 +18,7 @@ export const environment = {
   useHash: false,
 };
 
-
+//local environment
 //export const environment = {
 //  production: false,
 //  baseUrl: '',
