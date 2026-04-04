@@ -681,6 +681,11 @@ export class ValidationDialog implements OnInit {
     ).subscribe({
       next: () => {
         this.isUpdated = true;
+        // Marquer le rapport comme ayant des données pour que les prochains dialogs
+        // utilisent le chemin update (this.data.report est partagé par référence avec le parent)
+        if (!this.data.report.IntrantMvtData?.length) {
+          this.data.report.IntrantMvtData = [{}];
+        }
         if (this.actionStatus !== STATUS.SUGGESTED) {
           this.data.disableAction();
         }
