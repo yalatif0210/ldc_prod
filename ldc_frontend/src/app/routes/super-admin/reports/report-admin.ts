@@ -99,7 +99,7 @@ export class ReportAdmin extends FormBaseComponent implements OnInit, OnDestroy 
       periods: this.service.getPeriods(),
       structures: this.users_service.getStructure(),
       regions: this.users_service.getRegion(),
-      equipments: this.reportService.getEquipments(),
+      equipments: this.reportService.equipments(),
     }).pipe(takeUntil(this.destroy$)).subscribe({
       next: (
         { reports,

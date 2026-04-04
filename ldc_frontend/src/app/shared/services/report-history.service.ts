@@ -9,6 +9,7 @@ import { englishDate, englishFromFrenchDate, frenchDate } from '@shared/utils/fr
 import { CustomButtonComponent } from '@shared/components/custom-button/custom-button';
 import { Router } from '@angular/router';
 import { ReportStatus, UserRole } from '@core';
+import EquipmentModel from '@shared/models/equipment.model';
 
 export const REQUEST_BY_SYNTHESIS_UNIT = {
   3: ReportModel.reportsBySupervisedStructuresAndEquipmentWithinDateRange,
@@ -29,6 +30,10 @@ export class ReportHistoryService extends SharedService {
 
   constructor() {
     super();
+  }
+
+  equipments(): Observable<any> {
+    return this.query(EquipmentModel.equipments());
   }
 
   getEquipments(): Observable<any> {
@@ -87,7 +92,7 @@ export class ReportHistoryService extends SharedService {
   getReportsBySupervisedStructuresAndEquipmentWithinDateRange(form_value: any): Observable<any> {
     return this.query(
       REQUEST_BY_SYNTHESIS_UNIT[
-        form_value.synthesis_unit as keyof typeof REQUEST_BY_SYNTHESIS_UNIT
+      form_value.synthesis_unit as keyof typeof REQUEST_BY_SYNTHESIS_UNIT
       ],
       {
         request: {
