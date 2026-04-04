@@ -71,7 +71,7 @@
           >
             <option value="">Tous les équipements</option>
             @for (p of equipments; track p.id) {
-            <option [value]="p.id">{{ p.equipmentName }}</option>
+            <option [value]="p.id">{{ p.name }}</option>
             }
           </select>
 
