@@ -149,8 +149,6 @@ services:
       - pilot_bot
     healthcheck:
       disable: true
-    ports:
-      - "443:443"
     volumes:
       # Certificats Let's Encrypt (lecture seule dans nginx)
       - certbot_certs:/etc/letsencrypt:ro

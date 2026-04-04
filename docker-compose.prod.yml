@@ -1,0 +1,8 @@
+# ─────────────────────────────────────────────────────────────
+# Production override — expose le port 443 (HTTPS/SSL).
+# Ne pas utiliser en staging (le port 443 est pris par la prod).
+# ─────────────────────────────────────────────────────────────
+services:
+  ldc_frontend:
+    ports:
+      - "443:443"
