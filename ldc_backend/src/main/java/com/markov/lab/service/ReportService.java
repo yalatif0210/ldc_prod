@@ -11,6 +11,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional(readOnly = true)
@@ -58,8 +60,8 @@ public class ReportService {
 
     @Transactional
     public Report createReportDetails(ReportDetailInput input) {
-        Report report = reportRepository.findById(input.report_id())
-            .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
+        Report report = reportRepository.findById(input.report_id()).orElse(null);
+        assert report != null;
         statusRepository.findById(input.status_id()).ifPresent(report::setStatus);
         //create lab activity data
         if (!input.lab_information_data_inputs().isEmpty()) {
@@ -93,9 +95,10 @@ public class ReportService {
         }
         labActivityDataRepository.saveAll(new ArrayList<>(report.getLabActivityData()));
         intrantMvtDataRepository.saveAll(new ArrayList<>(report.getIntrantMvtData()));
-        for (IntrantMvtData intrantMvtData : report.getIntrantMvtData()){
-            adjustmentRepository.saveAll(new ArrayList<>(intrantMvtData.getAdjustments()));
-        }
+        List<Adjustment> allAdjustments = report.getIntrantMvtData().stream()
+                .flatMap(d -> d.getAdjustments().stream())
+                .collect(Collectors.toList());
+        adjustmentRepository.saveAll(allAdjustments);
         return reportRepository.save(report);
     }
 
@@ -106,8 +109,8 @@ public class ReportService {
         }
         intrantMvtDataRepository.saveAll(updateIntrantMvtData(input));
         adjustmentRepository.saveAll(updateAdjustments(input.intrant_information_data_inputs()));
-        Report report = reportRepository.findById(input.report_id())
-            .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
+        Report report = reportRepository.findById(input.report_id()).orElse(null);
+        assert report != null;
         reportRepository.save(updateReportStatus(report, input.status_id()));
     }
 
@@ -138,22 +141,36 @@ public class ReportService {
     }
 
     private List<Adjustment> updateAdjustments(List<IntrantInformation> intrantMvtDataList){
-        List<Adjustment> adjustments = new ArrayList<>();
-        for (IntrantInformation intrantInformation : intrantMvtDataList){
-            for(AdjustmentInput adjustment : intrantInformation.adjustments()){
-                Adjustment existing_adjustment = adjustmentRepository.findById(adjustment.id()).orElse(null);
-                if (existing_adjustment != null){
-                    existing_adjustment.setQuantity(adjustment.quantity());
-                    existing_adjustment.setComment(adjustment.comment());
-                    adjustments.add(existing_adjustment);
-                }else{
-                    Adjustment new_adjustment = new Adjustment();
-                    intrantMvtDataRepository.findById(intrantInformation.id()).ifPresent(new_adjustment::setIntrantMvtData);
-                    adjustmentTypeRepository.findById(adjustment.type()).ifPresent(new_adjustment::setAdjustmentType);
-                    new_adjustment.setQuantity(adjustment.quantity());
-                    new_adjustment.setComment(adjustment.comment());
+        List<Long> existingAdjustmentIds = intrantMvtDataList.stream()
+                .flatMap(i -> i.adjustments().stream())
+                .map(AdjustmentInput::id)
+                .filter(id -> id != 0L)
+                .collect(Collectors.toList());
 
-                    adjustments.add(new_adjustment);
+        List<Long> intrantIds = intrantMvtDataList.stream()
+                .map(IntrantInformation::id)
+                .collect(Collectors.toList());
+
+        Map<Long, Adjustment> existingAdjustments = adjustmentRepository.findAllById(existingAdjustmentIds)
+                .stream().collect(Collectors.toMap(Adjustment::getId, a -> a));
+        Map<Long, IntrantMvtData> existingIntrants = intrantMvtDataRepository.findAllById(intrantIds)
+                .stream().collect(Collectors.toMap(IntrantMvtData::getId, i -> i));
+
+        List<Adjustment> adjustments = new ArrayList<>();
+        for (IntrantInformation intrantInformation : intrantMvtDataList) {
+            for (AdjustmentInput adjustment : intrantInformation.adjustments()) {
+                Adjustment existing = existingAdjustments.get(adjustment.id());
+                if (existing != null) {
+                    existing.setQuantity(adjustment.quantity());
+                    existing.setComment(adjustment.comment());
+                    adjustments.add(existing);
+                } else {
+                    Adjustment newAdj = new Adjustment();
+                    newAdj.setIntrantMvtData(existingIntrants.get(intrantInformation.id()));
+                    adjustmentTypeRepository.findById(adjustment.type()).ifPresent(newAdj::setAdjustmentType);
+                    newAdj.setQuantity(adjustment.quantity());
+                    newAdj.setComment(adjustment.comment());
+                    adjustments.add(newAdj);
                 }
             }
         }
