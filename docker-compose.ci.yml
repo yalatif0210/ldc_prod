@@ -2,23 +2,24 @@
 # CI/CD override — utilise les images pre-buildées depuis ghcr.io
 # au lieu de builder localement.
 #
-# Usage sur VPS :
+# Usage sur VPS (manuel) :
 #   docker compose -f docker-compose.yml -f docker-compose.ci.yml pull
 #   docker compose -f docker-compose.yml -f docker-compose.ci.yml up -d --no-build
 #
-# Variables requises :
-#   CI_IMAGE_OWNER  : nom du compte GitHub (ex: monorg)
-#   IMAGE_TAG       : tag de l'image (ex: sha-a1b2c3d ou latest)
+# Variables (lues depuis .env si non exportées) :
+#   CI_IMAGE_OWNER  : nom du compte GitHub (ex: yalatif0210)  — à mettre dans .env
+#   IMAGE_TAG       : tag de l'image — défaut: staging (opérations manuelles)
+#                     le pipeline CI/CD injecte le tag précis (ex: staging-a508c33)
 # ─────────────────────────────────────────────────────────────
 services:
   ldc_backend:
-    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_backend:${IMAGE_TAG:-latest}
+    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_backend:${IMAGE_TAG:-staging}
 
   ldc_frontend:
-    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_frontend:${IMAGE_TAG:-latest}
+    image: ghcr.io/${CI_IMAGE_OWNER}/ldc_frontend:${IMAGE_TAG:-staging}
 
   support_bot:
-    image: ghcr.io/${CI_IMAGE_OWNER}/support_bot:${IMAGE_TAG:-latest}
+    image: ghcr.io/${CI_IMAGE_OWNER}/support_bot:${IMAGE_TAG:-staging}
 
   pilot_bot:
-    image: ghcr.io/${CI_IMAGE_OWNER}/pilot_bot:${IMAGE_TAG:-latest}
+    image: ghcr.io/${CI_IMAGE_OWNER}/pilot_bot:${IMAGE_TAG:-staging}
