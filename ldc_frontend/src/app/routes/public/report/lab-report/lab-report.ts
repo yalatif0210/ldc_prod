@@ -117,6 +117,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
   pharm_form!: FormGroup;
   equipmentId!: any;
   equipmentName!: string;
+  periodName!: string;
   information_unit?: any;
   information_units?: any;
   information_unit_label?: string;
@@ -526,9 +527,10 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
         const data = JSON.parse(params.get('data')!);
         if (!data) return;
 
+        this.equipmentName = data.equipment;
+        this.periodName = data.period;
         this.service.getEquipmentId(data.equipment).subscribe(equipRes => {
           this.equipmentId = Number(equipRes.data.equipmentByNameOther.id);
-          this.equipmentName = data.equipment;
         });
 
         this.service.findPeriodByName(data.period).subscribe(res => {
@@ -606,7 +608,17 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
   }
 
   openValidationDialog(data: any) {
-    this.validationDialog.open(ValidationDialog, { data });
+    const dialogRef = this.validationDialog.open(ValidationDialog, { data });
+    dialogRef.afterClosed().pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.service
+        .findReportByAccountAndEquipmentAndPeriodAlso(this.equipmentName, this.periodName)
+        .subscribe(res => {
+          const report = res.data.reportByAccountAndEquipmentAndPeriodAlso;
+          if (report) {
+            this.report = report;
+          }
+        });
+    });
   }
 
   openAdjustmentDialog(data: any) {
@@ -681,11 +693,6 @@ export class ValidationDialog implements OnInit {
     ).subscribe({
       next: () => {
         this.isUpdated = true;
-        // Marquer le rapport comme ayant des données pour que les prochains dialogs
-        // utilisent le chemin update (this.data.report est partagé par référence avec le parent)
-        if (!this.data.report.IntrantMvtData?.length) {
-          this.data.report.IntrantMvtData = [{}];
-        }
         if (this.actionStatus !== STATUS.SUGGESTED) {
           this.data.disableAction();
         }
