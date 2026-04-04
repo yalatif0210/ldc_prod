@@ -64,18 +64,11 @@ public class ReportService {
                 .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
         statusRepository.findById(input.status_id()).ifPresent(report::setStatus);
 
-        // Idempotence : supprime les données existantes avant de recréer
-        if (!report.getIntrantMvtData().isEmpty()) {
-            List<Adjustment> existingAdjustments = report.getIntrantMvtData().stream()
-                    .flatMap(d -> d.getAdjustments().stream())
-                    .collect(Collectors.toList());
-            adjustmentRepository.deleteAll(existingAdjustments);
-            intrantMvtDataRepository.deleteAll(report.getIntrantMvtData());
-            report.getIntrantMvtData().clear();
-        }
-        if (!report.getLabActivityData().isEmpty()) {
-            labActivityDataRepository.deleteAll(report.getLabActivityData());
-            report.getLabActivityData().clear();
+        // Idempotence : si des données existent déjà, rediriger vers l'update
+        if (!report.getLabActivityData().isEmpty() || !report.getIntrantMvtData().isEmpty()) {
+            updateReportDetails(input);
+            return reportRepository.findById(input.report_id())
+                    .orElseThrow(() -> new IllegalArgumentException("Report introuvable : " + input.report_id()));
         }
 
         // Création lab activity data
