@@ -12,7 +12,13 @@
       "Bash(xargs grep:*)",
       "Bash(python3 -c \":*)",
       "Bash(grep -r \"backup\\\\|sauvegarde\\\\|dump\\\\|pg_dump\\\\|restore\" c:DEV_APP_LABDEPLOYapp_v3_claude_production --include=Makefile --include=*.yaml --include=*.yml)",
-      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''scripts'''',{}\\)\\)\")"
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(d.get\\(''''scripts'''',{}\\)\\)\")",
+      "Bash(git checkout:*)",
+      "Bash(git pull:*)",
+      "Bash(git merge:*)",
+      "Bash(bash scripts/bump-version.sh patch)",
+      "Bash(bash scripts/bump-version.sh 1.0.2)",
+      "Bash(ls c:/DEV_APP_LAB/DEPLOY/app_v3_claude_production/*.md)"
     ]
   }
 }
