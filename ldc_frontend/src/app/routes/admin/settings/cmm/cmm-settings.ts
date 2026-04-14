@@ -88,6 +88,7 @@ export class CmmSettings extends FormBaseComponent implements OnInit, OnDestroy 
       this.disabledConfirm = false;
       this.equipmentIntrants = null;
       this.cmmConfigInstance = null;
+      this.pharmInputs = {};
     });
 
     forkJoin([this.reportHistoryService.getEquipments()]).subscribe(([response]) => {
@@ -154,9 +155,9 @@ export class CmmSettings extends FormBaseComponent implements OnInit, OnDestroy 
       { structureId: value.structure, equipmentId: value.equipment },
       this.pharmInputs
     );
-    console.log('DTO to send - cmm-settings.ts:157', dto, this.pharmInputs);
+    console.log('DTO to send - cmm-settings.ts:158', dto, this.pharmInputs);
     const cmm_config = this.normalizeIntrantCmm(dto, this.equipmentSecondaryIntrants);
-    console.log('DTO normalized - cmm-settings.ts:159', cmm_config);
+    console.log('DTO normalized - cmm-settings.ts:160', cmm_config);
     this.service
       .handleCreateCmmConfig(cmm_config)
       .subscribe(r => {
