@@ -152,7 +152,7 @@
           "route": "",
           "name": "factors",
           "type": "sub",
-          "icon": "description",
+          "icon": "settings",
           "children": [
             {
               "route": "factors",
@@ -161,6 +161,12 @@
               "icon": "perm_identity"
             }
           ]
+        },
+        {
+          "route": "cmm",
+          "name": "cmm",
+          "type": "link",
+          "icon": "settings"
         }
       ],
       "permissions": {

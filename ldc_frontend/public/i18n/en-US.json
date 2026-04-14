@@ -12,6 +12,7 @@
     "super_admin.system": "System",
 
     "dashboard": "Dashboard",
+
     "settings": "Configurations",
     "settings.users": "Utilisateurs",
     "settings.users.create_users": "Créer un utilisateur",
@@ -24,13 +25,18 @@
     "settings.periods.manage_periods": "Manager les périodes",
     "settings.factors": "Facteurs de conversion",
     "settings.factors.manage_factors": "Manager les facteurs de conversion",
+    "settings.cmm": "Configurer les CMM",
+
     "weekly": "Données",
     "weekly.create-report": "Saisir mes données",
     "weekly.view-reports": "Consulter mes données",
+
     "design": "Design",
+
     "synthese": "Rapports de synthèse",
     "synthese.rapport-synthese": "Synthese hebdommadaire",
     "synthese.rapport-synthese-c": "Rapports personnalisés",
+
     "design.colors": "Color System",
     "design.icons": "Material Icons",
     "material": "Material",

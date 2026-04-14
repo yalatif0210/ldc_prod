@@ -11,6 +11,7 @@ import {
 import { ReportService } from '@shared/services/report.service';
 import { id } from 'date-fns/locale';
 import { compileTargets } from '@shared/validator/rules';
+import { COBAS_5800_RELATIONS, Relation } from '@shared/validator/realtions/relations';
 
 const USER_ROLE_ID = {
   PHARMACY: 5,
@@ -254,6 +255,7 @@ export class SynthesisService extends SharedService {
     lab_mvt_grouped: any,
     report: any
   ) {
+    console.log('WX>> - synthesis.service.ts:258', cmmConfigs, intrant_mvt_grouped, lab_mvt_grouped);
     //Recupération du nom de l'équipement et la configuration requise pour la synthèse
     const equipment_name = report[0]?.equipment?.name;
     const compileConfig = compileTargets[equipment_name as keyof typeof compileTargets];
@@ -309,7 +311,7 @@ export class SynthesisService extends SharedService {
         cmm: compiled_cmm.find((e: any) => e.intrant.code === temp[0].intrant.code)?.cmm,
         msd: (
           total_available_stock /
-            compiled_cmm.find((e: any) => e.intrant.code === temp[0].intrant.code)?.cmm || 0
+          compiled_cmm.find((e: any) => e.intrant.code === temp[0].intrant.code)?.cmm || 0
         ).toFixed(2),
       });
     });
@@ -346,46 +348,34 @@ export class SynthesisService extends SharedService {
     return this.handleFinalizeSpecificSecondary(result, equipment_name);
   }
 
+  handleNormalizeSecondaryIntrantCmm(
+    secondaryIntrant: any,
+    test_realisable_array: any,
+    equipment_name: string
+  ) {
+
+    const relation = equipment_name === COBAS_5800 ? COBAS_5800_RELATIONS.find(
+      (relation: Relation) =>
+      relation.intrants === secondaryIntrant.code
+    ) : null;
+    return this.handlePrimaryUnit(
+      test_realisable_array,
+      [secondaryIntrant.convertionFactor, secondaryIntrant.otherFactor],
+      !relation ? [] : relation?.main_reagents
+    );
+  }
+
   handleFinalizeSpecificSecondary(e: any, equipment_name: string) {
-    e.compiled_specific_secondary.forEach((elt: any) => {
+    (e.compiled_specific_secondary || e).forEach((elt: any) => {
       if (equipment_name === COBAS_5800) {
-        switch (elt.intrant.code) {
-          case 40403173:
-            elt['primary_unit'] = this.handlePrimaryUnit(
-              e.compiled_specific_primary,
-              [elt.intrant.convertionFactor],
-              [40403172]
-            );
-            break;
-          case 4030521:
-            elt['primary_unit'] = this.handlePrimaryUnit(
-              e.compiled_specific_primary,
-              [elt.intrant.convertionFactor],
-              [4040136, 40403172]
-            );
-            break;
-          case 4040131:
-            elt['primary_unit'] = this.handlePrimaryUnit(
-              e.compiled_specific_primary,
-              [elt.intrant.convertionFactor],
-              [4040317, 4040136]
-            );
-            break;
-          case 4040140:
-            elt['primary_unit'] = this.handlePrimaryUnit(
-              e.compiled_specific_primary,
-              [elt.intrant.convertionFactor, elt.intrant.otherFactor],
-              [40403172, 4040136]
-            );
-            break;
-          default:
-            elt['primary_unit'] = this.handlePrimaryUnit(
-              e.compiled_specific_primary,
-              [elt.intrant.convertionFactor],
-              [4040317]
-            );
-            break;
-        }
+        const relation = COBAS_5800_RELATIONS.find((relation: Relation) =>
+          relation.intrants === elt.intrant.code
+        );
+        elt['primary_unit'] = this.handlePrimaryUnit(
+          e.compiled_specific_primary,
+          [elt.intrant.convertionFactor, elt.intrant.otherFactor],
+          relation?.main_reagents
+        );
       } else {
         elt['primary_unit'] = this.handlePrimaryUnit(e.compiled_specific_primary, [
           elt.intrant.convertionFactor,
@@ -397,6 +387,58 @@ export class SynthesisService extends SharedService {
     });
     return e;
   }
+
+  //handleFinalizeSpecificSecondary(e: any, equipment_name: string) {
+  //  e.compiled_specific_secondary.forEach((elt: any) => {
+  //    if (equipment_name === COBAS_5800) {
+  //      switch (elt.intrant.code) {
+  //        case 40403173:
+  //          elt['primary_unit'] = this.handlePrimaryUnit(
+  //            e.compiled_specific_primary,
+  //            [elt.intrant.convertionFactor],
+  //            [40403172]
+  //          );
+  //          break;
+  //        case 4030521:
+  //          elt['primary_unit'] = this.handlePrimaryUnit(
+  //            e.compiled_specific_primary,
+  //            [elt.intrant.convertionFactor],
+  //            [4040136, 40403172]
+  //          );
+  //          break;
+  //        case 4040131:
+  //          elt['primary_unit'] = this.handlePrimaryUnit(
+  //            e.compiled_specific_primary,
+  //            [elt.intrant.convertionFactor],
+  //            [4040317, 4040136]
+  //          );
+  //          break;
+  //        case 4040140:
+  //          elt['primary_unit'] = this.handlePrimaryUnit(
+  //            e.compiled_specific_primary,
+  //            [elt.intrant.convertionFactor, elt.intrant.otherFactor],
+  //            [40403172, 4040136]
+  //          );
+  //          break;
+  //        default:
+  //          elt['primary_unit'] = this.handlePrimaryUnit(
+  //            e.compiled_specific_primary,
+  //            [elt.intrant.convertionFactor],
+  //            [4040317]
+  //          );
+  //          break;
+  //      }
+  //    } else {
+  //      elt['primary_unit'] = this.handlePrimaryUnit(e.compiled_specific_primary, [
+  //        elt.intrant.convertionFactor,
+  //      ]);
+  //    }
+  //    elt['kit'] = this.handleKit(elt);
+  //    elt['qac'] = this.handle_specific_secondary_qac(elt);
+  //    elt['taux'] = this.handle_specific_secondary_taux(elt);
+  //  });
+  //  return e;
+  //}
 
   handleAvailableStock(elt: any, total_available_stock: any) {
     const factor = elt.intrant.sku === elt.intrant.primary_sku ? 1 : elt.intrant.roundFactor;
@@ -431,38 +473,16 @@ export class SynthesisService extends SharedService {
   ) {
     let cumul = 0;
     if (targeted_intrant_code && targeted_intrant_code.length !== 0) {
-      const filter_result = e.filter((i: any) => targeted_intrant_code.includes(i.intrant.code));
-      if (
-        targeted_intrant_code.length === 1 ||
-        (targeted_intrant_code.includes(4040136) && targeted_intrant_code.includes(40403172))
-      ) {
-        filter_result.forEach((element: any) => {
-          cumul += Number(element.test_realisable) * conversion_factor[0];
-        });
-      }
-
-      if (targeted_intrant_code.includes(4040136) && targeted_intrant_code.includes(4040317)) {
-        filter_result.forEach((element: any) => {
-          if (element.intrant.code === 4040136) {
-            cumul -= Number(element.test_realisable) * conversion_factor[0];
-          } else {
-            cumul += Number(element.test_realisable) * conversion_factor[0];
-          }
-        });
-      }
-
-      if (targeted_intrant_code.includes(4040136) && targeted_intrant_code.includes(40403172)) {
-        filter_result.forEach((element: any) => {
-          if (element.intrant.code === 4040136) {
-            cumul -= Number(element.test_realisable) * conversion_factor[1];
-          } else {
-            cumul += Number(element.test_realisable) * conversion_factor[0];
-          }
-        });
-      }
+      const filter_result = e.filter(
+        (i: any) => targeted_intrant_code.includes(i.intrant?.code ?? i.code));
+      targeted_intrant_code.forEach((code: any, index: number) => {
+        const match = filter_result.find((i: any) => i.intrant?.code === code || i.code === code);
+        const test_realisable = match?.test_realisable ?? match?.cmm ?? 0;
+        cumul += Number(test_realisable) * conversion_factor[index];
+      });
     } else {
       e.forEach((element: any) => {
-        cumul += Number(element.test_realisable) * conversion_factor[0];
+        cumul += Number(element.test_realisable ?? element.cmm ?? 0) * conversion_factor[0];
       });
     }
     return Math.ceil(cumul);

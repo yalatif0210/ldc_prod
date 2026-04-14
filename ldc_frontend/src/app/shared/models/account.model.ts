@@ -39,6 +39,15 @@ class AccountModel extends ModelBase {
         structures{
           id
           name
+          active
+          district{
+            id
+            name
+            region{
+              id
+              name
+            }
+          }
           equipments{
             id
             name

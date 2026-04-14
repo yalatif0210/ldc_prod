@@ -1,0 +1,145 @@
+<h2 mat-dialog-title>
+  Détails Complétude — {{ data.period }}
+  <span style="display:block; font-size:13px; font-weight:400; color:#1E88E5; margin-top:2px;">
+    {{ data.equipment }}
+  </span>
+  <span style="display:block; font-size:12px; font-weight:400; color:#757575; margin-top:1px;">
+    {{ data.details.length }} site(s)
+  </span>
+</h2>
+
+<mat-dialog-content>
+  <div style="min-width:520px;">
+    <table class="completeness-dialog-table">
+      <thead>
+        <tr>
+          <th>Site</th>
+          <th>Rapport laboratoire</th>
+          <th>Rapport pharmacie</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (detail of pageData; track detail.site.id) {
+        <tr>
+          <td>{{ detail.site.name }}</td>
+          <td>
+            @if (detail.labDataReported) {
+              <span class="status-chip ok">
+                <mat-icon style="font-size:14px;height:14px;width:14px;line-height:14px;">check_circle</mat-icon>
+                Soumis
+              </span>
+            } @else {
+              <span class="status-chip nok">
+                <mat-icon style="font-size:14px;height:14px;width:14px;line-height:14px;">cancel</mat-icon>
+                Non soumis
+              </span>
+            }
+          </td>
+          <td>
+            @if (detail.pharmDataReported) {
+              <span class="status-chip ok">
+                <mat-icon style="font-size:14px;height:14px;width:14px;line-height:14px;">check_circle</mat-icon>
+                Soumis
+              </span>
+            } @else {
+              <span class="status-chip nok">
+                <mat-icon style="font-size:14px;height:14px;width:14px;line-height:14px;">cancel</mat-icon>
+                Non soumis
+              </span>
+            }
+          </td>
+        </tr>
+        }
+      </tbody>
+    </table>
+
+    <mat-paginator
+      [length]="data.details.length"
+      [pageSize]="pageSize"
+      [pageIndex]="pageIndex"
+      [pageSizeOptions]="[5, 10, 25, 50]"
+      (page)="onPage($event)"
+      aria-label="Sélectionner une page"
+    />
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions>
+  <span class="dialog-actions-row">
+    <span class="dialog-export-actions">
+      <button mat-stroked-button
+              style="color:#2E7D32; border-color:#2E7D32;"
+              (click)="exportExcel()"
+              [disabled]="exporting">
+        <mat-icon>table_chart</mat-icon>
+        Excel
+      </button>
+      <button mat-stroked-button
+              style="color:#C62828; border-color:#C62828;"
+              (click)="exportPdf()"
+              [disabled]="exporting">
+        <mat-icon>picture_as_pdf</mat-icon>
+        PDF
+      </button>
+      @if (exporting) {
+        <mat-spinner diameter="18" style="display:inline-block;margin-left:8px;"></mat-spinner>
+      }
+    </span>
+    <button mat-button (click)="dialogRef.close()">Fermer</button>
+  </span>
+</mat-dialog-actions>
+
+<style>
+  .completeness-dialog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .completeness-dialog-table th {
+    padding: 10px 14px;
+    text-align: left;
+    background: #1E88E5;
+    color: white;
+    font-weight: 600;
+  }
+  .completeness-dialog-table td {
+    padding: 8px 14px;
+    border-bottom: 1px solid #EEE;
+    vertical-align: middle;
+  }
+  .completeness-dialog-table tr:nth-child(even) td {
+    background: #F8F9FA;
+  }
+  .completeness-dialog-table tr:hover td {
+    background: #E3F2FD;
+    transition: background 0.15s;
+  }
+  .status-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 500;
+  }
+  .status-chip.ok {
+    background: #E8F5E9;
+    color: #2E7D32;
+  }
+  .status-chip.nok {
+    background: #FFEBEE;
+    color: #C62828;
+  }
+  .dialog-export-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dialog-actions-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    justify-content: space-between;
+  }
+</style>

@@ -5,7 +5,6 @@ import { HistoryHome } from './histrory/home/history-home';
 import { ReportHistory } from './histrory/report/report-history';
 import { Synthesis } from './synthesis/synthesis';
 import { SynthesisClaude } from './synthesis-claude/synthesis-claude';
-import { PublicSettings } from './settings/settings';
 import { publicUserGuard } from '@core/authentication/role-guard';
 import { synthesisGuard } from '@core/authentication/role-guard';
 
@@ -16,5 +15,4 @@ export const routes: Routes = [
   { path: 'report/history', component: ReportHistory, canActivate: [synthesisGuard] },
   { path: 'synthesis', component: Synthesis, canActivate: [synthesisGuard] },
   { path: 'synthesis-c', component: SynthesisClaude, canActivate: [synthesisGuard] },
-  { path: 'settings', component: PublicSettings, canActivate: [publicUserGuard] },
 ];

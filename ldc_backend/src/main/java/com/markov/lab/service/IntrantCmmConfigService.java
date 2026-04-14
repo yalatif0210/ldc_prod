@@ -42,6 +42,10 @@ public class IntrantCmmConfigService {
 
     @Transactional
     public List<IntrantCmmConfig> saveMultipl(List<IntrantCmmConfigInput> inputs) {
+        if (inputs == null || inputs.isEmpty()) return List.of();
+        long structureId = inputs.get(0).structureId();
+        long equipmentId = inputs.get(0).equipmentId();
+        intrantCmmConfigRepository.deleteByStructureAndEquipment(structureId, equipmentId);
         return inputs.stream().map(this::save).toList();
     }
 

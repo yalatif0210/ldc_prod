@@ -8,6 +8,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatOptionModule } from '@angular/material/core';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import ApexCharts from 'apexcharts';
 import { Subject, forkJoin } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
@@ -21,12 +23,16 @@ import {
   StockAlert,
   Completeness,
   PeriodInfo,
+  CompletenessDetail,
 } from './dashboard.service';
+import { MatExpansionModule } from '@angular/material/expansion';
+import { CompletenessDetailDialog } from './completeness-detail-dialog';
 
 @Component({
   selector: 'app-dashboard',
+  standalone: true,
   templateUrl: './dashboard.html',
-  styleUrl: './dashboard.scss',
+  styleUrls: ['./dashboard.scss'],
   imports: [
     CommonModule,
     FormsModule,
@@ -37,16 +43,19 @@ import {
     MatFormFieldModule,
     MatOptionModule,
     MatProgressSpinnerModule,
+    MatExpansionModule,
+    MatDialogModule,
   ],
 })
 export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
-  private readonly ngZone         = inject(NgZone);
-  private readonly authService    = inject(AuthService);
+  private readonly ngZone = inject(NgZone);
+  private readonly authService = inject(AuthService);
   private readonly historyService = inject(ReportHistoryService);
-  private readonly dashService    = inject(DashboardService);
+  private readonly dashService = inject(DashboardService);
+  private readonly dialog = inject(MatDialog);
 
   // ── Rôle ──────────────────────────────────────────────────────────────────
-  isAdmin      = false;
+  isAdmin = false;
   isSupervisor = false;
 
   // ── Compte ────────────────────────────────────────────────────────────────
@@ -56,33 +65,35 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   // ── Données brutes (chargées une fois par équipement) ─────────────────────
   allReports: any[] = [];
   allPeriods: PeriodInfo[] = [];
-  allSites:   DashboardSite[] = [];
+  allSites: DashboardSite[] = [];
 
   // ── Filtres toolbar ───────────────────────────────────────────────────────
-  selectedPeriod: string = '';
-  selectedRegion: string = 'all';
-  selectedSiteId: string = 'all';
+  selectedPeriod = '';
+  selectedRegion = 'all';
+  selectedSiteId = 'all';
 
   // ── Rapports filtrés ──────────────────────────────────────────────────────
   filteredReports: any[] = [];
 
   // ── Sélecteurs in-card ────────────────────────────────────────────────────
-  activityPeriod: string = '';
-  trendStart:     string = '';
-  trendEnd:       string = '';
-  tatStart:       string = '';
-  tatEnd:         string = '';
-  retestStart:    string = '';
-  retestEnd:      string = '';
-  rejectStart:    string = '';
-  rejectEnd:      string = '';
+  activityPeriod = '';
+  trendStart = '';
+  trendEnd = '';
+  tatStart = '';
+  tatEnd = '';
+  retestStart = '';
+  retestEnd = '';
+  rejectStart = '';
+  rejectEnd = '';
 
   // ── Résultats ─────────────────────────────────────────────────────────────
-  kpis:             DashboardKpi | null = null;
-  stockAlerts:      StockAlert[]        = [];
-  completeness:     Completeness | null = null;
-  hasBreakdownData                      = false;
-  loading                               = false;
+  kpis: DashboardKpi | null = null;
+  stockAlerts: StockAlert[] = [];
+  cmmConfigs: any[] = [];
+  completeness: Completeness[] | null = null;
+  completenessDetails: CompletenessDetail[] | null = null;
+  hasBreakdownData = false;
+  loading = false;
 
   // ── Lifecycle ─────────────────────────────────────────────────────────────
   private readonly destroy$ = new Subject<void>();
@@ -95,7 +106,7 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   get equipmentList() { return this.historyService.getEquipmentList(this.account); }
 
   get regionList(): string[] {
-    return ['all', ...new Set(this.allSites.map(s => s.regionName)).values()];
+    return ['all', ...new Set(this.allSites.map(s => s.regionName).sort((a, b) => a.localeCompare(b))).values()];
   }
 
   get siteListForRegion(): DashboardSite[] {
@@ -112,25 +123,25 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.authService.userRole()
       .pipe(takeUntil(this.destroy$))
       .subscribe(role => {
-        this.isAdmin      = [UserRole.SUPER_ADMIN, UserRole.ADMIN].includes(role as UserRole);
+        this.isAdmin = [UserRole.SUPER_ADMIN, UserRole.ADMIN].includes(role as UserRole);
         this.isSupervisor = role === UserRole.SUPERVISOR;
       });
 
     forkJoin([this.historyService.getEquipments()])
       .pipe(takeUntil(this.destroy$))
       .subscribe(([accountRes]: [any]) => {
-      if (accountRes?.data) {
-        this.account = accountRes.data.account;
-        const eqList = this.equipmentList;
-        if (eqList.length) {
-          this.selectedEquipmentId = eqList[0].id;
-          this.loadDashboardData();
+        if (accountRes?.data) {
+          this.account = accountRes.data.account;
+          const eqList = this.equipmentList;
+          if (eqList.length) {
+            this.selectedEquipmentId = eqList[0].id;
+            this.loadDashboardData();
+          }
         }
-      }
-    });
+      });
   }
 
-  ngAfterViewInit(): void {}
+  ngAfterViewInit(): void { }
 
   // ── Handlers toolbar ──────────────────────────────────────────────────────
   onEquipmentChange(): void { this.loadDashboardData(); }
@@ -155,22 +166,26 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   onTrendRangeChange(): void {
     this.renderChart('chartTrend',
-      this.dashService.buildTrendChart(this.filteredReports, this.allPeriods, this.trendStart, this.trendEnd));
+      this.dashService.buildTrendChart(
+        this.filteredReports, this.allPeriods, this.trendStart, this.trendEnd));
   }
 
   onTatRangeChange(): void {
     this.renderChart('chartTat',
-      this.dashService.buildTatChart(this.filteredReports, this.allPeriods, this.tatStart, this.tatEnd));
+      this.dashService.buildTatChart(
+        this.filteredReports, this.allPeriods, this.tatStart, this.tatEnd));
   }
 
   onRetestRangeChange(): void {
     this.renderChart('chartRetest',
-      this.dashService.buildRetestChart(this.filteredReports, this.allPeriods, this.retestStart, this.retestEnd));
+      this.dashService.buildRetestChart(
+        this.filteredReports, this.allPeriods, this.retestStart, this.retestEnd));
   }
 
   onRejectRangeChange(): void {
     this.renderChart('chartReject',
-      this.dashService.buildRejectChart(this.filteredReports, this.allPeriods, this.rejectStart, this.rejectEnd));
+      this.dashService.buildRejectChart(
+        this.filteredReports, this.allPeriods, this.rejectStart, this.rejectEnd));
   }
 
   // ── Chargement HTTP ───────────────────────────────────────────────────────
@@ -178,43 +193,47 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     if (!this.selectedEquipmentId || !this.account) return;
 
     this.loading = true;
-    this.kpis    = null;
+    this.kpis = null;
     this.destroyAllCharts();
 
     const structureIds = this.historyService.getAdminSuperivisedStructuresIds(
       this.account.structures ?? []
     );
 
-    this.dashService.loadReports(structureIds, Number(this.selectedEquipmentId))
-      .pipe(takeUntil(this.destroy$))
+    forkJoin([
+      this.dashService.loadReports(structureIds, Number(this.selectedEquipmentId)),
+      this.dashService.loadCmmConfigs(structureIds, Number(this.selectedEquipmentId)),
+    ]).pipe(takeUntil(this.destroy$))
       .subscribe({
-      next: (reports: any[]) => {
-        this.allReports = reports;
-        this.allPeriods = this.dashService.extractPeriods(reports);
-        this.allSites   = this.dashService.extractSites(reports);
+        next: ([reports, cmmConfigs]: [any[], any[]]) => {
+          this.allReports = reports;
+          this.cmmConfigs = cmmConfigs;
+          this.allPeriods = this.dashService.extractPeriods(reports);
+          this.allSites = this.dashService.extractSitesFromAccount(
+            this.account, Number(this.selectedEquipmentId));
 
-        const last = this.allPeriods[this.allPeriods.length - 1];
-        const prev = this.allPeriods[this.allPeriods.length - 2] ?? last;
+          const last = this.allPeriods[this.allPeriods.length - 1];
+          const prev = this.allPeriods[this.allPeriods.length - 2] ?? last;
 
-        this.selectedPeriod = last?.name ?? '';
-        this.activityPeriod = last?.name ?? '';
-        this.trendStart     = prev?.name ?? '';
-        this.trendEnd       = last?.name ?? '';
-        this.tatStart       = prev?.name ?? '';
-        this.tatEnd         = last?.name ?? '';
-        this.retestStart    = prev?.name ?? '';
-        this.retestEnd      = last?.name ?? '';
-        this.rejectStart    = prev?.name ?? '';
-        this.rejectEnd      = last?.name ?? '';
+          this.selectedPeriod = last?.name ?? '';
+          this.activityPeriod = last?.name ?? '';
+          this.trendStart = prev?.name ?? '';
+          this.trendEnd = last?.name ?? '';
+          this.tatStart = prev?.name ?? '';
+          this.tatEnd = last?.name ?? '';
+          this.retestStart = prev?.name ?? '';
+          this.retestEnd = last?.name ?? '';
+          this.rejectStart = prev?.name ?? '';
+          this.rejectEnd = last?.name ?? '';
 
-        this.selectedRegion = 'all';
-        this.selectedSiteId = 'all';
+          this.selectedRegion = 'all';
+          this.selectedSiteId = 'all';
 
-        this.loading = false;
-        this.applyFiltersAndRender();
-      },
-      error: () => { this.loading = false; },
-    });
+          this.loading = false;
+          this.applyFiltersAndRender();
+        },
+        error: () => { this.loading = false; },
+      });
   }
 
   // ── Filtrage + rendu ──────────────────────────────────────────────────────
@@ -222,18 +241,31 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
     this.filteredReports = this.dashService.filterReports(
       this.allReports, this.selectedRegion, this.selectedSiteId
     );
-
     const kpiReports = this.filteredReports.filter(
       r => r.period?.periodName === this.selectedPeriod
     );
 
-    this.kpis         = this.dashService.computeKpis(kpiReports);
-    this.stockAlerts  = this.dashService.computeStockAlerts(this.filteredReports);
+    this.kpis = this.dashService.computeKpis(kpiReports);
+    this.stockAlerts = this.dashService.computeStockAlerts(
+      this.filteredReports, this.cmmConfigs, this.selectedPeriod
+    );
     this.completeness = this.dashService.computeCompleteness(
       this.filteredReports,
-      this.account?.structures?.length ?? 0,
-      this.selectedPeriod
+      this.dashService.completenessSites(
+        this.account?.structures,
+        this.selectedRegion,
+        this.selectedSiteId,
+        Number(this.selectedEquipmentId)
+      ).length ?? 0,
+      this.selectedPeriod,
     );
+    this.completenessDetails = this.dashService.completenessDetails(
+      this.filteredReports,
+      this.selectedPeriod,
+      this.siteListForRegion
+    );
+
+    console.log('KPI calculés : - dashboard.ts:268', this.completeness, this.kpis, this.stockAlerts);
 
     if (this.renderTimeout) clearTimeout(this.renderTimeout);
     this.ngZone.runOutsideAngular(() => {
@@ -242,14 +274,14 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private renderAllCharts(): void {
-    const r  = this.filteredReports;
+    const r = this.filteredReports;
     const ap = this.allPeriods;
 
     this.renderChart('chartActivity', this.dashService.buildActivityChart(r, this.activityPeriod));
-    this.renderChart('chartTrend',    this.dashService.buildTrendChart(r, ap, this.trendStart, this.trendEnd));
-    this.renderChart('chartTat',      this.dashService.buildTatChart(r, ap, this.tatStart, this.tatEnd));
-    this.renderChart('chartRetest',   this.dashService.buildRetestChart(r, ap, this.retestStart, this.retestEnd));
-    this.renderChart('chartReject',   this.dashService.buildRejectChart(r, ap, this.rejectStart, this.rejectEnd));
+    this.renderChart('chartTrend', this.dashService.buildTrendChart(r, ap, this.trendStart, this.trendEnd));
+    this.renderChart('chartTat', this.dashService.buildTatChart(r, ap, this.tatStart, this.tatEnd));
+    this.renderChart('chartRetest', this.dashService.buildRetestChart(r, ap, this.retestStart, this.retestEnd));
+    this.renderChart('chartReject', this.dashService.buildRejectChart(r, ap, this.rejectStart, this.rejectEnd));
 
     const brkOpts = this.dashService.buildBreakdownChart(r);
     this.hasBreakdownData = brkOpts !== null;
@@ -283,17 +315,11 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   // ── Helpers template ──────────────────────────────────────────────────────
   alertIcon(level: string): string {
-    if (level === 'critical') return 'dangerous';
-    if (level === 'surstock') return 'inventory';
-    if (level === 'low')      return 'warning';
-    return 'info';
+    return level === 'critical' ? 'dangerous' : 'warning';
   }
 
   alertLabel(level: string): string {
-    if (level === 'critical') return 'CRITIQUE';
-    if (level === 'low')      return 'BAS';
-    if (level === 'warning')  return 'ATTENTION';
-    return 'SURSTOCK';
+    return level === 'critical' ? 'CRITIQUE' : 'SURVEILLER';
   }
 
   tatColor(tat: number): string {
@@ -306,5 +332,20 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
 
   completenessColor(rate: number): string {
     return rate >= 80 ? '#28a745' : rate >= 50 ? '#f48c06' : '#e85d04';
+  }
+
+  openCompletenessDialog(): void {
+    if (!this.completenessDetails?.length) return;
+    const eq = this.equipmentList.find(e => e.id === this.selectedEquipmentId);
+    this.dialog.open(CompletenessDetailDialog, {
+      width: '820px',
+      maxWidth: '95vw',
+      maxHeight: '80vh',
+      data: {
+        details: this.completenessDetails,
+        period: this.selectedPeriod,
+        equipment: eq?.name ?? '',
+      },
+    });
   }
 }

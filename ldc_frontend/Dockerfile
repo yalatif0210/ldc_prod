@@ -1,13 +1,13 @@
 # === Build stage ===
 FROM node:20-alpine AS build
 WORKDIR /app
-# Installer dépendances (cache npm)
-COPY package*.json ./
-RUN npm ci --no-audit --no-fund --legacy-peer-deps
+# Installer dépendances (cache yarn)
+COPY package.json yarn.lock ./
+RUN yarn install --frozen-lockfile
 # Copier le code et builder
 COPY . .
 # Remplace "production" par l'env Angular cible si différent
-RUN npm run build -- --configuration production
+RUN yarn build --configuration production
 
 # === Runtime stage (Nginx) ===
 FROM nginx:1.27-alpine

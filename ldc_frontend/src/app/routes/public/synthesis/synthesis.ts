@@ -41,6 +41,7 @@ import { ReportService } from '@shared/services/report.service';
 import { Router } from '@angular/router';
 
 const SYNTHESIS_UNIT_ID = '10';
+const SPECIFIC_PRIMARY = 1;
 const REDIRECTION = 'zver/public/settings';
 
 @Component({
@@ -127,7 +128,8 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
       this.service.getPeriods(),
     ]).subscribe(([synthesis, account, periods]) => {
       if (synthesis && synthesis.data) {
-        this.syntheses = synthesis.data.syntheses;
+        this.syntheses = synthesis.data.syntheses.filter(
+          (s: any) => s.id === SYNTHESIS_UNIT_ID);
       }
       if (account && account.data) {
         this.account = account.data.account;
@@ -180,12 +182,10 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
         ) {
           const confirm = window.confirm(
             `Aucune CMM n'est configuré pour
-               cet équipement. Voulez-vous continuer ?`
+               cet équipement.`
           );
           this.lockedButton = !confirm;
           if (confirm) {
-            this.router.navigateByUrl(REDIRECTION);
-          } else {
             this.lockedButton = true;
             return;
           }
@@ -194,7 +194,9 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
           config.data &&
           config.data.intrantCmmConfigByStructureAndEquipment.length !== 0
         ) {
-          this.cmmConfigInstance = config.data.intrantCmmConfigByStructureAndEquipment;
+          console.log('Configurations CMM trouvées: - synthesis.ts:197', config.data.intrantCmmConfigByStructureAndEquipment);
+          this.cmmConfigInstance = config.data.intrantCmmConfigByStructureAndEquipment.filter(
+            (e: any) => Number(e.intrant.intrantType.id) === SPECIFIC_PRIMARY);
         }
       });
   }
@@ -254,7 +256,7 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
     }
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void { }
   // Add methods and properties as required
   exportExcel() {
     const element = this.table.nativeElement;
@@ -361,7 +363,7 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
           try {
             worksheet.mergeCells(i + 1, startCol, i + 1, endCol);
           } catch (e) {
-            console.warn('Fusion ignorée: - synthesis.ts:371', e);
+            console.warn('Fusion ignorée: - synthesis.ts:366', e);
           }
         }
 

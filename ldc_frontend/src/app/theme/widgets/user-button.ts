@@ -24,10 +24,6 @@ import { AuthService, SettingsService, User } from '@core';
         <mat-icon>person</mat-icon>
         <span>{{ user_name }}</span>
       </button>
-      @if(!isAdmin){<button routerLink="zver/public//settings" mat-menu-item>
-        <mat-icon>settings</mat-icon>
-        <span>{{ 'Configurer mes CMM' }}</span>
-      </button>}
       <button mat-menu-item  (click)="logout()">
         <mat-icon>exit_to_app</mat-icon>
         <span>{{ 'logout' | translate }}</span>

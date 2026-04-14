@@ -6,6 +6,7 @@ import { Period } from './period/period';
 import { Factor } from './factors/factor';
 import { ManageUsers } from './manage-users/manage-users';
 import { adminGuard } from '@core/authentication/role-guard';
+import { CmmSettings } from './cmm/cmm-settings';
 
 export const routes: Routes = [
   { path: 'users', component: Users, canActivate: [adminGuard] },
@@ -18,4 +19,6 @@ export const routes: Routes = [
   { path: 'periods/periods', component: Period, canActivate: [adminGuard] },
   { path: 'factors', component: Factor, canActivate: [adminGuard] },
   { path: 'factors/factors', component: Factor, canActivate: [adminGuard] },
+  { path: 'cmm', component: CmmSettings, canActivate: [adminGuard] },
+
 ];

@@ -3,9 +3,6 @@ import {
   OnInit,
   OnDestroy,
   inject,
-  AfterViewInit,
-  ViewChild,
-  ElementRef,
 } from '@angular/core';
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
@@ -22,10 +19,7 @@ import { MtxGridModule } from '@ng-matero/extensions/grid';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormBaseComponent, PageHeader } from '@shared';
 import { AppTable } from '@shared/components/table/app-table';
-import { PeriodManagementService } from '@shared/services/period-management.service';
-import { PublicHomeService } from '@shared/services/public-home.service';
 import { forkJoin } from 'rxjs';
-import flatpickr from 'flatpickr';
 import { MatDividerModule } from '@angular/material/divider';
 import { ReportHistoryService } from '@shared/services/report-history.service';
 import { AuthService } from '@core';

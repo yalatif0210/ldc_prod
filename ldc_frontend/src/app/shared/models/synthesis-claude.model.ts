@@ -9,9 +9,13 @@ class SynthesisClaudeModel {
       status { id status }
       account {
         id
+        role{
+          role
+        }
         structures {
           id
           name
+          active
           district {
             name
             region { name }

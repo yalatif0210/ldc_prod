@@ -205,11 +205,22 @@
 .db-section-icon { font-size: 18px; height: 18px; width: 18px; color: #e85d04; }
 
 // ── Alertes stock ─────────────────────────────────────────────────────────────
-.db-alerts-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
+.db-alerts-scroll {
+  overflow-x: auto;
   margin-bottom: 20px;
+  padding-bottom: 6px;
+
+  &::-webkit-scrollbar { height: 4px; }
+  &::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 2px; }
+  &::-webkit-scrollbar-thumb { background: #ccc; border-radius: 2px; }
+}
+
+.db-alerts-grid {
+  display: grid;
+  grid-template-rows: repeat(3, auto);
+  grid-auto-flow: column;
+  gap: 10px;
+  width: max-content;
 }
 
 .db-alert-card {
@@ -223,10 +234,8 @@
   border-left: 4px solid #ccc;
 }
 
-.db-alert-critical { border-left-color: #e85d04; background: #fff8f6; }
-.db-alert-low      { border-left-color: #f48c06; background: #fffaf2; }
-.db-alert-warning  { border-left-color: #ffd166; background: #fffef0; }
-.db-alert-surstock { border-left-color: #2f75b5; background: #eef4fc; }
+.db-alert-critical   { border-left-color: #e85d04; background: #fff8f6; }
+.db-alert-surveiller { border-left-color: #f48c06; background: #fffaf2; }
 
 .db-alert-header {
   display: flex;
@@ -243,10 +252,8 @@
   padding: 1px 6px;
   border-radius: 8px;
 }
-.db-badge-critical { background: #ffc7ce; color: #9c0006; }
-.db-badge-low      { background: #ffd966; color: #7f6000; }
-.db-badge-warning  { background: #ffeb9c; color: #9c6500; }
-.db-badge-surstock { background: #bde0fe; color: #1a3a6b; }
+.db-badge-critical   { background: #ffc7ce; color: #9c0006; }
+.db-badge-surveiller { background: #ffd966; color: #7f6000; }
 
 .db-alert-site {
   font-size: 11px; color: #444; font-weight: 600;
@@ -270,10 +277,8 @@
   padding: 1px 8px;
   border-radius: 8px;
 }
-.db-coverage-critical { background: #ffc7ce; color: #9c0006; }
-.db-coverage-low      { background: #ffd966; color: #7f6000; }
-.db-coverage-warning  { background: #ffeb9c; color: #9c6500; }
-.db-coverage-surstock { background: #bde0fe; color: #1a3a6b; }
+.db-coverage-critical   { background: #ffc7ce; color: #9c0006; }
+.db-coverage-surveiller { background: #ffd966; color: #7f6000; }
 
 .db-no-alert {
   display: flex;

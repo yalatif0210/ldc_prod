@@ -86,11 +86,17 @@ export class StartupService {
               ],
             },
             {
-              route: 'factors', name: 'factors', type: 'sub', icon: 'calculate',
+              route: 'factors', name: 'factors', type: 'sub', icon: 'settings',
               children: [
-                { route: 'factors', name: 'manage_factors', type: 'link', icon: 'calculate' },
+                { route: 'factors', name: 'manage_factors', type: 'link', icon: 'settings' },
               ],
             },
+            {
+              route: 'cmm',
+              name: 'cmm',
+              type: 'link',
+              icon: 'settings'
+            }
           ],
         },
         {
@@ -101,22 +107,22 @@ export class StartupService {
           ],
         },
         {
-          route: "zver/public",
-          name: "synthese",
-          type: "sub",
-          icon: "all_inbox",
+          route: 'zver/public',
+          name: 'synthese',
+          type: 'sub',
+          icon: 'all_inbox',
           children: [
             {
-              route: "synthesis",
-              name: "rapport-synthese",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis',
+              name: 'rapport-synthese',
+              type: 'link',
+              icon: 'edit'
             },
             {
-              route: "synthesis-c",
-              name: "rapport-synthese-c",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis-c',
+              name: 'rapport-synthese-c',
+              type: 'link',
+              icon: 'edit'
             }
           ]
         }
@@ -151,11 +157,17 @@ export class StartupService {
               ],
             },
             {
-              route: 'factors', name: 'factors', type: 'sub', icon: 'calculate',
+              route: 'factors', name: 'factors', type: 'sub', icon: 'settings',
               children: [
-                { route: 'factors', name: 'manage_factors', type: 'link', icon: 'calculate' },
+                { route: 'factors', name: 'manage_factors', type: 'link', icon: 'settings' },
               ],
             },
+            {
+              route: 'cmm',
+              name: 'cmm',
+              type: 'link',
+              icon: 'settings'
+            }
           ],
         },
         {
@@ -165,22 +177,22 @@ export class StartupService {
           ],
         },
         {
-          route: "zver/public",
-          name: "synthese",
-          type: "sub",
-          icon: "all_inbox",
+          route: 'zver/public',
+          name: 'synthese',
+          type: 'sub',
+          icon: 'all_inbox',
           children: [
             {
-              route: "synthesis",
-              name: "rapport-synthese",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis',
+              name: 'rapport-synthese',
+              type: 'link',
+              icon: 'edit'
             },
             {
-              route: "synthesis-c",
-              name: "rapport-synthese-c",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis-c',
+              name: 'rapport-synthese-c',
+              type: 'link',
+              icon: 'edit'
             }
           ]
         }
@@ -197,22 +209,22 @@ export class StartupService {
           ],
         },
         {
-          route: "zver/public",
-          name: "synthese",
-          type: "sub",
-          icon: "all_inbox",
+          route: 'zver/public',
+          name: 'synthese',
+          type: 'sub',
+          icon: 'all_inbox',
           children: [
             {
-              route: "synthesis",
-              name: "rapport-synthese",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis',
+              name: 'rapport-synthese',
+              type: 'link',
+              icon: 'edit'
             },
             {
-              route: "synthesis-c",
-              name: "rapport-synthese-c",
-              type: "link",
-              icon: "edit"
+              route: 'synthesis-c',
+              name: 'rapport-synthese-c',
+              type: 'link',
+              icon: 'edit'
             }
           ]
         }
@@ -230,22 +242,22 @@ export class StartupService {
         ],
       },
       {
-        route: "zver/public",
-        name: "synthese",
-        type: "sub",
-        icon: "all_inbox",
+        route: 'zver/public',
+        name: 'synthese',
+        type: 'sub',
+        icon: 'all_inbox',
         children: [
           {
-            route: "synthesis",
-            name: "rapport-synthese",
-            type: "link",
-            icon: "edit"
+            route: 'synthesis',
+            name: 'rapport-synthese',
+            type: 'link',
+            icon: 'edit'
           },
           {
-            route: "synthesis-c",
-            name: "rapport-synthese-c",
-            type: "link",
-            icon: "edit"
+            route: 'synthesis-c',
+            name: 'rapport-synthese-c',
+            type: 'link',
+            icon: 'edit'
           }
         ]
       }
