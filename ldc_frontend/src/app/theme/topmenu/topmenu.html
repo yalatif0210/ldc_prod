@@ -5,7 +5,7 @@
       [ngxPermissionsExcept]="menuItem.permissions?.except!"
     >
       @if (menuItem.type === 'link') {
-        <a mat-button [routerLink]="buildRoute([menuItem.route])" routerLinkActive="active">
+        <a style="color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); border-radius: 3px;" mat-button [routerLink]="buildRoute([menuItem.route])" routerLinkActive="active">
           <ng-container
             [ngTemplateOutlet]="linkTypeTpl"
             [ngTemplateOutletContext]="{ item: menuItem }"
@@ -13,7 +13,7 @@
         </a>
       }
       @if (menuItem.type === 'extLink') {
-        <a mat-button [href]="menuItem.route">
+        <a style="color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); border-radius: 3px;" mat-button [href]="menuItem.route">
           <ng-container
             [ngTemplateOutlet]="linkTypeTpl"
             [ngTemplateOutletContext]="{ item: menuItem }"
@@ -21,7 +21,7 @@
         </a>
       }
       @if (menuItem.type === 'extTabLink') {
-        <a mat-button [href]="menuItem.route" target="_blank">
+        <a style="color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); border-radius: 3px;" mat-button [href]="menuItem.route" target="_blank">
           <ng-container
             [ngTemplateOutlet]="linkTypeTpl"
             [ngTemplateOutletContext]="{ item: menuItem }"
@@ -35,6 +35,7 @@
           routerLinkActive
           #rla="routerLinkActive"
           [class.active]="rla.isActive || menuStates[index].active"
+          style="color: white; font-weight: bold; text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.4); border-radius: 3px;"
         >
           <ng-container
             [ngTemplateOutlet]="linkTypeTpl"
@@ -60,12 +61,12 @@
   <mat-icon class="menu-icon">{{ item.icon }}</mat-icon>
   <span class="menu-name">{{ item.name | translate }}</span>
   @if (item.label) {
-    <span class="menu-label bg-{{ item.label.color }}">{{ item.label.value }}</span>
+    <span style="color: white;" class="menu-label bg-{{ item.label.color }}">{{ item.label.value }}</span>
   }
   @if (item.badge) {
-    <span class="menu-badge bg-{{ item.badge.color }}">{{ item.badge.value }}</span>
+    <span style="color: white;" class="menu-badge bg-{{ item.badge.color }}">{{ item.badge.value }}</span>
   }
-  @if (item.type !== 'link') {
-    <mat-icon class="menu-caret">{{ item.type === 'sub' ? 'arrow_drop_down' : 'launch' }}</mat-icon>
-  }
+  <!-- @if (item.type !== 'link') {
+    <mat-icon style="color: white;" class="menu-caret">{{ item.type === 'sub' ? 'arrow_drop_down' : 'launch' }}</mat-icon>
+  } -->
 </ng-template>
