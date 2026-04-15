@@ -10,7 +10,7 @@
     </parent>
     <groupId>com.markov</groupId>
     <artifactId>lab</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
     <name>lab</name>
     <description>lab</description>
     <url/>
