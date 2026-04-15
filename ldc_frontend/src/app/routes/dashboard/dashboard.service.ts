@@ -365,7 +365,8 @@ export class DashboardService extends SharedService {
           const cmm = cmmMap.get(`${structureId}__${intrantId}`);
           if (!cmm) return;
 
-          const availableStock = mvt.availableStock ?? 0;
+          const roundFactor = mvt.intrant?.roundFactor || 1;
+          const availableStock = (mvt.availableStock ?? 0) / roundFactor;
           const msd = availableStock / cmm;
 
           const level: StockAlert['level'] | null =

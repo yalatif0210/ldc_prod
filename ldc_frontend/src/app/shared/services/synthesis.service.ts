@@ -358,11 +358,14 @@ export class SynthesisService extends SharedService {
       (relation: Relation) =>
       relation.intrants === secondaryIntrant.code
     ) : null;
-    return this.handlePrimaryUnit(
+    const primary_cmm = this.handlePrimaryUnit(
       test_realisable_array,
       [secondaryIntrant.convertionFactor, secondaryIntrant.otherFactor],
       !relation ? [] : relation?.main_reagents
     );
+    // eslint-disable-next-line max-len
+    const factor = secondaryIntrant?.sku === secondaryIntrant?.primary_sku ? 1 : secondaryIntrant?.roundFactor;
+    return Number((primary_cmm / (factor || 1)).toFixed(0));
   }
 
   handleFinalizeSpecificSecondary(e: any, equipment_name: string) {
