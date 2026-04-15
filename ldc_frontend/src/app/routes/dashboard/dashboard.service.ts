@@ -366,7 +366,7 @@ export class DashboardService extends SharedService {
           if (!cmm) return;
 
           const roundFactor = mvt.intrant?.roundFactor || 1;
-          const availableStock = (mvt.availableStock ?? 0) / roundFactor;
+          const availableStock = Number(((mvt.availableStock ?? 0) / roundFactor).toFixed(0));
           const msd = availableStock / cmm;
 
           const level: StockAlert['level'] | null =
