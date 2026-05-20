@@ -17,8 +17,12 @@ public class UserDetailsOutput {
 
 
     public UserDetailsOutput(User user) {
-        this.role = user.getAccount().getRole().getRole();
-        this.accountId = user.getAccount().getId();
+        if (user.getAccount() != null) {
+            this.accountId = user.getAccount().getId();
+            if (user.getAccount().getRole() != null) {
+                this.role = user.getAccount().getRole().getRole();
+            }
+        }
         this.username = user.getUsername();
         this.name = user.getName();
     }

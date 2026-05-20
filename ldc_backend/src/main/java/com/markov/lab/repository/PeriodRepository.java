@@ -14,6 +14,6 @@ public interface PeriodRepository extends JpaRepository<Period, Long> {
     @Query("SELECT p FROM Period p WHERE p.id > :id ORDER BY p.id ASC")
     List<Period> findByIdGreaterThan(@Param("id") Long id);
 
-    @Query("SELECT p FROM Period p WHERE p.periodName = :name")
+    @Query("SELECT p FROM Period p WHERE p.periodName = :name ORDER BY p.id ASC LIMIT 1")
     Optional<Period> findByPeriodName(@Param("name") String name);
 }

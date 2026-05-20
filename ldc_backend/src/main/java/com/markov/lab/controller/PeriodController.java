@@ -91,7 +91,8 @@ class PeriodController {
     private Period getPeriod(PeriodInput periodInput, Period period){
         period.setStartDate(periodInput.startDate());
         period.setEndDate(periodInput.endDate());
-        period.setMonth(monthRepository.findByMonth(periodInput.monthName()).get(0));
+        List<com.markov.lab.entity.Month> months = monthRepository.findByMonth(periodInput.monthName());
+        if (!months.isEmpty()) period.setMonth(months.get(0));
         return period;
     }
 

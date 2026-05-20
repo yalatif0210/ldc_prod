@@ -76,7 +76,8 @@ class ReportController {
     }
 
     @QueryMapping
-    public Report report(@Argument @NonNull Long id) {
+    public Report report(@Argument Long id) {
+        if (id == null) return null;
         return reportRepository.findById(id).orElse(null);
     }
 
@@ -111,7 +112,8 @@ class ReportController {
     }
 
     @MutationMapping
-    public Report updateReport(@Argument @NonNull Long id, @Argument ReportInput reportInput) {
+    public Report updateReport(@Argument Long id, @Argument ReportInput reportInput) {
+        if (id == null) return null;
         return reportRepository.findById(id)
                 .map(existingreport -> {
                     Report report = getReport(existingreport, reportInput);

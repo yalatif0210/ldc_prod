@@ -52,9 +52,13 @@ class TransactionController {
     @PostMapping("/create")
     public ResponseEntity<ApiSuccessResponse> createTransaction(@Parameter(description = "Credentials of transaction to be created", required = true) @Valid @RequestBody TransactionInput input){
         Transaction transaction =  transactionService.createTransaction(input);
-        socketNotificationService.send(new SocketNotification("transfer", "IN", transaction.getId(), false, transaction.getDestination().getId()));
-        socketNotificationService.send(new SocketNotification("transfer", "OUT", transaction.getId(), false, transaction.getOrigin().getId()));
-        socketNotificationService.send_to_admin(new SocketNotification("transfer", "OUT", transaction.getId(), false, transaction.getOrigin().getId()));
+        if (transaction.getDestination() != null) {
+            socketNotificationService.send(new SocketNotification("transfer", "IN", transaction.getId(), false, transaction.getDestination().getId()));
+        }
+        if (transaction.getOrigin() != null) {
+            socketNotificationService.send(new SocketNotification("transfer", "OUT", transaction.getId(), false, transaction.getOrigin().getId()));
+            socketNotificationService.send_to_admin(new SocketNotification("transfer", "OUT", transaction.getId(), false, transaction.getOrigin().getId()));
+        }
         return ResponseEntity.ok(new ApiSuccessResponse(200, "Transaction created"));
     }
 
@@ -89,9 +93,12 @@ class TransactionController {
 
     @QueryMapping
     public List<Transaction> transactionByDateRange(@Argument @Valid @RequestBody TransactionByPeriodInput request) throws ParseException {
+        java.time.LocalDate startDate = JavaDateFormater.formatDate(request.start_date());
+        java.time.LocalDate endDate = JavaDateFormater.formatDate(request.end_date());
+        if (startDate == null || endDate == null) return List.of();
         return transactionRepository.findByDateRange(
-                JavaDateFormater.formatDate(request.start_date()).atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                JavaDateFormater.formatDate(request.end_date()).plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
+                startDate.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                endDate.plusDays(1).atStartOfDay(ZoneId.systemDefault()).toInstant()
         );
     }
 

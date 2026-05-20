@@ -40,11 +40,9 @@ class AccountController {
 
     @MutationMapping
     public Account createAccount(@Argument AccountInput accountInput) {
-        User user = userRepository.findById(accountInput.getUserId()).orElse(null);
-        Role role = roleRepository.findById(accountInput.getRoleId()).orElse(null);
         Account account = new Account();
-        account.setUser(user);
-        account.setRole(role);
+        userRepository.findById(accountInput.getUserId()).ifPresent(account::setUser);
+        roleRepository.findById(accountInput.getRoleId()).ifPresent(account::setRole);
         return accountRepository.save(account);
     }
 

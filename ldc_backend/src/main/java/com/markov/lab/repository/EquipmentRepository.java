@@ -12,6 +12,6 @@ public interface EquipmentRepository extends JpaRepository<Equipment, Long> {
     @Query("SELECT a FROM Equipment a WHERE a.id in :idList")
     List<Equipment> findByIdList(@Param("idList") List<Long> idList);
 
-    @Query("SELECT a FROM Equipment a WHERE a.name = :name")
+    @Query("SELECT a FROM Equipment a WHERE a.name = :name ORDER BY a.id ASC LIMIT 1")
     Optional<Equipment> findByName(@Param("name") String name);
 }

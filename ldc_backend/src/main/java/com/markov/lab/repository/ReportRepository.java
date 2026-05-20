@@ -21,7 +21,7 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         List<Report> findLastsValidReportByAccountAndEquipment(@Param("account_id") long account_id,
                         @Param("equipment_name") String equipment_name, @Param("status_id") Long status_id);
 
-        @Query("SELECT r FROM Report r WHERE r.account.id = :account_id AND r.equipment.name = :equipment_name AND r.period.periodName = :period_name ")
+        @Query("SELECT r FROM Report r WHERE r.account.id = :account_id AND r.equipment.name = :equipment_name AND r.period.periodName = :period_name ORDER BY r.id DESC LIMIT 1")
         Report findByAccountAndEquipmentAndPeriod(@Param("account_id") Long account_id,
                         @Param("equipment_name") String equipment_name, @Param("period_name") String period_name);
 

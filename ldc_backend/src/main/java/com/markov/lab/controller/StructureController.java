@@ -70,7 +70,7 @@ class StructureController {
         structure.setName(structureInput.getName());
         districtRepository.findById(structureInput.getDistrictId()).ifPresent(structure::setDistrict);
         for (Long id : structureInput.getEquipmentsIds()) {
-            structure.getEquipments().add(equipmentRepository.findById(id).orElse(null));
+            equipmentRepository.findById(id).ifPresent(structure.getEquipments()::add);
         }
         return structureRepository.save(structure);
 
@@ -94,7 +94,7 @@ class StructureController {
                 .map(existingstructure -> {
                     districtRepository.findById(structureInput.getDistrictId()).ifPresent(existingstructure::setDistrict);
                     for (Long equipmentId : structureInput.getEquipmentsIds()) {
-                        existingstructure.getEquipments().add(equipmentRepository.findById(equipmentId).orElse(null));
+                        equipmentRepository.findById(equipmentId).ifPresent(existingstructure.getEquipments()::add);
                     }
                     existingstructure.setName(structureInput.getName());
                     return structureRepository.save(existingstructure);
