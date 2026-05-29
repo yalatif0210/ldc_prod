@@ -567,7 +567,8 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
 
         forkJoin({
           adjustmentTypes: this.service.get_adjustment_type(),
-          lastFinalized: this.service.findLastFinalizedReportByEquipmentAndAccount(data.equipment, data.period),
+          lastFinalized: this.service
+            .findLastFinalizedReportByEquipmentAndAccount(data.equipment, data.period),
           reportRes: this.service.findReportByAccountAndEquipmentAndPeriodAlso(
             data.equipment, data.period
           ),

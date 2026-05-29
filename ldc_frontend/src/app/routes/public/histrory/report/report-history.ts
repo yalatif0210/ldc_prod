@@ -161,11 +161,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
     return this.report?.labActivityData?.length ? this.Tabs : [this.Tabs[1]];
   }
 
-  get isUserPharmUser() {
-    // Consultation mode: always show all columns regardless of viewer role.
-    // Column restrictions only apply to the data entry form (lab-report.ts).
-    return false;
-  }
+  readonly isUserPharmUser = false;
 
   changePage(direction: number) {
     this.page += direction;

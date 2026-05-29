@@ -327,7 +327,9 @@ export class ReportService extends SharedService {
     );
   }
 
-  findLastFinalizedReportByStructureAndEquipment(structure_id: number, equipment_name: string, period_name: string) {
+  findLastFinalizedReportByStructureAndEquipment(
+    structure_id: number, equipment_name: string, period_name: string
+  ) {
     return this.query(ReportModel.lastFinalizedReportByStructureAndEquipment, {
       request: { structure_id, equipment_name, period_name },
     }).pipe(

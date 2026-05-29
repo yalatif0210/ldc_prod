@@ -90,7 +90,9 @@ export class CmmSettings extends FormBaseComponent implements OnInit, OnDestroy 
       this.pharmInputs = {};
     });
 
-    forkJoin([this.reportHistoryService.getEquipments()]).pipe(takeUntil(this.destroy$)).subscribe(([response]) => {
+    forkJoin([this.reportHistoryService.getEquipments()])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([response]) => {
       this.account = response.data?.account;
       this.structure_list = response.data?.account?.structures;
       this.loading = false;
