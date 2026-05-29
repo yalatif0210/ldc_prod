@@ -19,7 +19,6 @@ import { ReportService } from '@shared/services/report.service';
 import { InfoBox } from '@shared/components/info-box/user-info-box';
 import { MatTabsModule } from '@angular/material/tabs';
 import { CommonModule } from '@angular/common';
-import { AuthService, UserRole } from '@core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -96,7 +95,6 @@ type IntrantsKeys = keyof Intrant;
 export class ReportHistory extends FormBaseComponent implements OnInit, OnDestroy {
   private readonly router = inject(ActivatedRoute);
   private readonly service = inject(ReportService);
-  private readonly auth = inject(AuthService);
   validationDialog = inject(MatDialog);
   form: FormGroup | undefined;
   lab_form: FormGroup | undefined;
@@ -164,7 +162,9 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
   }
 
   get isUserPharmUser() {
-    return this.auth.userRoleByToken === UserRole.PHARM_USER;
+    // Consultation mode: always show all columns regardless of viewer role.
+    // Column restrictions only apply to the data entry form (lab-report.ts).
+    return false;
   }
 
   changePage(direction: number) {
