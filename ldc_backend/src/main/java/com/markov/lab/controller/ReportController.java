@@ -50,7 +50,6 @@ class ReportController {
     @QueryMapping
     public Report reportByAccountAndEquipment(
             @Parameter(description = "Request body", required = true) @Argument @Valid @RequestBody ReportByAccountAndId request) {
-        System.out.println(request);
         return reportRepository.findByAccountAndEquipment(request.account_id(), request.equipment_id());
     }
 
@@ -65,7 +64,17 @@ class ReportController {
     public Report lastFinalizedReportByEquipmentAndAccount(
             @Argument @Valid @RequestBody LastFinalizedReportByEquipmentAndAccount request) {
         return reportRepository.findLastValidReportByAccountAndEquipment(request.account_id(), request.equipment_name(),
-                4L);
+                4L, request.period_name() != null ? request.period_name() : "");
+    }
+
+    @QueryMapping
+    public Report lastFinalizedReportByStructureAndEquipment(
+            @Argument @Valid @RequestBody LastFinalizedReportByStructureAndEquipment request) {
+        return reportRepository.findLastValidReportByStructureAndEquipment(
+                request.structure_id(),
+                request.equipment_name(),
+                4L,
+                request.period_name() != null ? request.period_name() : "");
     }
 
     @QueryMapping

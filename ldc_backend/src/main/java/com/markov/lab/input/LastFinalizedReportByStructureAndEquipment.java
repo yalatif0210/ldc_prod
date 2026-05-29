@@ -1,8 +1,8 @@
 package com.markov.lab.input;
 
-public record LastFinalizedReportByEquipmentAndAccount(
+public record LastFinalizedReportByStructureAndEquipment(
         String equipment_name,
-        Long account_id,
+        Long structure_id,
         String period_name
 ) {
 }

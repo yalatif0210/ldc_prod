@@ -57,7 +57,7 @@ public class JwtHelper {
 
     public Boolean validateToken(String token, UserDetails userDetails) throws JsonProcessingException {
         final UserRoleDTO user = extractUser(token);
-        return user.getUsername().equals(userDetails.getUsername()) && !isTokenExpired(token);
+        return user != null && user.getUsername().equals(userDetails.getUsername()) && !isTokenExpired(token);
     }
 
     public Claims getTokenBody(String token) {

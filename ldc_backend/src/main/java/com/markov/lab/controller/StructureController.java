@@ -83,7 +83,6 @@ class StructureController {
     @ApiResponse(responseCode = "500", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
     @PostMapping("/create-platform")
     public ResponseEntity<PlatformResponse> createPlatform(@Parameter(description = "Credentials of platform to be created", required = true) @Valid @RequestBody PlatformInput platformInput) {
-        System.out.println(platformInput);
         Structure structurePartial = platformService.save(platformInput);
         return ResponseEntity.ok(new PlatformResponse(structurePartial.getId()));
     }

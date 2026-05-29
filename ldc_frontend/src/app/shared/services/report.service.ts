@@ -301,11 +301,12 @@ export class ReportService extends SharedService {
     return adjustments;
   }
 
-  findLastFinalizedReportByEquipmentAndAccount(equipment_name: string) {
+  findLastFinalizedReportByEquipmentAndAccount(equipment_name: string, period_name: string) {
     return this.query(ReportModel.lastFinalizedReportByEquipmentAndAccount, {
       request: {
         account_id: this.authService.userAccountId,
         equipment_name,
+        period_name,
       },
     }).pipe(
       map((response: any) => {
@@ -326,10 +327,27 @@ export class ReportService extends SharedService {
     );
   }
 
+  findLastFinalizedReportByStructureAndEquipment(structure_id: number, equipment_name: string, period_name: string) {
+    return this.query(ReportModel.lastFinalizedReportByStructureAndEquipment, {
+      request: { structure_id, equipment_name, period_name },
+    }).pipe(
+      map((response: any) => response.data.lastFinalizedReportByStructureAndEquipment)
+    );
+  }
+
   findLastsFinalizedReportByEquipmentAndAccount(equipment_name: string) {
     return this.query(ReportModel.lastsFinalizedReportByEquipmentAndAccount, {
       request: {
         account_id: this.authService.userAccountId,
+        equipment_name,
+      },
+    }).pipe(map((response: any) => response.data.lastsFinalizedReportByEquipmentAndAccount));
+  }
+
+  findLastsFinalizedReportByEquipmentForAccount(account_id: any, equipment_name: string) {
+    return this.query(ReportModel.lastsFinalizedReportByEquipmentAndAccount, {
+      request: {
+        account_id,
         equipment_name,
       },
     }).pipe(map((response: any) => response.data.lastsFinalizedReportByEquipmentAndAccount));

@@ -56,11 +56,8 @@ public class IntrantCmmConfigService {
 
     @Transactional
     public IntrantCmmConfig getIntrantCmmConfigByStructureAndEquipmentAndIntrant(long structureId, long equipmentId, long intrantId) {
-        return intrantCmmConfigRepository.findAll().stream()
-                .filter(config -> config.getStructure() != null && config.getStructure().getId() == structureId)
-                .filter(config -> config.getEquipment() != null && config.getEquipment().getId() == equipmentId)
-                .filter(config -> config.getIntrant() != null && config.getIntrant().getId() == intrantId)
-                .findFirst()
+        return intrantCmmConfigRepository
+                .findByStructureAndEquipmentAndIntrant(structureId, equipmentId, intrantId)
                 .orElse(null);
     }
 

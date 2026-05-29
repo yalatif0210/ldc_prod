@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError, tap } from 'rxjs/operators';
+import { Observable, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -29,9 +29,7 @@ export class RestService {
         responseType: 'json' as const,
       })
       .pipe(
-        catchError(error => {
-          return of(error);
-        })
+        catchError(error => throwError(() => error))
       );
   }
 }

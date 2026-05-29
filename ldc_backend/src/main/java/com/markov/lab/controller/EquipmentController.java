@@ -16,7 +16,6 @@ import org.springframework.stereotype.Controller;
 
 
 import java.util.List;
-import java.util.Objects;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +30,9 @@ class EquipmentController {
 
     @QueryMapping
     public EquipmentInformation equipmentInformationByName(@Argument String name) {
-        return equipmentProcessor.serve(Objects.requireNonNull(equipmentRepository.findByName(name).orElse(null)));
+        return equipmentRepository.findByName(name)
+                .map(equipmentProcessor::serve)
+                .orElse(null);
     }
 
     @QueryMapping

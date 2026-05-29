@@ -255,7 +255,6 @@ export class SynthesisService extends SharedService {
     lab_mvt_grouped: any,
     report: any
   ) {
-    console.log('WX>> - synthesis.service.ts:258', cmmConfigs, intrant_mvt_grouped, lab_mvt_grouped);
     //Recupération du nom de l'équipement et la configuration requise pour la synthèse
     const equipment_name = report[0]?.equipment?.name;
     const compileConfig = compileTargets[equipment_name as keyof typeof compileTargets];

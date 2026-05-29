@@ -54,7 +54,6 @@ export class StructureAdmin implements OnInit, OnDestroy {
     this.loading = true;
     this.service.getStructures().pipe(takeUntil(this.destroy$)).subscribe({
       next: data => {
-        console.log('sr - structure-admin.ts:45', data);
         this.structures = data.sort((a, b) => a.id - b.id);
         this.regions = this.unique(data.map((s: any) => s.district?.region).filter(Boolean), 'id');
         this.allDistricts = this.unique(data.map((s: any) => s.district).filter(Boolean), 'id');

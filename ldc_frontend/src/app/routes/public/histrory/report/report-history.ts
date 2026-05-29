@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+import { forkJoin, switchMap } from 'rxjs';
 import { FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -159,11 +160,7 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
   }
 
   get threeDTabs() {
-    return this.auth.userRoleByToken == UserRole.LAB_USER ||
-      (this.auth.isUserAdminOrSupervisor(this.auth.userRoleByToken) &&
-        this.report.labActivityData.length)
-      ? this.Tabs
-      : [this.Tabs[1]];
+    return this.report?.labActivityData?.length ? this.Tabs : [this.Tabs[1]];
   }
 
   get isUserPharmUser() {
@@ -255,7 +252,6 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
         value: data.value,
       });
     });
-    console.log('pending_last_week_controls - report-history.ts:258', pending_last_week_controls);
     this.setPending_last_week(pending_last_week_controls);
   }
 
@@ -314,59 +310,55 @@ export class ReportHistory extends FormBaseComponent implements OnInit, OnDestro
     this.form!.get('information_unit')?.valueChanges.subscribe(information_unit_label => {
       this.onInformationUnitChange(information_unit_label);
     });
-    // Récupération du type d'ajustement
-    this.service.get_adjustment_type().subscribe(res => {
-      this.adjustment_types = res.data?.adjustmentTypes;
-    });
-    // Récupération de l'état
+
     this.router.queryParamMap.subscribe(params => {
       const data = JSON.parse(params.get('data')!);
-      if (data) {
+      if (!data) return;
+
+      if (data.period) {
         this.service.findPeriodByName(data.period).subscribe(res => {
           if (res) {
             this.service
-              .findTransactionByDateRange({
-                start_date: res.startDate,
-                end_date: res.endDate,
-              })
+              .findTransactionByDateRange({ start_date: res.startDate, end_date: res.endDate })
               .subscribe(response => {
                 this.transactionByDateRange = response;
                 this.service.handleTransactions(
                   data.equipment,
                   this.transactionByDateRange,
                   this.adjustment_mvt,
-                  {
-                    start_date: res.startDate,
-                    end_date: res.endDate,
-                  },
+                  { start_date: res.startDate, end_date: res.endDate },
                   this.handleTransactionCallBack.bind(this)
                 );
               });
           }
         });
-        this.service
-          .findLastsFinalizedReportByEquipmentAndAccount(data.equipment)
-          .subscribe(res => {
-            this.lastFinalizedReport = res;
-            console.log('lastFinalizedReport - report-history.ts:351', this.lastFinalizedReport);
-          });
-        this.service.findReportById(data.id).subscribe(response => {
-          const report = response.data.report;
-          if (report) {
-            this.adjustments = this.service.compileAdjustments(
-              this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
-              this.adjustment_types
-            );
-            this.report = report;
-            this.service.getEquipmentInfo(report.equipment.name).subscribe(equipRes => {
-              const equipmentInfo = equipRes.data.equipmentInformationByName;
-              this.equipmentInfo = equipmentInfo;
-              this.createLabFromReportInformations();
-              this.createPharmFromReportInformations();
-            });
-          }
-        });
       }
+
+      forkJoin({
+        adjustmentTypes: this.service.get_adjustment_type(),
+        reportRes: this.service.findReportById(data.id),
+      }).pipe(
+        switchMap(({ adjustmentTypes, reportRes }) => {
+          const report = reportRes.data.report;
+          this.adjustment_types = adjustmentTypes.data?.adjustmentTypes;
+          this.report = report;
+          this.adjustments = this.service.compileAdjustments(
+            this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
+            this.adjustment_types
+          );
+          return forkJoin({
+            lastFinalized: this.service.findLastsFinalizedReportByEquipmentForAccount(
+              report.account.id, report.equipment.name
+            ),
+            equipmentInfo: this.service.getEquipmentInfo(report.equipment.name),
+          });
+        })
+      ).subscribe(({ lastFinalized, equipmentInfo }) => {
+        this.lastFinalizedReport = lastFinalized;
+        this.equipmentInfo = equipmentInfo.data.equipmentInformationByName;
+        this.createLabFromReportInformations();
+        this.createPharmFromReportInformations();
+      });
     });
   }
 

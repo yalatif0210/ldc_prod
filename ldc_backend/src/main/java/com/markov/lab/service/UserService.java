@@ -58,20 +58,10 @@ public class UserService {
         Account account = new Account();
         switch (role) {
             case 1: case 2:
-                for (Structure structure: structureRepository.findAll()){
-                    account.addStructure(structure);
-                }
-                break;
-            case 3:
-                List<Structure> structures = structureRepository.findByIdList(request.platforms());
-                for(Structure structure: structures){
-                    account.addStructure(structure);
-                }
+                account.getStructures().addAll(structureRepository.findAll());
                 break;
             default:
-                for(Structure structure: structureRepository.findByIdList(request.platforms())){
-                    account.addStructure(structure);
-                }
+                account.getStructures().addAll(structureRepository.findByIdList(request.platforms()));
                 break;
         }
         account.setRole(roleRepository.findById((long) role).orElse(null));

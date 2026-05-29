@@ -21,7 +21,7 @@ import { CommonModule } from '@angular/common';
 import { MtxAlert } from '@ng-matero/extensions/alert';
 import { AuthService, UserRole } from '@core';
 import { MatDivider } from '@angular/material/divider';
-import { forkJoin, takeUntil } from 'rxjs';
+import { forkJoin, switchMap, takeUntil } from 'rxjs';
 import { ValidationService } from '@shared/validator/validation.service';
 import { validatorRules } from '@shared/validator/rules';
 import {
@@ -470,19 +470,34 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
           });
         });
     } else {
+      this.disable = true;
       this.service.createReportDetails(
         this.report.id,
         status_id,
         [],
         intrantsDTO,
         this.isUpdated || !!this.report?.IntrantMvtData?.length
+      ).pipe(
+        switchMap(() => this.service.findReportByAccountAndEquipmentAndPeriodAlso(
+          this.equipmentName, this.periodName
+        ))
       ).subscribe({
-        next: () => {
+        next: (res) => {
+          const report = res.data.reportByAccountAndEquipmentAndPeriodAlso;
+          if (report) {
+            this.report = report;
+            this.adjustments = this.service.compileAdjustments(
+              this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
+              this.adjustment_types
+            );
+          }
           this.isUpdated = true;
+          this.disable = false;
           if (status_id !== STATUS.SUGGESTED) {
             this.disableRegisterButton();
           }
         },
+        error: () => { this.disable = false; },
       });
     }
   }
@@ -552,7 +567,7 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
 
         forkJoin({
           adjustmentTypes: this.service.get_adjustment_type(),
-          lastFinalized: this.service.findLastFinalizedReportByEquipmentAndAccount(data.equipment),
+          lastFinalized: this.service.findLastFinalizedReportByEquipmentAndAccount(data.equipment, data.period),
           reportRes: this.service.findReportByAccountAndEquipmentAndPeriodAlso(
             data.equipment, data.period
           ),
@@ -569,24 +584,17 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
             );
             this.service.getEquipmentInfo(data.equipment).subscribe(equipRes => {
               this.equipmentInfo = equipRes.data.equipmentInformationByName;
-              if (!report?.IntrantMvtData.length || !report?.labActivityData.length) {
-                if (!this.isUserPharmUser) {
+              if (!this.isUserPharmUser) {
+                if (report?.labActivityData.length) {
+                  this.createLabFromReportInformations();
+                } else {
                   this.createLabFormFromEquipmentInformations();
                 }
-                if (this.isUserPharmUser || this.equipmentId === CONSOMMABLES_GENERAUX_ID) {
-                  if (report?.IntrantMvtData.length) {
-                    this.createPharmFromReportInformations();
-                  } else {
-                    this.createPharmFormEquipmentIntrants();
-                  }
-                } else {
-                  this.createPharmFormEquipmentIntrants();
-                }
-              } else {
-                if (!this.isUserPharmUser) {
-                  this.createLabFromReportInformations();
-                }
+              }
+              if (report?.IntrantMvtData.length) {
                 this.createPharmFromReportInformations();
+              } else {
+                this.createPharmFormEquipmentIntrants();
               }
             });
           } else {
@@ -616,6 +624,10 @@ export class LabReport extends FormBaseComponent implements OnInit, OnDestroy {
           const report = res.data.reportByAccountAndEquipmentAndPeriodAlso;
           if (report) {
             this.report = report;
+            this.adjustments = this.service.compileAdjustments(
+              this.service.getAdjustmentsFromExistingReport(report.IntrantMvtData),
+              this.adjustment_types
+            );
           }
         });
     });
