@@ -137,7 +137,8 @@ export class SynthesisClaudeService extends SharedService {
   private buildLabCrossTab(
     reports: any[],
     subUnitIds: string[],
-    metricLabelFn: (info: any) => { key: string; label: string; group?: string; subGroup?: string } | null
+    metricLabelFn: (info: any) =>
+      { key: string; label: string; group?: string; subGroup?: string } | null
   ): { periods: string[]; rows: ClaudeRow[] } {
     const periods = this.extractPeriods(reports);
     const map = new Map<string, ClaudeRow>();
@@ -394,7 +395,9 @@ export class SynthesisClaudeService extends SharedService {
       const [siteId, su, period] = key.split('__');
       const rowKey = `${siteId}__${su}`;
       if (!rowMap.has(rowKey)) {
-        const site = reports.flatMap(r => r.account?.structures ?? []).find((s: any) => s.id === siteId);
+        const site = reports
+          .flatMap(r => r.account?.structures ?? [])
+          .find((s: any) => s.id === siteId);
         rowMap.set(rowKey, {
           siteId,
           siteName:     site?.name ?? siteId,
@@ -534,7 +537,10 @@ export class SynthesisClaudeService extends SharedService {
   computeTransfers(transactions: any[], structureIds: string[]): TransferRow[] {
     const rows: TransferRow[] = [];
     transactions
-      .filter(tx => structureIds.includes(String(tx.origin?.id)) || structureIds.includes(String(tx.destination?.id)))
+      .filter(tx =>
+        structureIds.includes(String(tx.origin?.id)) ||
+        structureIds.includes(String(tx.destination?.id))
+      )
       .forEach(tx => {
         tx.sanguineProductTransactions?.forEach((spt: any) => {
           rows.push({
