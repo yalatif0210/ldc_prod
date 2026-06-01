@@ -107,8 +107,8 @@ export class ReportHistoryService extends SharedService {
   }
 
   onSubmit(form_value: any, isUserAdminOrSupervisor: boolean) {
-    this.getReportsBySupervisedStructureAndEquipmentWithinDateRange(form_value).subscribe(
-      response => {
+    this.getReportsBySupervisedStructureAndEquipmentWithinDateRange(form_value).subscribe({
+      next: response => {
         if (response.data.reportsBySupervisedStructureAndEquipmentWithinDateRange) {
           this.setList(
             this.reportsToList(
@@ -116,8 +116,9 @@ export class ReportHistoryService extends SharedService {
             )
           );
         }
-      }
-    );
+      },
+      error: () => this.setList([]),
+    });
     //this.getReportsByAccountAndEquipmentWithinDateRange(form_value).subscribe(response => {
     //  console.log('response>>> - report-history.service.ts:106', response);
     //  if (response.data.reportsByAccountAndEquipmentWithinDateRange) {

@@ -265,7 +265,6 @@ export class Dashboard implements OnInit, AfterViewInit, OnDestroy {
       this.siteListForRegion
     );
 
-    console.log('KPI calculés : - dashboard.ts:268', this.completeness, this.kpis, this.stockAlerts);
 
     if (this.renderTimeout) clearTimeout(this.renderTimeout);
     this.ngZone.runOutsideAngular(() => {

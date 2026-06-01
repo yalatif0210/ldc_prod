@@ -51,7 +51,7 @@ class InformationController {
     private Information getInformation(@Argument InformationInput informationInput, @NotNull Information existinginformation) {
         informationUnitRepository.findById(informationInput.getInformationUnitId()).ifPresent(existinginformation::setInformationUnit);
         informationSubUnitRepository.findById(informationInput.getInformationSubUnitId()).ifPresent(existinginformation::setInformationSubUnit);
-        informationSubSubUnitRepository.findById(informationInput.getInformationSubUnitId()).ifPresent(existinginformation::setInformationSubSubUnit);
+        informationSubSubUnitRepository.findById(informationInput.getInformationSubSubUnitId()).ifPresent(existinginformation::setInformationSubSubUnit);
         equipmentRepository.findById(informationInput.getEquipmentId()).ifPresent(existinginformation::setEquipment);
         return existinginformation;
     }

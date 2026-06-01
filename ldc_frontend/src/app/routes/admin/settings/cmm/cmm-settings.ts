@@ -13,12 +13,11 @@ import { MatStepperModule } from '@angular/material/stepper';
 import { MtxGridModule } from '@ng-matero/extensions/grid';
 import { TranslateModule } from '@ngx-translate/core';
 import { FormBaseComponent } from '@shared';
-import { forkJoin } from 'rxjs';
+import { forkJoin, takeUntil } from 'rxjs';
 import { MatDividerModule } from '@angular/material/divider';
 import { SynthesisService } from '@shared/services/synthesis.service';
 import { ReportHistoryService } from '@shared/services/report-history.service';
 import { LoadingComponent } from '@shared/components/loading/loading';
-import { log } from 'console';
 
 const SPECIFIC_PRIMARY_INTRANT = 1;
 const SPECIFIC_SECONDARY_INTRANT = 2;
@@ -77,21 +76,23 @@ export class CmmSettings extends FormBaseComponent implements OnInit, OnDestroy 
   }
 
   ngOnInit(): void {
-    this.home_form?.get('equipment')?.valueChanges.subscribe(value => {
+    this.home_form?.get('equipment')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(value => {
       this.selectedEquipmentName = this.equipmentList.find((e: any) => e.id === value)?.name;
       this.structure_by_equipment = this.structure_list.filter((s: any) =>
         s.equipments.some((e: any) => e.id === value)
       );
     });
 
-    this.home_form?.get('structure')?.valueChanges.subscribe(value => {
+    this.home_form?.get('structure')?.valueChanges.pipe(takeUntil(this.destroy$)).subscribe(value => {
       this.disabledConfirm = false;
       this.equipmentIntrants = null;
       this.cmmConfigInstance = null;
       this.pharmInputs = {};
     });
 
-    forkJoin([this.reportHistoryService.getEquipments()]).subscribe(([response]) => {
+    forkJoin([this.reportHistoryService.getEquipments()])
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(([response]) => {
       this.account = response.data?.account;
       this.structure_list = response.data?.account?.structures;
       this.loading = false;
@@ -155,9 +156,7 @@ export class CmmSettings extends FormBaseComponent implements OnInit, OnDestroy 
       { structureId: value.structure, equipmentId: value.equipment },
       this.pharmInputs
     );
-    console.log('DTO to send - cmm-settings.ts:158', dto, this.pharmInputs);
     const cmm_config = this.normalizeIntrantCmm(dto, this.equipmentSecondaryIntrants);
-    console.log('DTO normalized - cmm-settings.ts:160', cmm_config);
     this.service
       .handleCreateCmmConfig(cmm_config)
       .subscribe(r => {

@@ -10,8 +10,8 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.graphql.data.method.annotation.Argument;
 import org.springframework.graphql.data.method.annotation.MutationMapping;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
-
 
 import java.util.List;
 
@@ -42,6 +42,7 @@ class UserController {
     }
     
 
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @MutationMapping
     private Boolean deleteUser(@Argument Long id) {
         try {

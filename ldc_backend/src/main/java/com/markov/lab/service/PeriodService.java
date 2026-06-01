@@ -39,7 +39,6 @@ public class PeriodService {
         } else {
             newPeriod.setMonth(months.get(0));
         }
-        System.out.println(period);
         newPeriod.setStartDate(period.startDate());
         newPeriod.setEndDate(period.endDate());
         newPeriod.setPeriodName(period.periodName());

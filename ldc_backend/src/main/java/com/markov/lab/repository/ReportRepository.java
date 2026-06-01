@@ -13,9 +13,10 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
         @Query("SELECT a FROM Report a WHERE a.account.id = :accountId AND a.equipment.id = :equipmentId ORDER BY a.id DESC LIMIT 1")
         Report findByAccountAndEquipment(@Param("accountId") Long accountId, @Param("equipmentId") Long equipmentId);
 
-        @Query("SELECT a FROM Report a WHERE a.account.id = :account_id AND a.equipment.name = :equipment_name AND a.status.id = :status_id ORDER BY a.id DESC LIMIT 1")
+        @Query("SELECT a FROM Report a WHERE a.account.id = :account_id AND a.equipment.name = :equipment_name AND a.status.id = :status_id AND a.period.periodName != :period_name ORDER BY a.id DESC LIMIT 1")
         Report findLastValidReportByAccountAndEquipment(@Param("account_id") long account_id,
-                        @Param("equipment_name") String equipment_name, @Param("status_id") Long status_id);
+                        @Param("equipment_name") String equipment_name, @Param("status_id") Long status_id,
+                        @Param("period_name") String period_name);
 
         @Query("SELECT a FROM Report a WHERE a.account.id = :account_id AND a.equipment.name = :equipment_name AND a.status.id = :status_id ORDER BY a.id DESC LIMIT 2")
         List<Report> findLastsValidReportByAccountAndEquipment(@Param("account_id") long account_id,
@@ -65,6 +66,22 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                         @Param("start_date") LocalDate start_date,
                         @Param("end_date") LocalDate end_date,
                         @Param("status_id") long status_id);
+
+        @Query("""
+                        SELECT r FROM Report r
+                        JOIN r.account a
+                        JOIN a.structures s
+                        WHERE s.id = :structure_id
+                          AND r.equipment.name = :equipment_name
+                          AND r.status.id = :status_id
+                          AND r.period.periodName != :period_name
+                        ORDER BY r.id DESC LIMIT 1
+                        """)
+        Report findLastValidReportByStructureAndEquipment(
+                        @Param("structure_id") long structure_id,
+                        @Param("equipment_name") String equipment_name,
+                        @Param("status_id") Long status_id,
+                        @Param("period_name") String period_name);
 
         @Query("""
                         SELECT COUNT(DISTINCT r) FROM Report r

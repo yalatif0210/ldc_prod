@@ -13,4 +13,6 @@ public interface AccountRepository extends JpaRepository<Account, Long> {
 
     @Query("SELECT DISTINCT a FROM Account a LEFT JOIN FETCH a.role LEFT JOIN FETCH a.structures LEFT JOIN FETCH a.user")
     List<Account> findAllWithDetails();
+
+    long countByIsActiveTrue();
 }

@@ -457,6 +457,13 @@ input ReportByEquipmentAccountPeriodInput {
 input LastFinalizedReportByEquipmentAndAccountInput {
     equipment_name: String
     account_id : ID
+    period_name: String
+}
+
+input LastFinalizedReportByStructureInput {
+    equipment_name: String
+    structure_id: ID
+    period_name: String
 }
 
 input IntrantCmmConfigByStructureAndEquipmentInput {
@@ -583,6 +590,7 @@ type Query {
     reportByAccountAndEquipmentAndPeriodAlso(request: ReportByEquipmentAccountPeriodInput): Report
     lastFinalizedReportByEquipmentAndAccount(request: LastFinalizedReportByEquipmentAndAccountInput): Report
     lastsFinalizedReportByEquipmentAndAccount(request: LastFinalizedReportByEquipmentAndAccountInput): [Report]
+    lastFinalizedReportByStructureAndEquipment(request: LastFinalizedReportByStructureInput): Report
     equipmentInformationByName(name: String): EquipmentInformation
     equipmentByNameOther(name: String): Equipment
     reportsByAccountAndEquipmentWithinDateRange(request: ReportHistoryInput) : [Report]

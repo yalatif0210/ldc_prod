@@ -41,9 +41,7 @@ public class SuperAdminService {
 
     public AppStatsDTO getStats() {
         long totalUsers = userRepository.count();
-        long activeUsers = accountRepository.findAll().stream()
-                .filter(a -> Boolean.TRUE.equals(a.getIsActive()))
-                .count();
+        long activeUsers = accountRepository.countByIsActiveTrue();
         long totalReports = reportRepository.count();
         long totalPeriods = periodRepository.count();
         long totalStructures = structureRepository.count();

@@ -188,6 +188,70 @@ class ReportModel {
   }
 } `;
 
+  static lastFinalizedReportByStructureAndEquipment = `query ($request: LastFinalizedReportByStructureInput) {
+  lastFinalizedReportByStructureAndEquipment(request: $request) {
+    id
+    createdAt
+    period {
+      id
+      month {
+        month
+      }
+      periodName
+      startDate
+      endDate
+    }
+    equipment {
+      id
+      name
+    }
+    account {
+      id
+    }
+    status {
+      id
+      status
+    }
+    labActivityData {
+      id
+      information {
+        id
+        informationUnit {
+          id
+          name
+        }
+        informationSubUnit {
+          id
+          name
+        }
+        informationSubSubUnit {
+          id
+          name
+        }
+      }
+      value
+    }
+    IntrantMvtData {
+      id
+      intrant {
+        id
+        sku
+        primary_sku
+        code
+        convertionFactor
+        roundFactor
+        otherFactor
+        intrantType {
+          name
+        }
+        name
+      }
+      availableStock
+      distributionStock
+    }
+  }
+} `;
+
   static lastsFinalizedReportByEquipmentAndAccount = `query ($request: LastFinalizedReportByEquipmentAndAccountInput) {
   lastsFinalizedReportByEquipmentAndAccount(request: $request) {
     id

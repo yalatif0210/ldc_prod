@@ -194,7 +194,6 @@ export class Synthesis extends FormBaseComponent implements OnInit, OnDestroy {
           config.data &&
           config.data.intrantCmmConfigByStructureAndEquipment.length !== 0
         ) {
-          console.log('Configurations CMM trouvées: - synthesis.ts:197', config.data.intrantCmmConfigByStructureAndEquipment);
           this.cmmConfigInstance = config.data.intrantCmmConfigByStructureAndEquipment.filter(
             (e: any) => Number(e.intrant.intrantType.id) === SPECIFIC_PRIMARY);
         }

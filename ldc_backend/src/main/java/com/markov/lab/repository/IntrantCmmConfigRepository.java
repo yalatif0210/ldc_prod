@@ -17,6 +17,17 @@ public interface IntrantCmmConfigRepository extends JpaRepository<IntrantCmmConf
     List<IntrantCmmConfig> findByStructureAndEquipment(@Param("structureId") List<Long> structureId,
             @Param("equipmentId") long equipmentId);
 
+    @Query("""
+            SELECT c FROM IntrantCmmConfig c
+            WHERE c.structure.id = :structureId
+              AND c.equipment.id = :equipmentId
+              AND c.intrant.id = :intrantId
+            """)
+    java.util.Optional<IntrantCmmConfig> findByStructureAndEquipmentAndIntrant(
+            @Param("structureId") long structureId,
+            @Param("equipmentId") long equipmentId,
+            @Param("intrantId") long intrantId);
+
     @Modifying(clearAutomatically = true)
     @Query("DELETE FROM IntrantCmmConfig a WHERE a.structure.id = :structureId AND a.equipment.id = :equipmentId")
     void deleteByStructureAndEquipment(@Param("structureId") long structureId,
