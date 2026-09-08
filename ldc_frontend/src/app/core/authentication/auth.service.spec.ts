@@ -166,6 +166,17 @@ describe('AuthService', () => {
       expect(newUser.platforms).toEqual([100]);
     });
 
+    it('does not crash when region/platform were never touched (untouched FormControl default is an empty string, not an array)', () => {
+      const newUser = authService.getNewUser(
+        { role: '4', region: '', platform: '' },
+        { name: 'Jean Kouassi', phone: '0000000000' },
+        'Password1!'
+      );
+
+      expect(newUser.regions).toEqual([]);
+      expect(newUser.platforms).toEqual([]);
+    });
+
     it('sends every selected region and platform for an ADMIN account (no more auto-full-access)', () => {
       const newUser = authService.getNewUser(
         { role: '2', region: ['10'], platform: ['100', '200'] },

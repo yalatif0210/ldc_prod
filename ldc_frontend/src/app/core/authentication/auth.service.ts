@@ -108,8 +108,8 @@ export class AuthService {
       phone: s2.phone,
       password,
       role: Number(s1.role),
-      platforms: s1.platform.map((p: any) => Number(p)),
-      regions: s1.region.map((r: any) => Number(r)),
+      platforms: (s1.platform || []).map((p: any) => Number(p)),
+      regions: (s1.region || []).map((r: any) => Number(r)),
     });
   }
 
