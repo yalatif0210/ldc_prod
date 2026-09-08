@@ -85,6 +85,10 @@ export class AuthService {
     return [1, 2].includes(role);
   }
 
+  isSuperAdminUser(role: any) {
+    return [1].includes(role) || [UserRole.SUPER_ADMIN].includes(role);
+  }
+
   buildPassword(): string {
     const upper   = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
     const lower   = 'abcdefghjkmnpqrstuvwxyz';

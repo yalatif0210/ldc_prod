@@ -20,23 +20,47 @@
                   </mat-select>
                 </mat-form-field>
 
-                <mat-form-field class="col-sm-4" appearance="outline">
-                  <mat-label class="f-s-12">Region</mat-label>
-                  <mat-select class="f-s-12" formControlName="region" multiple>
-                    @for (region of regions; track $index) {
-                    <mat-option class="f-s-12" [value]="region.id">{{ region.name }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                @if (!isSuperAdminRole) {
+                <div class="col-sm-4">
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label class="f-s-12">Region</mat-label>
+                    <mat-select class="f-s-12" formControlName="region" multiple>
+                      @for (region of regions; track $index) {
+                      <mat-option class="f-s-12" [value]="region.id">{{ region.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  @if (showSelectAllShortcut) {
+                  <mat-checkbox
+                    class="f-s-12"
+                    [checked]="isAllRegionsSelected()"
+                    (change)="toggleAllRegions()"
+                  >
+                    Tout sélectionner
+                  </mat-checkbox>
+                  }
+                </div>
 
-                <mat-form-field class="col-sm-4" appearance="outline">
-                  <mat-label class="f-s-12">Plateforme</mat-label>
-                  <mat-select class="f-s-12" formControlName="platform" multiple>
-                    @for (platform of filteredPlatforms; track $index) {
-                    <mat-option class="f-s-12" [value]="platform.id">{{ platform.name }}</mat-option>
-                    }
-                  </mat-select>
-                </mat-form-field>
+                <div class="col-sm-4">
+                  <mat-form-field class="w-100" appearance="outline">
+                    <mat-label class="f-s-12">Plateforme</mat-label>
+                    <mat-select class="f-s-12" formControlName="platform" multiple>
+                      @for (platform of filteredPlatforms; track $index) {
+                      <mat-option class="f-s-12" [value]="platform.id">{{ platform.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  @if (showSelectAllShortcut) {
+                  <mat-checkbox
+                    class="f-s-12"
+                    [checked]="isAllPlatformsSelected()"
+                    (change)="toggleAllPlatforms()"
+                  >
+                    Tout sélectionner
+                  </mat-checkbox>
+                  }
+                </div>
+                }
                 <div>
                   <button class="f-s-12" mat-button matStepperNext>Next</button>
                 </div>
