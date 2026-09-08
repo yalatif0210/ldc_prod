@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.markov.lab.controller.dto.ApiErrorResponse;
 import com.markov.lab.exceptions.DuplicateException;
+import com.markov.lab.exceptions.InvalidCurrentPasswordException;
 import com.markov.lab.exceptions.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -51,6 +52,13 @@ public class RestExceptionHandler {
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicateException(DuplicateException e) {
         return ResponseEntity.status(CONFLICT).body(new ApiErrorResponse(CONFLICT.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(InvalidCurrentPasswordException.class)
+    public ResponseEntity<ApiErrorResponse> handleInvalidCurrentPasswordException(InvalidCurrentPasswordException e) {
+        // 400 (pas 401) : un mot de passe actuel incorrect n'est pas une session invalide —
+        // l'intercepteur frontend déconnecte l'utilisateur sur tout 401.
+        return ResponseEntity.status(BAD_REQUEST).body(new ApiErrorResponse(BAD_REQUEST.value(), e.getMessage()));
     }
 
     @ExceptionHandler(InternalAuthenticationServiceException.class)

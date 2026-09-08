@@ -77,14 +77,6 @@ export class AuthService {
     );
   }
 
-  isSupervisorUser(role: any) {
-    return [3].includes(role) || [UserRole.SUPERVISOR].includes(role);
-  }
-
-  isAdminUser(role: any) {
-    return [1, 2].includes(role);
-  }
-
   isSuperAdminUser(role: any) {
     return [1].includes(role) || [UserRole.SUPER_ADMIN].includes(role);
   }
@@ -123,6 +115,10 @@ export class AuthService {
         return { username: response?.username, phone: response?.phone };
       })
     );
+  }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.loginService.changePassword(currentPassword, newPassword);
   }
 
   login(username: string, password: string, rememberMe = false) {

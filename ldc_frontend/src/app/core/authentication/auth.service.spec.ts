@@ -132,6 +132,20 @@ describe('AuthService', () => {
     httpMock.expectOne('/user').flush({});
   });
 
+  describe('changePassword', () => {
+    it('posts the current and new password to /api/auth/change-password', () => {
+      authService.changePassword('OldPassword1!', 'NewPassword2!').subscribe();
+
+      const req = httpMock.expectOne('/api/auth/change-password');
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({
+        currentPassword: 'OldPassword1!',
+        newPassword: 'NewPassword2!',
+      });
+      req.flush({});
+    });
+  });
+
   describe('getNewUser', () => {
     it('sends every selected region and platform for a SUPERVISOR account, not just the first', () => {
       const newUser = authService.getNewUser(

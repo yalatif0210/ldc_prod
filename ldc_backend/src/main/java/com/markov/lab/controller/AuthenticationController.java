@@ -146,6 +146,19 @@ public class AuthenticationController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Changer son propre mot de passe")
+    @ApiResponse(responseCode = "200")
+    @ApiResponse(responseCode = "400", content = @Content(schema = @Schema(implementation = ApiErrorResponse.class)))
+    @PostMapping("/change-password")
+    public ResponseEntity<Void> changePassword(
+            @RequestHeader("Authorization") String token,
+            @Parameter(required = true) @Valid @RequestBody ChangePasswordRequest request)
+            throws JsonProcessingException {
+        String username = jwtHelper.extractUser(token.replace("Bearer ", "")).getUsername();
+        userService.changePassword(username, request.currentPassword(), request.newPassword());
+        return ResponseEntity.ok().build();
+    }
+
     @Operation(summary = "Historique des tentatives de connexion")
     @ApiResponse(responseCode = "200", content = @Content(schema = @Schema(implementation = LoginAttemptResponse.class)))
     @GetMapping("/loginAttempts")

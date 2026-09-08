@@ -4,6 +4,7 @@ import com.markov.lab.controller.dto.SignupRequest;
 import com.markov.lab.entity.Account;
 import com.markov.lab.entity.Structure;
 import com.markov.lab.entity.User;
+import com.markov.lab.exceptions.InvalidCurrentPasswordException;
 import com.markov.lab.input.UserInput;
 
 import com.markov.lab.repository.RoleRepository;
@@ -41,6 +42,16 @@ public class UserService {
                 user.setPassword(passwordEncoder.encode(input.getPassword()));
             return repository.save(user);
         }).orElse(null);
+    }
+
+    @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = repository.findByUsername(username).orElseThrow();
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidCurrentPasswordException("Current password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        repository.save(user);
     }
 
     @Transactional
