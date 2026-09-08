@@ -56,13 +56,11 @@ public class UserService {
     private User createUser(SignupRequest request, User user) {
         int role = request.role();
         Account account = new Account();
-        switch (role) {
-            case 1: case 2:
-                account.getStructures().addAll(structureRepository.findAll());
-                break;
-            default:
-                account.getStructures().addAll(structureRepository.findByIdList(request.platforms()));
-                break;
+        if (role == 1) {
+            // SUPER_ADMIN : accès à toutes les Structures, non restreignable (docs/adr/0001-admin-role-scoped-structure-access.md)
+            account.getStructures().addAll(structureRepository.findAll());
+        } else {
+            account.getStructures().addAll(structureRepository.findByIdList(request.platforms()));
         }
         account.setRole(roleRepository.findById((long) role).orElse(null));
         account.setIsActive(true);

@@ -108,11 +108,8 @@ export class AuthService {
       phone: s2.phone,
       password,
       role: Number(s1.role),
-      platforms:
-        (!this.isUserAdminOrSupervisor(Number(s1.role)) && [Number(s1.platform[0])]) ||
-        (this.isSupervisorUser(Number(s1.role)) && s1.platform.map((p: any) => Number(p))) ||
-        [],
-      regions: (!this.isAdminUser(Number(s1.role)) && [Number(s1.region[0])]) || [],
+      platforms: s1.platform.map((p: any) => Number(p)),
+      regions: s1.region.map((r: any) => Number(r)),
     });
   }
 

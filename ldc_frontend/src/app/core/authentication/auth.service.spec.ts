@@ -131,4 +131,50 @@ describe('AuthService', () => {
     tokenService.set(token);
     httpMock.expectOne('/user').flush({});
   });
+
+  describe('getNewUser', () => {
+    it('sends every selected region and platform for a SUPERVISOR account, not just the first', () => {
+      const newUser = authService.getNewUser(
+        { role: '3', region: ['10', '20'], platform: ['100', '200', '300'] },
+        { name: 'Jean Kouassi', phone: '0000000000' },
+        'Password1!'
+      );
+
+      expect(newUser.regions).toEqual([10, 20]);
+      expect(newUser.platforms).toEqual([100, 200, 300]);
+    });
+
+    it('sends every selected region and platform for a LABORATORY_USER account, not just the first', () => {
+      const newUser = authService.getNewUser(
+        { role: '4', region: ['10'], platform: ['100', '200'] },
+        { name: 'Jean Kouassi', phone: '0000000000' },
+        'Password1!'
+      );
+
+      expect(newUser.regions).toEqual([10]);
+      expect(newUser.platforms).toEqual([100, 200]);
+    });
+
+    it('sends every selected region and platform for a PHARMACY_USER account, not just the first', () => {
+      const newUser = authService.getNewUser(
+        { role: '5', region: ['10', '20'], platform: ['100'] },
+        { name: 'Jean Kouassi', phone: '0000000000' },
+        'Password1!'
+      );
+
+      expect(newUser.regions).toEqual([10, 20]);
+      expect(newUser.platforms).toEqual([100]);
+    });
+
+    it('sends every selected region and platform for an ADMIN account (no more auto-full-access)', () => {
+      const newUser = authService.getNewUser(
+        { role: '2', region: ['10'], platform: ['100', '200'] },
+        { name: 'Jean Kouassi', phone: '0000000000' },
+        'Password1!'
+      );
+
+      expect(newUser.regions).toEqual([10]);
+      expect(newUser.platforms).toEqual([100, 200]);
+    });
+  });
 });
