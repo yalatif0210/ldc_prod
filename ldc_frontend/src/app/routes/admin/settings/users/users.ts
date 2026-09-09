@@ -30,6 +30,8 @@ import {
 import { UserManagementService } from '@shared/services/user-management.service';
 import { forkJoin, Subscription } from 'rxjs';
 import { AppTable } from '@shared/components/table/app-table';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { isAllSelected, toggleAllSelection } from '@shared/utils/multi-select.util';
 
 @Component({
   selector: 'app-users',
@@ -50,7 +52,8 @@ import { AppTable } from '@shared/components/table/app-table';
     TranslateModule,
     MatStepperModule,
     MtxGridModule,
-    AppTable
+    AppTable,
+    MatCheckboxModule
 ],
 })
 export class Users extends FormBaseComponent implements OnInit, OnDestroy {
@@ -67,6 +70,8 @@ export class Users extends FormBaseComponent implements OnInit, OnDestroy {
 
   isLinear = false;
   isSubmitting = false;
+  isSuperAdminRole = false;
+  showSelectAllShortcut = false;
 
   constructor() {
     super();
@@ -88,6 +93,9 @@ export class Users extends FormBaseComponent implements OnInit, OnDestroy {
     this.service.clearList();
     this.reactiveStep1!.get('region')?.valueChanges.subscribe(selectedRegion => {
       this.onRegionChange(selectedRegion);
+    });
+    this.reactiveStep1!.get('role')?.valueChanges.subscribe(selectedRole => {
+      this.onRoleChange(selectedRole);
     });
     this.translateSubscription = this.translate.onLangChange.subscribe((res: { lang: any }) => {
       this.dateAdapter.setLocale(res.lang);
@@ -135,6 +143,64 @@ export class Users extends FormBaseComponent implements OnInit, OnDestroy {
   onRegionChange(region: any[]) {
     this.filteredPlatforms = this.plateformes.filter(element =>
       region.includes(element!.district!.region!.id) && element.active
+    );
+
+    // Purge les plateformes sélectionnées qui ne sont plus proposées après le
+    // changement de région, pour éviter d'envoyer des ids obsolètes (et une
+    // case "Tout sélectionner" faussement cochée).
+    const validIds = this.filteredPlatforms.map(p => p.id);
+    const platformControl = this.reactiveStep1!.get('platform')!;
+    const current: any[] = platformControl.value || [];
+    const pruned = current.filter((id: any) => validIds.includes(id));
+    if (pruned.length !== current.length) {
+      platformControl.setValue(pruned);
+    }
+  }
+
+  onRoleChange(role: any): void {
+    const roleId = Number(role);
+    this.isSuperAdminRole = this.authService.isSuperAdminUser(roleId);
+    this.showSelectAllShortcut =
+      this.authService.isUserAdminOrSupervisor(roleId) && !this.isSuperAdminRole;
+
+    const regionControl = this.reactiveStep1!.get('region')!;
+    const platformControl = this.reactiveStep1!.get('platform')!;
+    if (this.isSuperAdminRole) {
+      regionControl.clearValidators();
+      platformControl.clearValidators();
+      regionControl.setValue([]);
+      platformControl.setValue([]);
+    } else {
+      regionControl.setValidators([Validators.required]);
+      platformControl.setValidators([Validators.required]);
+    }
+    regionControl.updateValueAndValidity();
+    platformControl.updateValueAndValidity();
+  }
+
+  isAllRegionsSelected(): boolean {
+    return isAllSelected(this.reactiveStep1!.get('region')!.value, this.regions.map(r => r.id!));
+  }
+
+  toggleAllRegions(): void {
+    this.reactiveStep1!.get('region')!.setValue(
+      toggleAllSelection(this.reactiveStep1!.get('region')!.value, this.regions.map(r => r.id!))
+    );
+  }
+
+  isAllPlatformsSelected(): boolean {
+    return isAllSelected(
+      this.reactiveStep1!.get('platform')!.value,
+      this.filteredPlatforms.map(p => p.id!)
+    );
+  }
+
+  toggleAllPlatforms(): void {
+    this.reactiveStep1!.get('platform')!.setValue(
+      toggleAllSelection(
+        this.reactiveStep1!.get('platform')!.value,
+        this.filteredPlatforms.map(p => p.id!)
+      )
     );
   }
 }

@@ -28,6 +28,10 @@ export class LoginService {
     return this.http.post<any>('/api/auth/logout', {});
   }
 
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.http.post<void>('/api/auth/change-password', { currentPassword, newPassword });
+  }
+
   user() {
     return this.http.get<User>('/api/user/me');
   }

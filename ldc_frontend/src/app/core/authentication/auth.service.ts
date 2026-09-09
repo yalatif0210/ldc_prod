@@ -77,12 +77,8 @@ export class AuthService {
     );
   }
 
-  isSupervisorUser(role: any) {
-    return [3].includes(role) || [UserRole.SUPERVISOR].includes(role);
-  }
-
-  isAdminUser(role: any) {
-    return [1, 2].includes(role);
+  isSuperAdminUser(role: any) {
+    return [1].includes(role) || [UserRole.SUPER_ADMIN].includes(role);
   }
 
   buildPassword(): string {
@@ -108,11 +104,8 @@ export class AuthService {
       phone: s2.phone,
       password,
       role: Number(s1.role),
-      platforms:
-        (!this.isUserAdminOrSupervisor(Number(s1.role)) && [Number(s1.platform[0])]) ||
-        (this.isSupervisorUser(Number(s1.role)) && s1.platform.map((p: any) => Number(p))) ||
-        [],
-      regions: (!this.isAdminUser(Number(s1.role)) && [Number(s1.region[0])]) || [],
+      platforms: (s1.platform || []).map((p: any) => Number(p)),
+      regions: (s1.region || []).map((r: any) => Number(r)),
     });
   }
 
@@ -122,6 +115,10 @@ export class AuthService {
         return { username: response?.username, phone: response?.phone };
       })
     );
+  }
+
+  changePassword(currentPassword: string, newPassword: string) {
+    return this.loginService.changePassword(currentPassword, newPassword);
   }
 
   login(username: string, password: string, rememberMe = false) {

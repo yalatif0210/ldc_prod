@@ -4,6 +4,7 @@ import com.markov.lab.controller.dto.SignupRequest;
 import com.markov.lab.entity.Account;
 import com.markov.lab.entity.Structure;
 import com.markov.lab.entity.User;
+import com.markov.lab.exceptions.InvalidCurrentPasswordException;
 import com.markov.lab.input.UserInput;
 
 import com.markov.lab.repository.RoleRepository;
@@ -44,6 +45,16 @@ public class UserService {
     }
 
     @Transactional
+    public void changePassword(String username, String currentPassword, String newPassword) {
+        User user = repository.findByUsername(username).orElseThrow();
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+            throw new InvalidCurrentPasswordException("Current password is incorrect");
+        }
+        user.setPassword(passwordEncoder.encode(newPassword));
+        repository.save(user);
+    }
+
+    @Transactional
     public User save(SignupRequest request) {
         Optional<User> existingUser = repository.findByUsername(request.username());
         if (existingUser.isPresent()) {
@@ -56,13 +67,11 @@ public class UserService {
     private User createUser(SignupRequest request, User user) {
         int role = request.role();
         Account account = new Account();
-        switch (role) {
-            case 1: case 2:
-                account.getStructures().addAll(structureRepository.findAll());
-                break;
-            default:
-                account.getStructures().addAll(structureRepository.findByIdList(request.platforms()));
-                break;
+        if (role == 1) {
+            // SUPER_ADMIN : accès à toutes les Structures, non restreignable (docs/adr/0001-admin-role-scoped-structure-access.md)
+            account.getStructures().addAll(structureRepository.findAll());
+        } else {
+            account.getStructures().addAll(structureRepository.findByIdList(request.platforms()));
         }
         account.setRole(roleRepository.findById((long) role).orElse(null));
         account.setIsActive(true);
