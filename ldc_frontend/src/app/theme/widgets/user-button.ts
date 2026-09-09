@@ -24,6 +24,10 @@ import { AuthService, SettingsService, User } from '@core';
         <mat-icon>person</mat-icon>
         <span>{{ user_name }}</span>
       </button>
+      <button mat-menu-item routerLink="/profile/settings">
+        <mat-icon>lock</mat-icon>
+        <span>Changer mon mot de passe</span>
+      </button>
       <button mat-menu-item  (click)="logout()">
         <mat-icon>exit_to_app</mat-icon>
         <span>{{ 'logout' | translate }}</span>
