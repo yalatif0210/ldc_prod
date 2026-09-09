@@ -1,0 +1,23 @@
+.profile-settings-wrapper {
+  display: flex;
+  justify-content: center;
+}
+
+.profile-settings-card {
+  width: 100%;
+  max-width: 480px;
+}
+
+.profile-settings-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--mat-sys-primary-container, #e8eaf6);
+  color: var(--mat-sys-on-primary-container, #3949ab);
+  border-radius: 50%;
+}
+
+mat-form-field {
+  display: block;
+  margin-bottom: 4px;
+}

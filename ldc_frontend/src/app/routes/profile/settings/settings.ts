@@ -3,10 +3,12 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { ToastrService } from 'ngx-toastr';
 import { AuthService } from '@core/authentication';
 import { matchValidator } from '@shared/validators/match.validator';
+import { PageHeader } from '@shared';
 
 // Même politique que côté serveur (SignupRequest.password) : 8+ caractères,
 // au moins une majuscule, un chiffre et un caractère spécial.
@@ -22,7 +24,9 @@ const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*()_+\-=[\]{};':"\
     MatButtonModule,
     MatCardModule,
     MatFormFieldModule,
+    MatIconModule,
     MatInputModule,
+    PageHeader,
   ],
 })
 export class ProfileSettings {
@@ -31,6 +35,11 @@ export class ProfileSettings {
   private readonly toast = inject(ToastrService);
 
   isSubmitting = false;
+  hide = { current: true, new: true, confirm: true };
+
+  toggleVisibility(field: keyof typeof this.hide): void {
+    this.hide[field] = !this.hide[field];
+  }
 
   reactiveForm = this.fb.nonNullable.group(
     {

@@ -1,49 +1,105 @@
-<mat-card>
-  <mat-card-header class="m-b-16">
-    <mat-card-title>Changer mon mot de passe</mat-card-title>
-  </mat-card-header>
+<page-header
+  title="Mon profil"
+  subtitle="Changer mon mot de passe"
+  hideBreadcrumb="true"
+/>
 
-  <mat-card-content>
-    <form [formGroup]="reactiveForm" (ngSubmit)="submit()" class="form-field-full">
-      <div class="row">
-        <div class="col-sm-6 col-xl-4">
-          <mat-form-field>
-            <mat-label>Mot de passe actuel</mat-label>
-            <input matInput type="password" formControlName="currentPassword" required />
-            @if (reactiveForm.get('currentPassword')?.invalid && reactiveForm.get('currentPassword')?.touched) {
-              <mat-error>Le mot de passe actuel est requis</mat-error>
-            }
-          </mat-form-field>
-        </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <mat-form-field>
-            <mat-label>Nouveau mot de passe</mat-label>
-            <input matInput type="password" formControlName="newPassword" required />
-            @if (reactiveForm.get('newPassword')?.hasError('required') && reactiveForm.get('newPassword')?.touched) {
-              <mat-error>Le nouveau mot de passe est requis</mat-error>
-            } @else if ((reactiveForm.get('newPassword')?.hasError('minlength') || reactiveForm.get('newPassword')?.hasError('maxlength') || reactiveForm.get('newPassword')?.hasError('pattern')) && reactiveForm.get('newPassword')?.touched) {
-              <mat-error>8 à 64 caractères, avec majuscule, chiffre et caractère spécial</mat-error>
-            }
-          </mat-form-field>
-        </div>
-
-        <div class="col-sm-6 col-xl-4">
-          <mat-form-field>
-            <mat-label>Confirmer le nouveau mot de passe</mat-label>
-            <input matInput type="password" formControlName="confirmPassword" required />
-            @if (reactiveForm.get('confirmPassword')?.hasError('mismatch') && reactiveForm.get('confirmPassword')?.touched) {
-              <mat-error>Les mots de passe ne correspondent pas</mat-error>
-            }
-          </mat-form-field>
-        </div>
+<div class="profile-settings-wrapper">
+  <mat-card class="profile-settings-card">
+    <mat-card-header>
+      <div mat-card-avatar class="profile-settings-icon">
+        <mat-icon>lock</mat-icon>
       </div>
+      <mat-card-title>Changer mon mot de passe</mat-card-title>
+      <mat-card-subtitle>
+        Confirmez votre mot de passe actuel puis choisissez-en un nouveau.
+      </mat-card-subtitle>
+    </mat-card-header>
 
-      <div class="d-flex justify-content-end">
-        <button mat-flat-button type="submit" [disabled]="reactiveForm.invalid || isSubmitting">
-          Enregistrer
-        </button>
-      </div>
-    </form>
-  </mat-card-content>
-</mat-card>
+    <mat-card-content>
+      <form [formGroup]="reactiveForm" (ngSubmit)="submit()">
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Mot de passe actuel</mat-label>
+          <input
+            matInput
+            [type]="hide.current ? 'password' : 'text'"
+            formControlName="currentPassword"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="toggleVisibility('current')"
+            [attr.aria-label]="hide.current ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
+          >
+            <mat-icon>{{ hide.current ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (reactiveForm.get('currentPassword')?.invalid && reactiveForm.get('currentPassword')?.touched) {
+            <mat-error>Le mot de passe actuel est requis</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Nouveau mot de passe</mat-label>
+          <input
+            matInput
+            [type]="hide.new ? 'password' : 'text'"
+            formControlName="newPassword"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="toggleVisibility('new')"
+            [attr.aria-label]="hide.new ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
+          >
+            <mat-icon>{{ hide.new ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (reactiveForm.get('newPassword')?.hasError('required') && reactiveForm.get('newPassword')?.touched) {
+            <mat-error>Le nouveau mot de passe est requis</mat-error>
+          } @else if ((reactiveForm.get('newPassword')?.hasError('minlength') || reactiveForm.get('newPassword')?.hasError('maxlength') || reactiveForm.get('newPassword')?.hasError('pattern')) && reactiveForm.get('newPassword')?.touched) {
+            <mat-error>8 à 64 caractères, avec majuscule, chiffre et caractère spécial</mat-error>
+          } @else {
+            <mat-hint>8 à 64 caractères, avec majuscule, chiffre et caractère spécial</mat-hint>
+          }
+        </mat-form-field>
+
+        <mat-form-field class="w-100" appearance="outline">
+          <mat-label>Confirmer le nouveau mot de passe</mat-label>
+          <input
+            matInput
+            [type]="hide.confirm ? 'password' : 'text'"
+            formControlName="confirmPassword"
+            required
+          />
+          <button
+            mat-icon-button
+            matSuffix
+            type="button"
+            (click)="toggleVisibility('confirm')"
+            [attr.aria-label]="hide.confirm ? 'Afficher le mot de passe' : 'Masquer le mot de passe'"
+          >
+            <mat-icon>{{ hide.confirm ? 'visibility_off' : 'visibility' }}</mat-icon>
+          </button>
+          @if (reactiveForm.get('confirmPassword')?.hasError('mismatch') && reactiveForm.get('confirmPassword')?.touched) {
+            <mat-error>Les mots de passe ne correspondent pas</mat-error>
+          }
+        </mat-form-field>
+
+        <div class="d-flex justify-content-end m-t-8">
+          <button
+            mat-flat-button
+            color="primary"
+            type="submit"
+            [disabled]="reactiveForm.invalid || isSubmitting"
+          >
+            <mat-icon>save</mat-icon>
+            Enregistrer
+          </button>
+        </div>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>
