@@ -165,6 +165,21 @@ public class SuperAdminService {
         return hadDetails;
     }
 
+    // ---- Report line items (Ticket #14) ----
+
+    @Transactional
+    public void deleteIntrantMvtData(Long id) {
+        if (!intrantMvtDataRepository.existsById(id)) {
+            throw new NotFoundException("IntrantMvtData not found: " + id);
+        }
+        // 1. Adjustments (enfants de IntrantMvtData) d'abord, pour eviter une erreur de contrainte
+        // de cle etrangere lors de la suppression du parent.
+        adjustmentRepository.deleteByIntrantMvtData_Id(id);
+        // 2. IntrantMvtData
+        intrantMvtDataRepository.deleteById(id);
+        log.info("IntrantMvtData {} deleted by super admin (cascade sur ses Adjustment)", id);
+    }
+
     @Transactional
     public void removeEquipmentFromStructure(Long structureId, Long equipmentId) {
         Structure structure = structureRepository.findById(structureId)

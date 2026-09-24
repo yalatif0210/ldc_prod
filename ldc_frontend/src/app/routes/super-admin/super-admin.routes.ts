@@ -123,4 +123,21 @@ export const routes: Routes = [
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],
   },
+  {
+    path: 'lab-activity-data',
+    loadComponent: () =>
+      import('./lab-activity-data/lab-activity-data-admin').then(m => m.LabActivityDataAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'intrant-mvt-data',
+    loadComponent: () =>
+      import('./intrant-mvt-data/intrant-mvt-data-admin').then(m => m.IntrantMvtDataAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'adjustments',
+    loadComponent: () => import('./adjustments/adjustment-admin').then(m => m.AdjustmentAdmin),
+    canActivate: [superAdminGuard],
+  },
 ];

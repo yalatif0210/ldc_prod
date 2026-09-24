@@ -7,4 +7,6 @@ public interface AdjustmentRepository extends JpaRepository<Adjustment, Long> {
     void deleteByIntrantMvtData_Report_Id(Long reportId);
 
     long countByAdjustmentType_Id(Long adjustmentTypeId);
+
+    void deleteByIntrantMvtData_Id(Long intrantMvtDataId);
 }
