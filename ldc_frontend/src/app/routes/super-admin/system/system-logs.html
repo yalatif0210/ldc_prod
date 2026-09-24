@@ -100,5 +100,133 @@
       </mat-card-content>
     </mat-card>
 
+    <!-- Section : Journal d'audit (Ticket #7) -->
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Journal d'audit</h2>
+        <button mat-icon-button color="primary" (click)="loadAuditLogs()" title="Rafraîchir">
+          <mat-icon>refresh</mat-icon>
+        </button>
+      </mat-card-content>
+
+      <mat-card-content>
+        <!-- Filtres -->
+        <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; padding-bottom:16px;">
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:11px; color:#666;">Type d'entité</label>
+            <select [(ngModel)]="auditFilter.entityType" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:140px;">
+              <option value="">Tous</option>
+              @for (type of auditEntityTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:11px; color:#666;">Action</label>
+            <select [(ngModel)]="auditFilter.action" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:120px;">
+              <option value="">Toutes</option>
+              @for (action of auditActions; track action) {
+                <option [value]="action">{{ action }}</option>
+              }
+            </select>
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:11px; color:#666;">Id du compte auteur</label>
+            <input type="number" [(ngModel)]="auditFilter.accountId" placeholder="Ex. 12"
+                   style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; width:110px;" />
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:11px; color:#666;">Depuis</label>
+            <input type="date" [(ngModel)]="auditFilter.from"
+                   style="padding:6px 8px; border:1px solid #ccc; border-radius:4px;" />
+          </div>
+
+          <div style="display:flex; flex-direction:column; gap:4px;">
+            <label style="font-size:11px; color:#666;">Jusqu'au</label>
+            <input type="date" [(ngModel)]="auditFilter.to"
+                   style="padding:6px 8px; border:1px solid #ccc; border-radius:4px;" />
+          </div>
+
+          <button mat-raised-button color="primary" (click)="applyAuditFilters()">
+            <mat-icon>filter_alt</mat-icon>
+            Filtrer
+          </button>
+          <button mat-button (click)="resetAuditFilters()">
+            Réinitialiser
+          </button>
+        </div>
+
+        @if (auditLoading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:170px;">Date</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Entité</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:110px;">Action</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:120px;">Auteur (id compte)</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd; width:90px;">Snapshot</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (entry of auditLogs; track entry.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  <td style="padding:10px 8px; color:#555;">{{ entry.timestamp | date:'dd/MM/yyyy HH:mm:ss' }}</td>
+                  <td style="padding:10px 8px;">
+                    {{ entry.entityType }}<span *ngIf="entry.entityId !== null"> #{{ entry.entityId }}</span>
+                  </td>
+                  <td style="padding:10px 8px;">
+                    <span
+                      [style.color]="entry.action === 'DELETE' ? '#c62828' : (entry.action === 'CREATE' ? '#2e7d32' : '#e65100')"
+                      style="font-weight:600; font-size:12px;">
+                      {{ entry.action }}
+                    </span>
+                  </td>
+                  <td style="padding:10px 8px; font-family:monospace;">{{ entry.accountId ?? '—' }}</td>
+                  <td style="padding:10px 8px;">
+                    <button mat-icon-button (click)="toggleAuditSnapshot(entry)" title="Voir le détail">
+                      <mat-icon>{{ expandedAuditLogId === entry.id ? 'expand_less' : 'expand_more' }}</mat-icon>
+                    </button>
+                  </td>
+                </tr>
+                @if (expandedAuditLogId === entry.id) {
+                  <tr>
+                    <td colspan="5" style="padding:0 8px 12px 8px;">
+                      <pre style="background:#f7f7f7; border-radius:4px; padding:12px; max-height:280px; overflow:auto; font-size:12px; margin:0;">{{ formattedSnapshot(entry) }}</pre>
+                    </td>
+                  </tr>
+                }
+              } @empty {
+                <tr>
+                  <td colspan="5" style="text-align:center; padding:30px; color:#999;">Aucune entrée dans le journal d'audit</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <!-- Pagination -->
+          <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; padding-top:12px;">
+            <span style="font-size:12px; color:#777;">{{ auditTotalElements }} entrée(s)</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <button mat-icon-button (click)="prevAuditPage()" [disabled]="auditPage <= 0">
+                <mat-icon>chevron_left</mat-icon>
+              </button>
+              <span style="font-size:13px; color:#555;">Page {{ auditPage + 1 }}</span>
+              <button mat-icon-button (click)="nextAuditPage()"
+                      [disabled]="(auditPage + 1) * auditPageSize >= auditTotalElements">
+                <mat-icon>chevron_right</mat-icon>
+              </button>
+            </div>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
   </div>
 </div>

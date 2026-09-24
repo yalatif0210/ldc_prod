@@ -25,6 +25,32 @@ export interface StatsFilter {
   equipmentId: number | null;
 }
 
+export interface AuditLog {
+  id: number;
+  accountId: number | null;
+  entityType: string;
+  entityId: number | null;
+  action: 'CREATE' | 'UPDATE' | 'DELETE';
+  timestamp: string;
+  snapshot: string;
+}
+
+export interface AuditLogPage {
+  content: AuditLog[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+}
+
+export interface AuditLogFilter {
+  entityType: string | null;
+  action: string | null;
+  accountId: number | null;
+  from: string | null;
+  to: string | null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class SuperAdminService {
   private readonly http = inject(HttpClient);
@@ -149,5 +175,28 @@ export class SuperAdminService {
 
   purgeBlacklist(): Observable<any> {
     return this.http.delete<any>(`${this.base}/system/blacklist`);
+  }
+
+  // Audit log (Ticket #7) — lecture seule
+  getAuditLogs(filter: AuditLogFilter, page: number, size: number): Observable<AuditLogPage> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('size', size.toString());
+    if (filter.entityType) {
+      params = params.set('entityType', filter.entityType);
+    }
+    if (filter.action) {
+      params = params.set('action', filter.action);
+    }
+    if (filter.accountId !== null && filter.accountId !== undefined) {
+      params = params.set('accountId', filter.accountId.toString());
+    }
+    if (filter.from) {
+      params = params.set('from', filter.from);
+    }
+    if (filter.to) {
+      params = params.set('to', filter.to);
+    }
+    return this.http.get<AuditLogPage>(`${this.base}/audit-logs`, { params });
   }
 }
