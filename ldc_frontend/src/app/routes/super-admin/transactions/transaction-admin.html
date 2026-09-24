@@ -1,0 +1,149 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Gestion des Transferts</h2>
+        <button mat-raised-button color="primary" (click)="openCreateForm()">
+          <mat-icon>add</mat-icon> Ajouter un transfert
+        </button>
+      </mat-card-content>
+
+      @if (showForm) {
+        <mat-card-content style="background:#f5f5f5; padding:16px; margin-bottom:16px; border-radius:4px;">
+          <h3 style="margin:0 0 12px;">{{ editingId ? 'Modifier le transfert #' + editingId : 'Nouveau transfert' }}</h3>
+
+          <div style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Structure origine</mat-label>
+              <mat-select [(ngModel)]="formOriginId">
+                @for (structure of structures; track structure.id) {
+                  <mat-option [value]="structure.id">{{ structure.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Structure destination</mat-label>
+              <mat-select [(ngModel)]="formDestinationId">
+                @for (structure of structures; track structure.id) {
+                  <mat-option [value]="structure.id">{{ structure.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Équipement</mat-label>
+              <mat-select [(ngModel)]="formEquipmentId">
+                @for (eq of equipments; track eq.id) {
+                  <mat-option [value]="eq.id">{{ eq.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Équipement destinataire</mat-label>
+              <mat-select [(ngModel)]="formEquipmentDestinataireId">
+                @for (eq of equipments; track eq.id) {
+                  <mat-option [value]="eq.id">{{ eq.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </div>
+
+          <div style="display:flex; gap:24px; margin:8px 0 16px;">
+            <mat-checkbox [(ngModel)]="formApproved">Approuvé</mat-checkbox>
+            <mat-checkbox [(ngModel)]="formIsRejected">Rejeté</mat-checkbox>
+          </div>
+
+          <div style="display:flex; gap:24px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:280px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong>Produits sanguins</strong>
+                <button mat-button color="primary" type="button" (click)="addSanguineLine()">
+                  <mat-icon>add</mat-icon> Ajouter une ligne
+                </button>
+              </div>
+              @for (line of sanguineLines; track $index) {
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                  <mat-form-field appearance="outline" style="flex:2;">
+                    <mat-label>Produit sanguin</mat-label>
+                    <mat-select [(ngModel)]="line.refId">
+                      @for (p of sanguineProducts; track p.id) {
+                        <mat-option [value]="p.id">{{ p.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" style="flex:1;">
+                    <mat-label>Quantité</mat-label>
+                    <input matInput type="number" [(ngModel)]="line.quantity" min="0" />
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" type="button" (click)="removeSanguineLine($index)" title="Retirer">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              } @empty {
+                <p style="color:#999; font-size:12px;">Aucune ligne de produit sanguin</p>
+              }
+            </div>
+
+            <div style="flex:1; min-width:280px;">
+              <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                <strong>Intrants (médicaments)</strong>
+                <button mat-button color="primary" type="button" (click)="addMedicineLine()">
+                  <mat-icon>add</mat-icon> Ajouter une ligne
+                </button>
+              </div>
+              @for (line of medicineLines; track $index) {
+                <div style="display:flex; gap:8px; align-items:center; margin-bottom:8px;">
+                  <mat-form-field appearance="outline" style="flex:2;">
+                    <mat-label>Intrant</mat-label>
+                    <mat-select [(ngModel)]="line.refId">
+                      @for (i of intrants; track i.id) {
+                        <mat-option [value]="i.id">{{ i.name }}</mat-option>
+                      }
+                    </mat-select>
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" style="flex:1;">
+                    <mat-label>Quantité</mat-label>
+                    <input matInput type="number" [(ngModel)]="line.quantity" min="0" />
+                  </mat-form-field>
+                  <button mat-icon-button color="warn" type="button" (click)="removeMedicineLine($index)" title="Retirer">
+                    <mat-icon>delete</mat-icon>
+                  </button>
+                </div>
+              } @empty {
+                <p style="color:#999; font-size:12px;">Aucune ligne d'intrant</p>
+              }
+            </div>
+          </div>
+
+          <div style="display:flex; gap:8px; padding-top:12px;">
+            <button mat-raised-button color="primary" type="button" (click)="submitForm()">
+              {{ editingId ? 'Enregistrer' : 'Créer' }}
+            </button>
+            <button mat-button type="button" (click)="cancelForm()">Annuler</button>
+          </div>
+        </mat-card-content>
+      }
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <ag-grid-angular
+            style="height: 600px; width: 100%;"
+            [rowData]="transactions"
+            [columnDefs]="colDefs"
+            [defaultColDef]="defaultColDef"
+            [pagination]="true"
+            [paginationPageSize]="10"
+            [paginationPageSizeSelector]="[10, 20, 50, 100]"
+            (cellClicked)="onCellClicked($event)"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

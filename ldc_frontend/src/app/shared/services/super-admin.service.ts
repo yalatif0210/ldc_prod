@@ -177,6 +177,35 @@ export class SuperAdminService {
     return this.http.delete<any>(`${this.base}/system/blacklist`);
   }
 
+  // Transactions (Transferts) — Ticket #8
+  getTransactions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/transactions`);
+  }
+
+  getTransaction(id: number): Observable<any> {
+    return this.http.get<any>(`${this.base}/transactions/${id}`);
+  }
+
+  createTransaction(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/transactions`, data);
+  }
+
+  updateTransaction(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/transactions/${id}`, data);
+  }
+
+  deleteTransaction(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/transactions/${id}`);
+  }
+
+  getTransactionSanguineProducts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/transactions/reference/sanguine-products`);
+  }
+
+  getTransactionIntrants(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/transactions/reference/intrants`);
+  }
+
   // Audit log (Ticket #7) — lecture seule
   getAuditLogs(filter: AuditLogFilter, page: number, size: number): Observable<AuditLogPage> {
     let params = new HttpParams()

@@ -60,6 +60,12 @@
           "icon": "inventory_2"
         },
         {
+          "route": "transactions",
+          "name": "transactions",
+          "type": "link",
+          "icon": "swap_horiz"
+        },
+        {
           "route": "system",
           "name": "system",
           "type": "link",
