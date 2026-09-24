@@ -43,6 +43,16 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'equipments',
+    loadComponent: () => import('./equipments/equipment-admin').then(m => m.EquipmentAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'sanguine-products',
+    loadComponent: () => import('./sanguine-products/sanguine-product-admin').then(m => m.SanguineProductAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'system',
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],

@@ -33,4 +33,8 @@ public interface IntrantCmmConfigRepository extends JpaRepository<IntrantCmmConf
     void deleteByStructureAndEquipment(@Param("structureId") long structureId,
             @Param("equipmentId") long equipmentId);
 
+    long countByEquipment_Id(Long equipmentId);
+
+    long countByIntrant_Id(Long intrantId);
+
 }

@@ -41,7 +41,6 @@ public class SuperAdminController {
     private final RoleRepository roleRepository;
     private final StructureRepository structureRepository;
     private final MonthRepository monthRepository;
-    private final EquipmentRepository equipmentRepository;
     private final TokenBlacklistService tokenBlacklistService;
     private final AuditLogRepository auditLogRepository;
 
@@ -60,10 +59,9 @@ public class SuperAdminController {
         return ResponseEntity.ok(superAdminService.getFilteredStats(periodId, structureId, equipmentId));
     }
 
-    @GetMapping("/equipments")
-    public ResponseEntity<List<Equipment>> getEquipments() {
-        return ResponseEntity.ok(equipmentRepository.findAll());
-    }
+    // Note : GET /equipments a migré vers SuperAdminEquipmentController (Ticket #13), qui gère
+    // désormais aussi la création/modification/suppression des Équipements — même URL de base,
+    // conservée pour ne pas casser les appelants existants (ex. tableau de bord Super Admin).
 
     // ---- Accounts ----
 

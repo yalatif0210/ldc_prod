@@ -23,4 +23,6 @@ public interface StructureRepository extends JpaRepository<Structure, Long> {
     @Query("SELECT a FROM Structure a WHERE a.district.region.id in :regionIdList")
     List<Structure> findByRegionIdList(@Param("regionIdList") List<Long> regionIdList);
 
+    long countByEquipments_Id(Long equipmentId);
+
 }

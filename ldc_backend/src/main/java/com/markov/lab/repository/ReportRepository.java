@@ -110,4 +110,6 @@ public interface ReportRepository extends JpaRepository<Report, Long> {
                         @Param("structureId") Long structureId,
                         @Param("equipmentId") Long equipmentId);
 
+        long countByEquipment_Id(Long equipmentId);
+
 }

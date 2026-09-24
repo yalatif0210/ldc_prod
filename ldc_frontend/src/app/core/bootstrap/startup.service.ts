@@ -58,6 +58,8 @@ export class StartupService {
             { route: 'structures', name: 'structures', type: 'link', icon: 'apartment' },
             { route: 'synthesis', name: 'synthesis', type: 'link', icon: 'summarize' },
             { route: 'intrants', name: 'intrants', type: 'link', icon: 'inventory_2' },
+            { route: 'equipments', name: 'equipments', type: 'link', icon: 'precision_manufacturing' },
+            { route: 'sanguine-products', name: 'sanguine_products', type: 'link', icon: 'bloodtype' },
             { route: 'system', name: 'system', type: 'link', icon: 'monitor_heart' },
           ],
         },
