@@ -119,6 +119,21 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'informations',
+    loadComponent: () => import('./informations/information-admin').then(m => m.InformationAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'intrant-cmm-configs',
+    loadComponent: () => import('./intrant-cmm-configs/intrant-cmm-config-admin').then(m => m.IntrantCmmConfigAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'synthesis-items',
+    loadComponent: () => import('./synthesis-items/synthesis-item-admin').then(m => m.SynthesisItemAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'system',
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],
