@@ -27,7 +27,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Tag(name = "Super Admin API", description = "Super Admin management endpoints")
 @RequestMapping(path = "/api/super-admin", produces = MediaType.APPLICATION_JSON_VALUE)
-//@PreAuthorize("hasRole('SUPER_ADMIN')")
+@PreAuthorize("hasAuthority('SUPER_ADMIN')")
 public class SuperAdminController {
 
     private final SuperAdminService superAdminService;

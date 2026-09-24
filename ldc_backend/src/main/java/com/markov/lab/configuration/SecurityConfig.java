@@ -94,7 +94,7 @@ public class SecurityConfig {
                         .requestMatchers("/graphql").authenticated()
                         // WebSocket : SockJS handshake (GET /ws/info) ne peut pas envoyer Bearer
                         .requestMatchers("/ws/**").permitAll()
-                        //.requestMatchers("/api/super-admin/**").hasRole("SUPER_ADMIN")
+                        .requestMatchers("/api/super-admin/**").hasAuthority("SUPER_ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().authenticated())
                 .authenticationManager(authenticationManager)
