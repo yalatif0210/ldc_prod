@@ -1,10 +1,7 @@
 package com.markov.lab.repository;
 
 import com.markov.lab.entity.Synthesis;
-import org.springframework.data.repository.Repository;
+import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
-
-public interface SynthesisRepository extends Repository<Synthesis, Long> {
-    List<Synthesis> findAll();
+public interface SynthesisRepository extends JpaRepository<Synthesis, Long> {
 }

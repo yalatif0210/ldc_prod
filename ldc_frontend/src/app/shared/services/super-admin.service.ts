@@ -162,6 +162,82 @@ export class SuperAdminService {
     return this.http.get<any[]>(`${this.base}/equipments`);
   }
 
+  // Informations (Ticket #15 - entité feuille Information)
+  getInformations(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/informations`);
+  }
+
+  getInformationUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/informations/information-units`);
+  }
+
+  getInformationSubUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/informations/information-sub-units`);
+  }
+
+  getInformationSubSubUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/informations/information-sub-sub-units`);
+  }
+
+  createInformation(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/informations`, data);
+  }
+
+  updateInformation(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/informations/${id}`, data);
+  }
+
+  deleteInformation(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/informations/${id}`);
+  }
+
+  // IntrantCmmConfigs (Ticket #15 - entité feuille IntrantCmmConfig)
+  getIntrantCmmConfigs(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrant-cmm-configs`);
+  }
+
+  getIntrantsForCmmConfig(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrant-cmm-configs/intrants`);
+  }
+
+  createIntrantCmmConfig(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/intrant-cmm-configs`, data);
+  }
+
+  updateIntrantCmmConfig(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/intrant-cmm-configs/${id}`, data);
+  }
+
+  deleteIntrantCmmConfig(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/intrant-cmm-configs/${id}`);
+  }
+
+  // Syntheses (Ticket #15 - entité feuille Synthesis, distincte de l'écran "synthesis" existant
+  // qui gère en réalité des Report)
+  getSynthesisItems(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/syntheses`);
+  }
+
+  getSynthesisTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/syntheses/synthesis-types`);
+  }
+
+  getInformationUnitsForSynthesis(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/syntheses/information-units`);
+  }
+
+  createSynthesisItem(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/syntheses`, data);
+  }
+
+  updateSynthesisItem(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/syntheses/${id}`, data);
+  }
+
+  deleteSynthesisItem(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/syntheses/${id}`);
+  }
+
   // System / Logs
   getLoginAttempts(page: number, size: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/system/login-attempts`, {
