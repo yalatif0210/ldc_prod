@@ -129,6 +129,12 @@ export class SystemLogs implements OnInit, OnDestroy {
 
   // ---- Journal d'audit (Ticket #7) ----
 
+  private endOfDayIso(dateOnly: string): string {
+    const date = new Date(dateOnly);
+    date.setUTCHours(23, 59, 59, 999);
+    return date.toISOString();
+  }
+
   loadAuditLogs(): void {
     this.auditLoading = true;
     const filter: AuditLogFilter = {
@@ -136,7 +142,10 @@ export class SystemLogs implements OnInit, OnDestroy {
       action: this.auditFilter.action || null,
       accountId: this.auditFilter.accountId ? Number(this.auditFilter.accountId) : null,
       from: this.auditFilter.from ? new Date(this.auditFilter.from).toISOString() : null,
-      to: this.auditFilter.to ? new Date(this.auditFilter.to).toISOString() : null,
+      // Le champ "to" est une date sans heure (input type="date") : Date() la parse à minuit UTC,
+      // ce qui exclurait quasiment toute la journée sélectionnée du filtre "timestamp <= to"
+      // côté serveur. On pousse donc "to" à la fin de cette même journée.
+      to: this.auditFilter.to ? this.endOfDayIso(this.auditFilter.to) : null,
     };
     this.service.getAuditLogs(filter, this.auditPage, this.auditPageSize)
       .pipe(takeUntil(this.destroy$))

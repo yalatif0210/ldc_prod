@@ -141,22 +141,31 @@ public class SuperAdminAuditAspect {
         // partagent le même EntityManager (cache de premier niveau) : si on différait la
         // sérialisation après proceed(), on capturerait l'état déjà modifié au lieu de l'état
         // d'origine. Voir la javadoc de AuditSnapshotService#toSnapshotNode.
-        JsonNode beforeSnapshot = (action != AuditAction.CREATE)
-                ? snapshotService.toSnapshotNode(loadById(entityType, entityId))
-                : null;
+        //
+        // Cette étape est protégée par son propre try/catch : le journal d'audit ne doit jamais
+        // faire échouer la requête métier qu'il observe (ni l'empêcher de démarrer, ni la faire
+        // paraître en échec après coup) — voir aussi le try/catch après proceed() ci-dessous.
+        JsonNode beforeSnapshot = null;
+        if (action != AuditAction.CREATE) {
+            try {
+                beforeSnapshot = snapshotService.toSnapshotNode(loadById(entityType, entityId));
+            } catch (Exception e) {
+                log.error("Echec du snapshot 'before' du journal d'audit pour {} {} id={}", entityType, action, entityId, e);
+            }
+        }
 
         Object result = pjp.proceed();
 
-        Long resolvedId = entityId;
-        if (resolvedId == null && action == AuditAction.CREATE) {
-            resolvedId = bestEffortLatestId(entityType);
-        }
-
-        JsonNode afterSnapshot = (action != AuditAction.DELETE)
-                ? snapshotService.toSnapshotNode(loadById(entityType, resolvedId))
-                : null;
-
         try {
+            Long resolvedId = entityId;
+            if (resolvedId == null && action == AuditAction.CREATE) {
+                resolvedId = bestEffortLatestId(entityType);
+            }
+
+            JsonNode afterSnapshot = (action != AuditAction.DELETE)
+                    ? snapshotService.toSnapshotNode(loadById(entityType, resolvedId))
+                    : null;
+
             AuditLog entry = new AuditLog();
             entry.setAccountId(currentAccountId());
             entry.setEntityType(entityType);
@@ -166,8 +175,10 @@ public class SuperAdminAuditAspect {
             entry.setSnapshot(snapshotService.combine(beforeSnapshot, afterSnapshot));
             auditLogRepository.save(entry);
         } catch (Exception e) {
-            // Le journal d'audit ne doit jamais faire échouer la requête métier qu'il observe.
-            log.error("Echec de l'ecriture du journal d'audit pour {} {} id={}", entityType, action, resolvedId, e);
+            // La mutation métier (proceed() ci-dessus) a déjà réussi à ce stade : on ne doit
+            // surtout pas propager cette exception, sous peine de faire paraître en échec une
+            // action qui a en réalité réussi.
+            log.error("Echec de l'ecriture du journal d'audit pour {} {} id={}", entityType, action, entityId, e);
         }
 
         return result;
@@ -194,8 +205,17 @@ public class SuperAdminAuditAspect {
             return null;
         }
         String remainder = uri.substring(idx + marker.length());
-        String firstSegment = remainder.split("/", 2)[0];
-        return SEGMENT_TO_ENTITY_TYPE.get(firstSegment);
+        String[] segments = remainder.split("/");
+        // "structures/{structureId}/equipments/{equipmentId}" est un endpoint de RELATION entre
+        // deux entités, pas une action sur la Structure elle-même : la DELETE ne supprime pas la
+        // Structure (elle détache un Équipement). La résoudre comme "Structure" DELETE produirait
+        // une entrée trompeuse (voir Ticket #7, relevé en revue). Les autres routes à 3 segments
+        // du contrôleur (ex. "accounts/{id}/activate", "structures/{id}/toggle") restent auditées
+        // normalement : ce sont bien des mises à jour de l'entité de premier niveau.
+        if (segments.length >= 3 && "equipments".equals(segments[2])) {
+            return null;
+        }
+        return SEGMENT_TO_ENTITY_TYPE.get(segments[0]);
     }
 
     private Long resolvePathId(String entityType, Method method, Object[] args) {
