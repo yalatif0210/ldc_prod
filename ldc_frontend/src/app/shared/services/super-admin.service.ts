@@ -162,6 +162,27 @@ export class SuperAdminService {
     return this.http.get<any[]>(`${this.base}/equipments`);
   }
 
+  // Notifications (Ticket #9)
+  getNotifications(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/notifications`);
+  }
+
+  getNotificationIntrants(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/notifications/intrants`);
+  }
+
+  createNotification(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/notifications`, data);
+  }
+
+  updateNotification(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/notifications/${id}`, data);
+  }
+
+  deleteNotification(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/notifications/${id}`);
+  }
+
   // System / Logs
   getLoginAttempts(page: number, size: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/system/login-attempts`, {

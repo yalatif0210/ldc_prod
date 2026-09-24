@@ -1,0 +1,174 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Gestion des Notifications</h2>
+        <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
+          <mat-icon>add</mat-icon> Ajouter une notification
+        </button>
+      </mat-card-content>
+
+      @if (showAddForm) {
+        <mat-card-content style="background:#f5f5f5; padding:16px; margin-bottom:16px; border-radius:4px;">
+          <h3 style="margin:0 0 12px;">Nouvelle notification</h3>
+          <form [formGroup]="addForm" (ngSubmit)="submitAdd()" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Structure émettrice</mat-label>
+              <mat-select formControlName="emitterId">
+                @for (structure of structures; track structure.id) {
+                  <mat-option [value]="structure.id">{{ structure.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Équipement</mat-label>
+              <mat-select formControlName="equipmentId">
+                @for (equipment of equipments; track equipment.id) {
+                  <mat-option [value]="equipment.id">{{ equipment.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:200px;">
+              <mat-label>Intrant</mat-label>
+              <mat-select formControlName="intrantId">
+                @for (intrant of intrants; track intrant.id) {
+                  <mat-option [value]="intrant.id">{{ intrant.name }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:120px;">
+              <mat-label>Quantité</mat-label>
+              <input matInput type="number" formControlName="quantity" />
+            </mat-form-field>
+            <div style="display:flex; gap:12px; align-items:center; padding-top:8px;">
+              <mat-checkbox formControlName="isResolved">Résolue</mat-checkbox>
+              <mat-checkbox formControlName="isRejected">Rejetée</mat-checkbox>
+            </div>
+            <div style="display:flex; gap:8px; padding-top:4px;">
+              <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid">Créer</button>
+              <button mat-button type="button" (click)="showAddForm = false">Annuler</button>
+            </div>
+          </form>
+        </mat-card-content>
+      }
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Structure émettrice</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Équipement</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Intrant</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Quantité</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Résolue</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Rejetée</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Créée le</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (notification of paginatedNotifications; track notification.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  @if (editingId === notification.id) {
+                    <td style="padding:8px;">{{ notification.id }}</td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <mat-select [(ngModel)]="editingData.emitterId">
+                          @for (structure of structures; track structure.id) {
+                            <mat-option [value]="structure.id">{{ structure.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <mat-select [(ngModel)]="editingData.equipmentId">
+                          @for (equipment of equipments; track equipment.id) {
+                            <mat-option [value]="equipment.id">{{ equipment.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <mat-select [(ngModel)]="editingData.intrantId">
+                          @for (intrant of intrants; track intrant.id) {
+                            <mat-option [value]="intrant.id">{{ intrant.name }}</mat-option>
+                          }
+                        </mat-select>
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:90px; font-size:12px;">
+                        <input matInput type="number" [(ngModel)]="editingData.quantity" />
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-checkbox [(ngModel)]="editingData.isResolved" />
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-checkbox [(ngModel)]="editingData.isRejected" />
+                    </td>
+                    <td style="padding:8px;">{{ notification.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td style="padding:8px;">
+                      <button mat-icon-button color="primary" (click)="saveEdit(notification)" title="Enregistrer">
+                        <mat-icon>save</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="cancelEdit()" title="Annuler">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </td>
+                  } @else {
+                    <td style="padding:10px 8px;">{{ notification.id }}</td>
+                    <td style="padding:10px 8px;">{{ notification.emitterName }}</td>
+                    <td style="padding:10px 8px;">{{ notification.equipmentName }}</td>
+                    <td style="padding:10px 8px;">{{ notification.intrantName }}</td>
+                    <td style="padding:10px 8px;">{{ notification.quantity }}</td>
+                    <td style="padding:10px 8px;">
+                      <mat-icon [style.color]="notification.isResolved ? '#2e7d32' : '#bdbdbd'">
+                        {{ notification.isResolved ? 'check_circle' : 'radio_button_unchecked' }}
+                      </mat-icon>
+                    </td>
+                    <td style="padding:10px 8px;">
+                      <mat-icon [style.color]="notification.isRejected ? '#c62828' : '#bdbdbd'">
+                        {{ notification.isRejected ? 'cancel' : 'radio_button_unchecked' }}
+                      </mat-icon>
+                    </td>
+                    <td style="padding:10px 8px;">{{ notification.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                    <td style="padding:10px 8px;">
+                      <button mat-icon-button color="accent" (click)="startEdit(notification)" title="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteNotification(notification)" title="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="9" style="text-align:center; padding:30px; color:#999;">Aucune notification disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="notifications.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

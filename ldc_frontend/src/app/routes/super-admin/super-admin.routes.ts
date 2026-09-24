@@ -48,6 +48,12 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'notifications',
+    loadComponent: () =>
+      import('./notifications/notification-admin').then(m => m.NotificationAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'system',
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],
