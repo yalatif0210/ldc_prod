@@ -33,6 +33,16 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'regions',
+    loadComponent: () => import('./regions/region-admin').then(m => m.RegionAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'districts',
+    loadComponent: () => import('./districts/district-admin').then(m => m.DistrictAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'synthesis',
     loadComponent: () => import('./synthesis/synthesis-admin').then(m => m.SynthesisAdmin),
     canActivate: [superAdminGuard],
