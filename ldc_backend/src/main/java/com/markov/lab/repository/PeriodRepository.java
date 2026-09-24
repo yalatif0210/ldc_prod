@@ -11,6 +11,8 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PeriodRepository extends JpaRepository<Period, Long> {
+    long countByMonth_Id(Long monthId);
+
     @Query("SELECT p FROM Period p WHERE p.id > :id ORDER BY p.id ASC")
     List<Period> findByIdGreaterThan(@Param("id") Long id);
 

@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface AdjustmentRepository extends JpaRepository<Adjustment, Long> {
     void deleteByIntrantMvtData_Report_Id(Long reportId);
+
+    long countByAdjustmentType_Id(Long adjustmentTypeId);
 }
