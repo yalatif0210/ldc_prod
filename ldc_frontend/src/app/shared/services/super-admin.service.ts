@@ -135,6 +135,57 @@ export class SuperAdminService {
     return this.http.delete<any>(`${this.base}/periods/${id}`);
   }
 
+  // Information units (Ticket #11)
+  getInformationUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/information-units`);
+  }
+
+  createInformationUnit(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/information-units`, data);
+  }
+
+  updateInformationUnit(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/information-units/${id}`, data);
+  }
+
+  deleteInformationUnit(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/information-units/${id}`);
+  }
+
+  // Information sub-units (Ticket #11)
+  getInformationSubUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/information-sub-units`);
+  }
+
+  createInformationSubUnit(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/information-sub-units`, data);
+  }
+
+  updateInformationSubUnit(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/information-sub-units/${id}`, data);
+  }
+
+  deleteInformationSubUnit(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/information-sub-units/${id}`);
+  }
+
+  // Information sub-sub-units (Ticket #11)
+  getInformationSubSubUnits(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/information-sub-sub-units`);
+  }
+
+  createInformationSubSubUnit(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/information-sub-sub-units`, data);
+  }
+
+  updateInformationSubSubUnit(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/information-sub-sub-units/${id}`, data);
+  }
+
+  deleteInformationSubSubUnit(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/information-sub-sub-units/${id}`);
+  }
+
   // Roles
   getRoles(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/roles`);

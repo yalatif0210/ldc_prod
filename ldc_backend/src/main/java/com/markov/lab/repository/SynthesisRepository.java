@@ -7,4 +7,6 @@ import java.util.List;
 
 public interface SynthesisRepository extends Repository<Synthesis, Long> {
     List<Synthesis> findAll();
+
+    long countByInformationUnitId(Long informationUnitId);
 }

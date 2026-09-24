@@ -43,6 +43,26 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'information-units',
+    loadComponent: () =>
+      import('./information-units/information-unit-admin').then(m => m.InformationUnitAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'information-sub-units',
+    loadComponent: () =>
+      import('./information-sub-units/information-sub-unit-admin').then(m => m.InformationSubUnitAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'information-sub-sub-units',
+    loadComponent: () =>
+      import('./information-sub-sub-units/information-sub-sub-unit-admin').then(
+        m => m.InformationSubSubUnitAdmin,
+      ),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'system',
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],

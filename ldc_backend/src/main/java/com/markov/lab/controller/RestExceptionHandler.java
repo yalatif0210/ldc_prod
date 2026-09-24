@@ -12,6 +12,7 @@ import java.util.List;
 
 import com.markov.lab.controller.dto.ApiErrorResponse;
 import com.markov.lab.exceptions.DuplicateException;
+import com.markov.lab.exceptions.EntityHasDependentsException;
 import com.markov.lab.exceptions.InvalidCurrentPasswordException;
 import com.markov.lab.exceptions.NotFoundException;
 import org.springframework.http.ResponseEntity;
@@ -51,6 +52,11 @@ public class RestExceptionHandler {
 
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ApiErrorResponse> handleDuplicateException(DuplicateException e) {
+        return ResponseEntity.status(CONFLICT).body(new ApiErrorResponse(CONFLICT.value(), e.getMessage()));
+    }
+
+    @ExceptionHandler(EntityHasDependentsException.class)
+    public ResponseEntity<ApiErrorResponse> handleEntityHasDependentsException(EntityHasDependentsException e) {
         return ResponseEntity.status(CONFLICT).body(new ApiErrorResponse(CONFLICT.value(), e.getMessage()));
     }
 
