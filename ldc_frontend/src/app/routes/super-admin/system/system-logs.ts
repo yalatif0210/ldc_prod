@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ToastrService } from 'ngx-toastr';
-import { SuperAdminService } from '@shared/services/super-admin.service';
+import { AuditLog, AuditLogFilter, SuperAdminService } from '@shared/services/super-admin.service';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 @Component({
@@ -15,6 +16,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
   templateUrl: './system-logs.html',
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatCardModule,
     MatDialogModule,
@@ -36,8 +38,26 @@ export class SystemLogs implements OnInit, OnDestroy {
   page     = 1;
   pageSize = 20;
 
+  // Journal d'audit (Ticket #7)
+  auditLogs: AuditLog[]      = [];
+  auditLoading                = true;
+  auditPage                   = 0;
+  auditPageSize                = 20;
+  auditTotalElements           = 0;
+  auditFilter = {
+    entityType: '',
+    action: '',
+    accountId: '',
+    from: '',
+    to: '',
+  };
+  readonly auditEntityTypes = ['Account', 'User', 'Report', 'Period', 'Role', 'Structure'];
+  readonly auditActions     = ['CREATE', 'UPDATE', 'DELETE'];
+  expandedAuditLogId: number | null = null;
+
   ngOnInit(): void {
     this.loadAll();
+    this.loadAuditLogs();
   }
 
   loadAll(): void {
@@ -105,6 +125,66 @@ export class SystemLogs implements OnInit, OnDestroy {
         this.purgingBlacklist = false;
       },
     });
+  }
+
+  // ---- Journal d'audit (Ticket #7) ----
+
+  loadAuditLogs(): void {
+    this.auditLoading = true;
+    const filter: AuditLogFilter = {
+      entityType: this.auditFilter.entityType || null,
+      action: this.auditFilter.action || null,
+      accountId: this.auditFilter.accountId ? Number(this.auditFilter.accountId) : null,
+      from: this.auditFilter.from ? new Date(this.auditFilter.from).toISOString() : null,
+      to: this.auditFilter.to ? new Date(this.auditFilter.to).toISOString() : null,
+    };
+    this.service.getAuditLogs(filter, this.auditPage, this.auditPageSize)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: result => {
+          this.auditLogs         = result?.content ?? [];
+          this.auditTotalElements = result?.totalElements ?? 0;
+          this.auditLoading       = false;
+        },
+        error: () => {
+          this.toast.error("Erreur lors du chargement du journal d'audit");
+          this.auditLoading = false;
+        },
+      });
+  }
+
+  applyAuditFilters(): void {
+    this.auditPage = 0;
+    this.loadAuditLogs();
+  }
+
+  resetAuditFilters(): void {
+    this.auditFilter = { entityType: '', action: '', accountId: '', from: '', to: '' };
+    this.applyAuditFilters();
+  }
+
+  prevAuditPage(): void {
+    if (this.auditPage <= 0) return;
+    this.auditPage--;
+    this.loadAuditLogs();
+  }
+
+  nextAuditPage(): void {
+    if ((this.auditPage + 1) * this.auditPageSize >= this.auditTotalElements) return;
+    this.auditPage++;
+    this.loadAuditLogs();
+  }
+
+  toggleAuditSnapshot(log: AuditLog): void {
+    this.expandedAuditLogId = this.expandedAuditLogId === log.id ? null : log.id;
+  }
+
+  formattedSnapshot(log: AuditLog): string {
+    try {
+      return JSON.stringify(JSON.parse(log.snapshot), null, 2);
+    } catch {
+      return log.snapshot ?? '';
+    }
   }
 
   ngOnDestroy(): void {

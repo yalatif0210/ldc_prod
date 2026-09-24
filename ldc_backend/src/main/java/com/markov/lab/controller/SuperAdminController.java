@@ -14,11 +14,14 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +43,7 @@ public class SuperAdminController {
     private final MonthRepository monthRepository;
     private final EquipmentRepository equipmentRepository;
     private final TokenBlacklistService tokenBlacklistService;
+    private final AuditLogRepository auditLogRepository;
 
     // ---- Stats ----
 
@@ -229,5 +233,28 @@ public class SuperAdminController {
     public ResponseEntity<ApiSuccessResponse> purgeBlacklist() {
         superAdminService.purgeBlacklist();
         return ResponseEntity.ok(new ApiSuccessResponse(200, "Token blacklist purged"));
+    }
+
+    // ---- Audit log (Ticket #7) — lecture seule, écrit uniquement par SuperAdminAuditAspect ----
+
+    // Bornes par défaut quand "from"/"to" ne sont pas fournis : voir la note dans
+    // AuditLogRepository.search sur pourquoi on évite un "IS NULL" sur ces paramètres Instant.
+    private static final Instant AUDIT_LOG_MIN_TIMESTAMP = Instant.EPOCH;
+    private static final Instant AUDIT_LOG_MAX_TIMESTAMP = Instant.parse("9999-12-31T23:59:59Z");
+
+    @GetMapping("/audit-logs")
+    public ResponseEntity<Page<AuditLog>> getAuditLogs(
+            @RequestParam(required = false) String entityType,
+            @RequestParam(required = false) AuditAction action,
+            @RequestParam(required = false) Long accountId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant to,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "timestamp"));
+        Instant effectiveFrom = from != null ? from : AUDIT_LOG_MIN_TIMESTAMP;
+        Instant effectiveTo = to != null ? to : AUDIT_LOG_MAX_TIMESTAMP;
+        return ResponseEntity.ok(
+                auditLogRepository.search(entityType, action, accountId, effectiveFrom, effectiveTo, pageable));
     }
 }
