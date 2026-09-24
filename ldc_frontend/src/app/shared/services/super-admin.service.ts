@@ -183,6 +183,40 @@ export class SuperAdminService {
     return this.http.delete<any>(`${this.base}/notifications/${id}`);
   }
 
+  // Regions (Ticket #10)
+  getRegions(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/regions`);
+  }
+
+  createRegion(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/regions`, data);
+  }
+
+  updateRegion(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/regions/${id}`, data);
+  }
+
+  deleteRegion(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/regions/${id}`);
+  }
+
+  // Districts (Ticket #10)
+  getDistricts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/districts`);
+  }
+
+  createDistrict(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/districts`, data);
+  }
+
+  updateDistrict(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/districts/${id}`, data);
+  }
+
+  deleteDistrict(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/districts/${id}`);
+  }
+
   // System / Logs
   getLoginAttempts(page: number, size: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/system/login-attempts`, {
