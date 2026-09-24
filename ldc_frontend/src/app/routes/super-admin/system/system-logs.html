@@ -113,8 +113,8 @@
         <!-- Filtres -->
         <div style="display:flex; flex-wrap:wrap; gap:12px; align-items:flex-end; padding-bottom:16px;">
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <label style="font-size:11px; color:#666;">Type d'entité</label>
-            <select [(ngModel)]="auditFilter.entityType" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:140px;">
+            <label for="audit-filter-entity-type" style="font-size:11px; color:#666;">Type d'entité</label>
+            <select id="audit-filter-entity-type" [(ngModel)]="auditFilter.entityType" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:140px;">
               <option value="">Tous</option>
               @for (type of auditEntityTypes; track type) {
                 <option [value]="type">{{ type }}</option>
@@ -123,8 +123,8 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <label style="font-size:11px; color:#666;">Action</label>
-            <select [(ngModel)]="auditFilter.action" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:120px;">
+            <label for="audit-filter-action" style="font-size:11px; color:#666;">Action</label>
+            <select id="audit-filter-action" [(ngModel)]="auditFilter.action" style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; min-width:120px;">
               <option value="">Toutes</option>
               @for (action of auditActions; track action) {
                 <option [value]="action">{{ action }}</option>
@@ -133,20 +133,20 @@
           </div>
 
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <label style="font-size:11px; color:#666;">Id du compte auteur</label>
-            <input type="number" [(ngModel)]="auditFilter.accountId" placeholder="Ex. 12"
+            <label for="audit-filter-account-id" style="font-size:11px; color:#666;">Id du compte auteur</label>
+            <input id="audit-filter-account-id" type="number" [(ngModel)]="auditFilter.accountId" placeholder="Ex. 12"
                    style="padding:6px 8px; border:1px solid #ccc; border-radius:4px; width:110px;" />
           </div>
 
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <label style="font-size:11px; color:#666;">Depuis</label>
-            <input type="date" [(ngModel)]="auditFilter.from"
+            <label for="audit-filter-from" style="font-size:11px; color:#666;">Depuis</label>
+            <input id="audit-filter-from" type="date" [(ngModel)]="auditFilter.from"
                    style="padding:6px 8px; border:1px solid #ccc; border-radius:4px;" />
           </div>
 
           <div style="display:flex; flex-direction:column; gap:4px;">
-            <label style="font-size:11px; color:#666;">Jusqu'au</label>
-            <input type="date" [(ngModel)]="auditFilter.to"
+            <label for="audit-filter-to" style="font-size:11px; color:#666;">Jusqu'au</label>
+            <input id="audit-filter-to" type="date" [(ngModel)]="auditFilter.to"
                    style="padding:6px 8px; border:1px solid #ccc; border-radius:4px;" />
           </div>
 

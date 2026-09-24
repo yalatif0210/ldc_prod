@@ -95,7 +95,8 @@ export class SanguineProductAdmin implements OnInit, OnDestroy {
   }
 
   saveEdit(sanguineProduct: any): void {
-    this.service.updateSanguineProduct(sanguineProduct.id, { name: this.editingData.name }).subscribe({
+    const data = { name: this.editingData.name };
+    this.service.updateSanguineProduct(sanguineProduct.id, data).subscribe({
       next: () => {
         this.toast.success('Compte sanguin mis à jour');
         this.cancelEdit();
