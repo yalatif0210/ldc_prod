@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface IntrantRepository extends JpaRepository<Intrant, Long> {
     long countByEquipment_Id(Long equipmentId);
+
+    long countByIntrantType_Id(Long intrantTypeId);
 }

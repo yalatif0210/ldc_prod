@@ -10,6 +10,8 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ReportRepository extends JpaRepository<Report, Long> {
+        long countByStatus_Id(Long statusId);
+
         @Query("SELECT a FROM Report a WHERE a.account.id = :accountId AND a.equipment.id = :equipmentId ORDER BY a.id DESC LIMIT 1")
         Report findByAccountAndEquipment(@Param("accountId") Long accountId, @Param("equipmentId") Long equipmentId);
 

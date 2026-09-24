@@ -186,6 +186,91 @@ export class SuperAdminService {
     return this.http.delete<any>(`${this.base}/information-sub-sub-units/${id}`);
   }
 
+  // Statuses (referentiel)
+  getStatuses(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/statuses`);
+  }
+
+  createStatus(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/statuses`, data);
+  }
+
+  updateStatus(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/statuses/${id}`, data);
+  }
+
+  deleteStatus(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/statuses/${id}`);
+  }
+
+  // Months (referentiel)
+  getMonths(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/months`);
+  }
+
+  createMonth(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/months`, data);
+  }
+
+  updateMonth(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/months/${id}`, data);
+  }
+
+  deleteMonth(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/months/${id}`);
+  }
+
+  // Adjustment types (referentiel)
+  getAdjustmentTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/adjustment-types`);
+  }
+
+  createAdjustmentType(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/adjustment-types`, data);
+  }
+
+  updateAdjustmentType(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/adjustment-types/${id}`, data);
+  }
+
+  deleteAdjustmentType(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/adjustment-types/${id}`);
+  }
+
+  // Intrant types (referentiel)
+  getIntrantTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrant-types`);
+  }
+
+  createIntrantType(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/intrant-types`, data);
+  }
+
+  updateIntrantType(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/intrant-types/${id}`, data);
+  }
+
+  deleteIntrantType(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/intrant-types/${id}`);
+  }
+
+  // Synthesis types (referentiel)
+  getSynthesisTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/synthesis-types`);
+  }
+
+  createSynthesisType(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/synthesis-types`, data);
+  }
+
+  updateSynthesisType(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/synthesis-types/${id}`, data);
+  }
+
+  deleteSynthesisType(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/synthesis-types/${id}`);
+  }
+
   // Roles
   getRoles(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/roles`);
@@ -228,10 +313,6 @@ export class SuperAdminService {
   // Intrants (Ticket #12)
   getIntrants(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/intrants`);
-  }
-
-  getIntrantTypes(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.base}/intrants/intrant-types`);
   }
 
   createIntrant(data: any): Observable<any> {

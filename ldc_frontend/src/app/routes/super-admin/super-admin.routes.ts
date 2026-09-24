@@ -94,6 +94,31 @@ export const routes: Routes = [
     canActivate: [superAdminGuard],
   },
   {
+    path: 'statuses',
+    loadComponent: () => import('./statuses/status-admin').then(m => m.StatusAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'months',
+    loadComponent: () => import('./months/month-admin').then(m => m.MonthAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'adjustment-types',
+    loadComponent: () => import('./adjustment-types/adjustment-type-admin').then(m => m.AdjustmentTypeAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'intrant-types',
+    loadComponent: () => import('./intrant-types/intrant-type-admin').then(m => m.IntrantTypeAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
+    path: 'synthesis-types',
+    loadComponent: () => import('./synthesis-types/synthesis-type-admin').then(m => m.SynthesisTypeAdmin),
+    canActivate: [superAdminGuard],
+  },
+  {
     path: 'system',
     loadComponent: () => import('./system/system-logs').then(m => m.SystemLogs),
     canActivate: [superAdminGuard],

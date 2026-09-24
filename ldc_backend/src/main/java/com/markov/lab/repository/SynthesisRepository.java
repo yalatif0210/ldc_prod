@@ -9,4 +9,6 @@ public interface SynthesisRepository extends Repository<Synthesis, Long> {
     List<Synthesis> findAll();
 
     long countByInformationUnitId(Long informationUnitId);
+
+    long countBySynthesisType_Id(Long synthesisTypeId);
 }
