@@ -4,15 +4,9 @@ import com.markov.lab.entity.Account;
 import com.markov.lab.entity.AuditAction;
 import com.markov.lab.entity.AuditLog;
 import com.markov.lab.entity.User;
-import com.markov.lab.repository.AccountRepository;
 import com.markov.lab.repository.AuditLogRepository;
-import com.markov.lab.repository.PeriodRepository;
-import com.markov.lab.repository.ReportRepository;
-import com.markov.lab.repository.RoleRepository;
-import com.markov.lab.repository.StructureRepository;
 import com.markov.lab.repository.UserRepository;
 import com.fasterxml.jackson.databind.JsonNode;
-import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,6 +14,8 @@ import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.reflect.MethodSignature;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.context.ApplicationContext;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,34 +28,44 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Point d'interception UNIQUE du journal d'audit (Ticket #7) pour la console Super Admin.
  *
- * <p>Cet aspect {@code @Around} entoure toutes les méthodes publiques de
- * {@link com.markov.lab.controller.SuperAdminController}. Quand la requête HTTP sous-jacente est
- * une mutation (POST/PUT/PATCH/DELETE) sur une ressource connue (Compte, Utilisateur, Rapport,
- * Période, Rôle, Structure), une entrée {@link AuditLog} est écrite automatiquement après
- * exécution réussie du contrôleur — sans qu'aucune méthode du contrôleur n'ait besoin d'appeler
- * explicitement le journal d'audit. Aucune entrée n'est créée si le contrôleur lève une exception
- * (ex. 404, 400) : proceed() propage alors l'exception avant qu'on atteigne la persistance.</p>
+ * <p>Cet aspect {@code @Around} entoure toutes les méthodes publiques de tout contrôleur
+ * {@code com.markov.lab.controller.SuperAdmin*Controller}. Quand la requête HTTP sous-jacente est
+ * une mutation (POST/PUT/PATCH/DELETE) sur une entité reconnue, une entrée {@link AuditLog} est
+ * écrite automatiquement après exécution réussie du contrôleur — sans qu'aucune méthode du
+ * contrôleur n'ait besoin d'appeler explicitement le journal d'audit. Aucune entrée n'est créée si
+ * le contrôleur lève une exception (ex. 404, 400) : proceed() propage alors l'exception avant
+ * qu'on atteigne la persistance.</p>
  *
- * <h2>Comment l'entité et son id sont résolus génériquement</h2>
- * <ul>
- *   <li>Le {@code entityType} est déduit du premier segment de chemin après
- *       {@code /api/super-admin/} via {@link #SEGMENT_TO_ENTITY_TYPE} (ex. "periods" -&gt;
- *       "Period"). Une route qui ne suivrait pas cette convention REST (segment pluriel de la
- *       ressource) ou qui ne concerne pas une des 6 entités couvertes (ex. {@code /system/**},
- *       {@code /stats/**}) n'est pas auditée — c'est volontaire, ces routes ne font pas partie du
- *       périmètre du ticket.</li>
- *   <li>L'id est résolu depuis un {@code @PathVariable} nommé "id" ou "&lt;entité&gt;Id" (ex.
- *       "structureId" pour {@code DELETE /structures/{structureId}/equipments/{equipmentId}}),
- *       sinon depuis un champ "&lt;entité&gt;Id" du corps de la requête déjà désérialisé (ex.
- *       {@code ChangeRoleRequest.accountId()}).</li>
- * </ul>
+ * <h2>Extensible sans toucher ce fichier — lis ceci avant d'ajouter une nouvelle entité</h2>
+ * <p>Cet aspect intercepte désormais TOUT contrôleur dont le nom de classe suit le motif
+ * {@code SuperAdmin<Entité>Controller} (ex. {@code SuperAdminTransactionController} -&gt;
+ * entityType {@code "Transaction"}), à condition qu'un bean Spring Data nommé
+ * {@code <entité en minuscule>Repository} existe (ex. {@code transactionRepository}, auto-généré
+ * par Spring pour toute interface {@code TransactionRepository extends JpaRepository<...>} — rien
+ * à enregistrer manuellement). <strong>Pour qu'une nouvelle entité soit auditée automatiquement,
+ * il suffit de nommer son contrôleur dédié selon cette convention</strong> — aucune modification de
+ * cette classe n'est nécessaire, ce qui évite que plusieurs tickets travaillant en parallèle sur
+ * des entités différentes se marchent sur les mêmes lignes.</p>
+ *
+ * <p>Le contrôleur historique {@link com.markov.lab.controller.SuperAdminController} (Compte,
+ * Utilisateur, Rapport, Période, Rôle, Structure dans une seule classe) ne suit pas cette
+ * convention un-contrôleur-par-entité : il reste résolu via {@link #LEGACY_SEGMENT_TO_ENTITY_TYPE},
+ * un repli explicite qui ne doit pas être étendu — toute nouvelle entité doit avoir son propre
+ * contrôleur {@code SuperAdmin<Entité>Controller}.</p>
+ *
+ * <h2>Comment l'id est résolu génériquement</h2>
+ * <p>Depuis un {@code @PathVariable} nommé "id" ou "&lt;entité&gt;Id" (ex. "structureId" pour
+ * {@code DELETE /structures/{structureId}/equipments/{equipmentId}}), sinon depuis un champ
+ * "&lt;entité&gt;Id" du corps de la requête déjà désérialisé (ex.
+ * {@code ChangeRoleRequest.accountId()}).</p>
  *
  * <h2>Limitation documentée : id d'une création (CREATE)</h2>
  * <p>Le seul endpoint de création actuellement dans le périmètre est {@code POST /periods}, dont
@@ -84,7 +90,8 @@ import java.util.Objects;
 @Slf4j
 public class SuperAdminAuditAspect {
 
-    private static final Map<String, String> SEGMENT_TO_ENTITY_TYPE = Map.of(
+    /** Repli explicite pour le seul contrôleur historique qui gère plusieurs entités — voir Javadoc de classe. */
+    private static final Map<String, String> LEGACY_SEGMENT_TO_ENTITY_TYPE = Map.of(
             "accounts", "Account",
             "users", "User",
             "reports", "Report",
@@ -93,30 +100,14 @@ public class SuperAdminAuditAspect {
             "structures", "Structure"
     );
 
+    private static final Pattern CONTROLLER_NAME_PATTERN = Pattern.compile("^SuperAdmin(.+)Controller$");
+
     private final AuditLogRepository auditLogRepository;
     private final AuditSnapshotService snapshotService;
     private final UserRepository userRepository;
-    private final AccountRepository accountRepository;
-    private final ReportRepository reportRepository;
-    private final PeriodRepository periodRepository;
-    private final RoleRepository roleRepository;
-    private final StructureRepository structureRepository;
+    private final ApplicationContext applicationContext;
 
-    private Map<String, JpaRepository<Object, Long>> repositoriesByType;
-
-    @PostConstruct
-    @SuppressWarnings("unchecked")
-    void init() {
-        repositoriesByType = new HashMap<>();
-        repositoriesByType.put("Account", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) accountRepository);
-        repositoriesByType.put("User", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) userRepository);
-        repositoriesByType.put("Report", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) reportRepository);
-        repositoriesByType.put("Period", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) periodRepository);
-        repositoriesByType.put("Role", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) roleRepository);
-        repositoriesByType.put("Structure", (JpaRepository<Object, Long>) (JpaRepository<?, ?>) structureRepository);
-    }
-
-    @Around("target(com.markov.lab.controller.SuperAdminController)")
+    @Around("execution(* com.markov.lab.controller.SuperAdmin*Controller.*(..))")
     public Object audit(ProceedingJoinPoint pjp) throws Throwable {
         HttpServletRequest request = currentRequest();
         AuditAction action = request == null ? null : resolveAction(request.getMethod());
@@ -124,8 +115,8 @@ public class SuperAdminAuditAspect {
             return pjp.proceed();
         }
 
-        String entityType = resolveEntityType(request.getRequestURI());
-        if (entityType == null) {
+        String entityType = resolveEntityType(pjp.getTarget(), request.getRequestURI());
+        if (entityType == null || resolveRepository(entityType) == null) {
             return pjp.proceed();
         }
 
@@ -198,7 +189,17 @@ public class SuperAdminAuditAspect {
         };
     }
 
-    private String resolveEntityType(String uri) {
+    private String resolveEntityType(Object controllerTarget, String uri) {
+        String controllerName = controllerTarget.getClass().getSimpleName();
+        Matcher matcher = CONTROLLER_NAME_PATTERN.matcher(controllerName);
+        if (matcher.matches() && !"".equals(matcher.group(1))
+                && !com.markov.lab.controller.SuperAdminController.class.getSimpleName().equals(controllerName)) {
+            return matcher.group(1);
+        }
+        return resolveLegacyEntityType(uri);
+    }
+
+    private String resolveLegacyEntityType(String uri) {
         String marker = "/api/super-admin/";
         int idx = uri.indexOf(marker);
         if (idx < 0) {
@@ -215,7 +216,17 @@ public class SuperAdminAuditAspect {
         if (segments.length >= 3 && "equipments".equals(segments[2])) {
             return null;
         }
-        return SEGMENT_TO_ENTITY_TYPE.get(segments[0]);
+        return LEGACY_SEGMENT_TO_ENTITY_TYPE.get(segments[0]);
+    }
+
+    @SuppressWarnings("unchecked")
+    private JpaRepository<Object, Long> resolveRepository(String entityType) {
+        String beanName = Character.toLowerCase(entityType.charAt(0)) + entityType.substring(1) + "Repository";
+        try {
+            return (JpaRepository<Object, Long>) applicationContext.getBean(beanName, JpaRepository.class);
+        } catch (NoSuchBeanDefinitionException e) {
+            return null;
+        }
     }
 
     private Long resolvePathId(String entityType, Method method, Object[] args) {
@@ -274,12 +285,12 @@ public class SuperAdminAuditAspect {
         if (id == null) {
             return null;
         }
-        JpaRepository<Object, Long> repository = repositoriesByType.get(entityType);
+        JpaRepository<Object, Long> repository = resolveRepository(entityType);
         return repository == null ? null : repository.findById(id).orElse(null);
     }
 
     private Long bestEffortLatestId(String entityType) {
-        JpaRepository<Object, Long> repository = repositoriesByType.get(entityType);
+        JpaRepository<Object, Long> repository = resolveRepository(entityType);
         if (repository == null) {
             return null;
         }
