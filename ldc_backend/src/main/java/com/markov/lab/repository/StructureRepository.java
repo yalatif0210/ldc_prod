@@ -25,4 +25,6 @@ public interface StructureRepository extends JpaRepository<Structure, Long> {
 
     long countByDistrict_Id(Long districtId);
 
+    long countByEquipments_Id(Long equipmentId);
+
 }

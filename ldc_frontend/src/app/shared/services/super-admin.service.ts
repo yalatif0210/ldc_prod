@@ -208,9 +208,59 @@ export class SuperAdminService {
     return this.http.delete<any>(`${this.base}/structures/${structureId}/equipments/${equipmentId}`);
   }
 
-  // Equipments
+  // Equipments (Ticket #12)
   getEquipments(): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/equipments`);
+  }
+
+  createEquipment(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/equipments`, data);
+  }
+
+  updateEquipment(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/equipments/${id}`, data);
+  }
+
+  deleteEquipment(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/equipments/${id}`);
+  }
+
+  // Intrants (Ticket #12)
+  getIntrants(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrants`);
+  }
+
+  getIntrantTypes(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrants/intrant-types`);
+  }
+
+  createIntrant(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/intrants`, data);
+  }
+
+  updateIntrant(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/intrants/${id}`, data);
+  }
+
+  deleteIntrant(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/intrants/${id}`);
+  }
+
+  // Sanguine products / comptes sanguins (Ticket #12)
+  getSanguineProducts(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/sanguine-products`);
+  }
+
+  createSanguineProduct(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/sanguine-products`, data);
+  }
+
+  updateSanguineProduct(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/sanguine-products/${id}`, data);
+  }
+
+  deleteSanguineProduct(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/sanguine-products/${id}`);
   }
 
   // Notifications (Ticket #9)

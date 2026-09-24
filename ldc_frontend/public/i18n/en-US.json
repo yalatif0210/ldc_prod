@@ -9,6 +9,8 @@
     "super_admin.structures": "Structures",
     "super_admin.synthesis": "Synthesis",
     "super_admin.intrants": "Intrants",
+    "super_admin.equipments": "Equipments",
+    "super_admin.sanguine_products": "Blood Accounts",
     "super_admin.system": "System",
 
     "dashboard": "Dashboard",

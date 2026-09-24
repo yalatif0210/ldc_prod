@@ -9,4 +9,6 @@ public interface InformationRepository extends JpaRepository<Information, Long> 
     long countByInformationSubUnitId(Long informationSubUnitId);
 
     long countByInformationSubSubUnitId(Long informationSubSubUnitId);
+
+    long countByEquipment_Id(Long equipmentId);
 }
