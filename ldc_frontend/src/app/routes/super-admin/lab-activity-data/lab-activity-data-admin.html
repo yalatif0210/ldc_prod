@@ -1,0 +1,114 @@
+<div class="wrapper-page-content row f-s-12">
+  <div class="col-sm-12">
+    <mat-card class="r-0">
+      <mat-card-content class="app-title-bar" style="display:flex; justify-content:space-between; align-items:center;">
+        <h2 class="th2">Données d'activité labo</h2>
+        <button mat-raised-button color="primary" (click)="showAddForm = !showAddForm">
+          <mat-icon>add</mat-icon> Ajouter une donnée
+        </button>
+      </mat-card-content>
+
+      @if (showAddForm) {
+        <mat-card-content style="background:#f5f5f5; padding:16px; margin-bottom:16px; border-radius:4px;">
+          <h3 style="margin:0 0 12px;">Nouvelle donnée d'activité labo</h3>
+          <form [formGroup]="addForm" (ngSubmit)="submitAdd()" style="display:flex; gap:12px; flex-wrap:wrap; align-items:flex-start;">
+            <mat-form-field appearance="outline" style="flex:1; min-width:140px;">
+              <mat-label>ID Rapport</mat-label>
+              <input matInput type="number" formControlName="reportId" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:140px;">
+              <mat-label>ID Information</mat-label>
+              <input matInput type="number" formControlName="informationId" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="flex:1; min-width:140px;">
+              <mat-label>Valeur</mat-label>
+              <input matInput type="number" formControlName="value" />
+            </mat-form-field>
+            <div style="display:flex; gap:8px; padding-top:4px;">
+              <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid">Créer</button>
+              <button mat-button type="button" (click)="showAddForm = false">Annuler</button>
+            </div>
+          </form>
+        </mat-card-content>
+      }
+
+      <mat-card-content>
+        @if (loading) {
+          <div style="display:flex; justify-content:center; padding:40px;">
+            <mat-spinner diameter="40" />
+          </div>
+        } @else {
+          <table style="width:100%; border-collapse:collapse; font-size:13px;">
+            <thead>
+              <tr style="background:#f0f0f0; text-align:left;">
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID Rapport</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">ID Information</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Valeur</th>
+                <th style="padding:10px 8px; border-bottom:2px solid #ddd;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (row of paginatedRows; track row.id) {
+                <tr style="border-bottom:1px solid #eee;">
+                  @if (editingId === row.id) {
+                    <td style="padding:8px;">{{ row.id }}</td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <input matInput type="number" [(ngModel)]="editingData.reportId" />
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <input matInput type="number" [(ngModel)]="editingData.informationId" />
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <mat-form-field appearance="outline" style="width:100%; font-size:12px;">
+                        <input matInput type="number" [(ngModel)]="editingData.value" />
+                      </mat-form-field>
+                    </td>
+                    <td style="padding:8px;">
+                      <button mat-icon-button color="primary" (click)="saveEdit(row)" title="Enregistrer">
+                        <mat-icon>save</mat-icon>
+                      </button>
+                      <button mat-icon-button (click)="cancelEdit()" title="Annuler">
+                        <mat-icon>close</mat-icon>
+                      </button>
+                    </td>
+                  } @else {
+                    <td style="padding:10px 8px;">{{ row.id }}</td>
+                    <td style="padding:10px 8px;">{{ row.report?.id ?? '-' }}</td>
+                    <td style="padding:10px 8px;">{{ row.information?.id ?? '-' }}</td>
+                    <td style="padding:10px 8px;">{{ row.value }}</td>
+                    <td style="padding:10px 8px;">
+                      <button mat-icon-button color="accent" (click)="startEdit(row)" title="Modifier">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" (click)="deleteRow(row)" title="Supprimer">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </td>
+                  }
+                </tr>
+              } @empty {
+                <tr>
+                  <td colspan="5" style="text-align:center; padding:30px; color:#999;">Aucune donnée disponible</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          <mat-paginator
+            [length]="rows.length"
+            [pageSize]="pageSize"
+            [pageIndex]="pageIndex"
+            [pageSizeOptions]="pageSizeOptions"
+            (page)="onPageChange($event)"
+            style="margin-top: 8px"
+            aria-label="Sélectionner une page"
+          />
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+</div>

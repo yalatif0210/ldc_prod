@@ -162,6 +162,57 @@ export class SuperAdminService {
     return this.http.get<any[]>(`${this.base}/equipments`);
   }
 
+  // Lab activity data (Ticket #14)
+  getLabActivityData(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/lab-activity-data`);
+  }
+
+  createLabActivityData(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/lab-activity-data`, data);
+  }
+
+  updateLabActivityData(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/lab-activity-data/${id}`, data);
+  }
+
+  deleteLabActivityData(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/lab-activity-data/${id}`);
+  }
+
+  // Intrant movement data (Ticket #14)
+  getIntrantMvtData(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/intrant-mvt-data`);
+  }
+
+  createIntrantMvtData(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/intrant-mvt-data`, data);
+  }
+
+  updateIntrantMvtData(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/intrant-mvt-data/${id}`, data);
+  }
+
+  deleteIntrantMvtData(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/intrant-mvt-data/${id}`);
+  }
+
+  // Adjustments (Ticket #14)
+  getAdjustments(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.base}/adjustments`);
+  }
+
+  createAdjustment(data: any): Observable<any> {
+    return this.http.post<any>(`${this.base}/adjustments`, data);
+  }
+
+  updateAdjustment(id: number, data: any): Observable<any> {
+    return this.http.put<any>(`${this.base}/adjustments/${id}`, data);
+  }
+
+  deleteAdjustment(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.base}/adjustments/${id}`);
+  }
+
   // System / Logs
   getLoginAttempts(page: number, size: number): Observable<any[]> {
     return this.http.get<any[]>(`${this.base}/system/login-attempts`, {
