@@ -103,8 +103,12 @@ export class DistrictAdmin implements OnInit, OnDestroy {
     this.editingRegionId = null;
   }
 
+  isSubmitting = false;
+
   saveEdit(district: any): void {
     if (this.editingRegionId == null) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateDistrict(district.id, {
       name: this.editingName,
       regionId: this.editingRegionId,
@@ -113,8 +117,12 @@ export class DistrictAdmin implements OnInit, OnDestroy {
         this.toast.success('District mis à jour');
         this.cancelEdit();
         this.loadDistricts();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -132,14 +140,20 @@ export class DistrictAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createDistrict({ name: val.name, regionId: val.regionId }).subscribe({
       next: () => {
         this.toast.success('District créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadDistricts();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la création'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

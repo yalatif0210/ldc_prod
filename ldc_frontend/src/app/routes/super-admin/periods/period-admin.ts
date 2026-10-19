@@ -92,19 +92,27 @@ export class PeriodAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(period: any): void {
     const payload = {
       periodName: this.editingData.periodName,
       startDate:  this.editingData.startDate,
       endDate:    this.editingData.endDate,
     };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updatePeriod(period.id, payload).subscribe({
       next: () => {
         this.toast.success('Période mise à jour');
         this.cancelEdit();
         this.loadPeriods();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -122,6 +130,8 @@ export class PeriodAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createPeriod({
       periodName: val.periodName,
       startDate:  val.startDate,
@@ -132,8 +142,12 @@ export class PeriodAdmin implements OnInit, OnDestroy {
         this.addForm.reset();
         this.showAddForm = false;
         this.loadPeriods();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

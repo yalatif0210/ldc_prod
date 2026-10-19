@@ -118,10 +118,10 @@
           </div>
 
           <div style="display:flex; gap:8px; padding-top:12px;">
-            <button mat-raised-button color="primary" type="button" (click)="submitForm()">
+            <button mat-raised-button color="primary" type="button" [disabled]="isSubmitting" (click)="submitForm()">
               {{ editingId ? 'Enregistrer' : 'Créer' }}
             </button>
-            <button mat-button type="button" (click)="cancelForm()">Annuler</button>
+            <button mat-button type="button" [disabled]="isSubmitting" (click)="cancelForm()">Annuler</button>
           </div>
         </mat-card-content>
       }

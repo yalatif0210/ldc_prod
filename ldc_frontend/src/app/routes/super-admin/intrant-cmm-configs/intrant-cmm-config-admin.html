@@ -41,7 +41,7 @@
               <input matInput type="number" formControlName="cmm" />
             </mat-form-field>
             <div style="display:flex; gap:8px; padding-top:4px;">
-              <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid">Créer</button>
+              <button mat-raised-button color="primary" type="submit" [disabled]="addForm.invalid || isSubmitting">Créer</button>
               <button mat-button type="button" (click)="showAddForm = false">Annuler</button>
             </div>
           </form>
@@ -103,7 +103,7 @@
                       </mat-form-field>
                     </td>
                     <td style="padding:8px;">
-                      <button mat-icon-button color="primary" (click)="saveEdit(config)" title="Enregistrer">
+                      <button mat-icon-button color="primary" [disabled]="isSubmitting" (click)="saveEdit(config)" title="Enregistrer">
                         <mat-icon>save</mat-icon>
                       </button>
                       <button mat-icon-button (click)="cancelEdit()" title="Annuler">

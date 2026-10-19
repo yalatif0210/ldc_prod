@@ -73,6 +73,7 @@ export class TransactionAdmin implements OnInit, OnDestroy {
   formIsRejected                             = false;
   sanguineLines: TransactionLineRow[]        = [];
   medicineLines: TransactionLineRow[]        = [];
+  isSubmitting                               = false;
 
   defaultColDef: ColDef = {
     filter: true,
@@ -175,8 +176,7 @@ export class TransactionAdmin implements OnInit, OnDestroy {
     }
   }
 
-  openCreateForm(): void {
-    this.editingId                   = null;
+  private resetFormFields(): void {
     this.formOriginId                = null;
     this.formDestinationId           = null;
     this.formEquipmentId             = null;
@@ -185,7 +185,12 @@ export class TransactionAdmin implements OnInit, OnDestroy {
     this.formIsRejected              = false;
     this.sanguineLines               = [];
     this.medicineLines               = [];
-    this.showForm                    = true;
+  }
+
+  openCreateForm(): void {
+    this.editingId = null;
+    this.resetFormFields();
+    this.showForm  = true;
   }
 
   startEdit(transaction: any): void {
@@ -210,6 +215,7 @@ export class TransactionAdmin implements OnInit, OnDestroy {
   cancelForm(): void {
     this.showForm   = false;
     this.editingId  = null;
+    this.resetFormFields();
   }
 
   addSanguineLine(): void {
@@ -229,6 +235,10 @@ export class TransactionAdmin implements OnInit, OnDestroy {
   }
 
   submitForm(): void {
+    if (this.isSubmitting) {
+      return;
+    }
+    this.isSubmitting = true;
     const payload = {
       originId: this.formOriginId,
       destinationId: this.formDestinationId,
@@ -251,10 +261,14 @@ export class TransactionAdmin implements OnInit, OnDestroy {
     request.subscribe({
       next: () => {
         this.toast.success(this.editingId ? 'Transfert mis à jour' : 'Transfert créé');
+        this.isSubmitting = false;
         this.cancelForm();
         this.loadAll();
       },
-      error: () => this.toast.error(this.editingId ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création'),
+      error: () => {
+        this.toast.error(this.editingId ? 'Erreur lors de la mise à jour' : 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

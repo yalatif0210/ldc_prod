@@ -65,7 +65,7 @@ export class IntrantMvtDataAdmin implements OnInit, OnDestroy {
         this.paginate();
       },
       error: () => {
-        this.toast.error("Erreur lors du chargement des mouvements d'intrants");
+        this.toast.error('Erreur lors du chargement des mouvements d\'intrants');
         this.loading = false;
       },
     });
@@ -98,14 +98,22 @@ export class IntrantMvtDataAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(row: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateIntrantMvtData(row.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Mouvement mis à jour');
         this.cancelEdit();
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -122,14 +130,20 @@ export class IntrantMvtDataAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createIntrantMvtData(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Mouvement créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

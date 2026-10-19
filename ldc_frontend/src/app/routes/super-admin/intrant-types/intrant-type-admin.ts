@@ -88,15 +88,23 @@ export class IntrantTypeAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(intrantType: any): void {
     const payload = { name: this.editingData.name };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateIntrantType(intrantType.id, payload).subscribe({
       next: () => {
         this.toast.success('Type d\'intrant mis à jour');
         this.cancelEdit();
         this.loadIntrantTypes();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -114,14 +122,20 @@ export class IntrantTypeAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createIntrantType({ name: val.name }).subscribe({
       next: () => {
         this.toast.success('Type d\'intrant créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadIntrantTypes();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la création'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

@@ -88,15 +88,23 @@ export class SynthesisTypeAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(synthesisType: any): void {
     const payload = { type: this.editingData.type };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateSynthesisType(synthesisType.id, payload).subscribe({
       next: () => {
         this.toast.success('Type de synthèse mis à jour');
         this.cancelEdit();
         this.loadSynthesisTypes();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -114,14 +122,20 @@ export class SynthesisTypeAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createSynthesisType({ type: val.type }).subscribe({
       next: () => {
         this.toast.success('Type de synthèse créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadSynthesisTypes();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la création'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

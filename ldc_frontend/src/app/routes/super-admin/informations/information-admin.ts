@@ -127,14 +127,22 @@ export class InformationAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(info: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateInformation(info.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Information mise à jour');
         this.cancelEdit();
         this.loadInformations();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -151,14 +159,20 @@ export class InformationAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createInformation(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Information créée');
         this.addForm.reset({ isActive: true });
         this.showAddForm = false;
         this.loadInformations();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

@@ -173,6 +173,7 @@
                 <button
                   mat-icon-button
                   color="primary"
+                  [disabled]="isSubmitting"
                   (click)="saveStatus(report)"
                   title="Enregistrer"
                 >

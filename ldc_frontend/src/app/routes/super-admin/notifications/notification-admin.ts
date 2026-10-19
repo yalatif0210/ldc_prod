@@ -124,6 +124,8 @@ export class NotificationAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(notification: any): void {
     const payload = {
       emitterId:   this.editingData.emitterId,
@@ -133,13 +135,19 @@ export class NotificationAdmin implements OnInit, OnDestroy {
       isResolved:  this.editingData.isResolved,
       isRejected:  this.editingData.isRejected,
     };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateNotification(notification.id, payload).subscribe({
       next: () => {
         this.toast.success('Notification mise à jour');
         this.cancelEdit();
         this.loadNotifications();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -157,6 +165,8 @@ export class NotificationAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createNotification({
       emitterId:   val.emitterId,
       equipmentId: val.equipmentId,
@@ -170,8 +180,12 @@ export class NotificationAdmin implements OnInit, OnDestroy {
         this.addForm.reset({ isResolved: false, isRejected: false });
         this.showAddForm = false;
         this.loadNotifications();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

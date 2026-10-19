@@ -96,14 +96,22 @@ export class AdjustmentAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(row: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateAdjustment(row.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Ajustement mis à jour');
         this.cancelEdit();
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -120,14 +128,20 @@ export class AdjustmentAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createAdjustment(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Ajustement créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

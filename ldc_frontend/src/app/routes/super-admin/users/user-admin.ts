@@ -125,16 +125,24 @@ export class UserAdmin implements OnInit, OnDestroy {
     this.editingRoleId = account.roleId;
   }
 
+  isSubmitting = false;
+
   saveRole(account: any): void {
     if (!this.editingRoleId) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.changeRole(account.id, this.editingRoleId).subscribe({
       next: () => {
         this.toast.success('Rôle mis à jour');
         this.editingId     = null;
         this.editingRoleId = null;
         this.loadData();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors du changement de rôle'),
+      error: () => {
+        this.toast.error('Erreur lors du changement de rôle');
+        this.isSubmitting = false;
+      },
     });
   }
 

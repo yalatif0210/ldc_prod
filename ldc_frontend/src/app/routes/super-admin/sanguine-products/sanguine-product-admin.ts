@@ -94,15 +94,23 @@ export class SanguineProductAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(sanguineProduct: any): void {
     const data = { name: this.editingData.name };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateSanguineProduct(sanguineProduct.id, data).subscribe({
       next: () => {
         this.toast.success('Compte sanguin mis à jour');
         this.cancelEdit();
         this.loadSanguineProducts();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -119,14 +127,20 @@ export class SanguineProductAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createSanguineProduct({ name: this.addForm.value.name }).subscribe({
       next: () => {
         this.toast.success('Compte sanguin créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadSanguineProducts();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la création'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

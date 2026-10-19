@@ -54,7 +54,7 @@
                           }
                         </mat-select>
                       </mat-form-field>
-                      <button mat-icon-button color="primary" (click)="saveRole(account)" title="Enregistrer">
+                      <button mat-icon-button color="primary" [disabled]="isSubmitting" (click)="saveRole(account)" title="Enregistrer">
                         <mat-icon>save</mat-icon>
                       </button>
                       <button mat-icon-button (click)="cancelRoleEdit()" title="Annuler">

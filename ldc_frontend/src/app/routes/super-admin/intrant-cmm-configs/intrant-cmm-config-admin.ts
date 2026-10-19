@@ -122,14 +122,22 @@ export class IntrantCmmConfigAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(config: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateIntrantCmmConfig(config.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Configuration CMM mise à jour');
         this.cancelEdit();
         this.loadConfigs();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -146,14 +154,20 @@ export class IntrantCmmConfigAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createIntrantCmmConfig(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Configuration CMM créée');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadConfigs();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

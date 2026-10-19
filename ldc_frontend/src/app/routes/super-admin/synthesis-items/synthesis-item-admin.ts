@@ -119,14 +119,22 @@ export class SynthesisItemAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(item: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateSynthesisItem(item.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Synthèse mise à jour');
         this.cancelEdit();
         this.loadItems();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -143,14 +151,20 @@ export class SynthesisItemAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createSynthesisItem(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Synthèse créée');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadItems();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

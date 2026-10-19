@@ -191,14 +191,22 @@ export class ReportAdmin extends FormBaseComponent implements OnInit, OnDestroy 
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveStatus(report: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.changeReportStatus(report.id, this.editingData.statusId).subscribe({
       next: () => {
         this.toast.success('Statut mis à jour');
         this.cancelEdit();
         this.loadReports();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour du statut'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour du statut');
+        this.isSubmitting = false;
+      },
     });
   }
 

@@ -34,7 +34,7 @@
                   </td>
                   <td style="padding:8px;">
                     @if (editingId === role.id) {
-                      <button mat-icon-button color="primary" (click)="saveEdit(role)" title="Enregistrer">
+                      <button mat-icon-button color="primary" [disabled]="isSubmitting" (click)="saveEdit(role)" title="Enregistrer">
                         <mat-icon>save</mat-icon>
                       </button>
                       <button mat-icon-button (click)="cancelEdit()" title="Annuler">

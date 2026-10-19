@@ -82,14 +82,22 @@ export class RoleAdmin implements OnInit, OnDestroy {
     this.editingName = '';
   }
 
+  isSubmitting = false;
+
   saveEdit(role: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateRole(role.id, { role: this.editingName }).subscribe({
       next: () => {
         this.toast.success('Rôle mis à jour');
         this.cancelEdit();
         this.loadRoles();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour du rôle'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour du rôle');
+        this.isSubmitting = false;
+      },
     });
   }
 

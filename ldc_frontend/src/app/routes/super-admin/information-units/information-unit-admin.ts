@@ -70,7 +70,7 @@ export class InformationUnitAdmin implements OnInit, OnDestroy {
         this.paginate();
       },
       error: () => {
-        this.toast.error("Erreur lors du chargement des unités d'information");
+        this.toast.error('Erreur lors du chargement des unités d\'information');
         this.loading = false;
       },
     });
@@ -97,15 +97,23 @@ export class InformationUnitAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(unit: any): void {
     const payload = { name: this.editingData.name };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateInformationUnit(unit.id, payload).subscribe({
       next: () => {
         this.toast.success('Unité mise à jour');
         this.cancelEdit();
         this.loadUnits();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -118,8 +126,8 @@ export class InformationUnitAdmin implements OnInit, OnDestroy {
       },
       error: (err: HttpErrorResponse) => {
         const message = err.status === 409
-          ? (err.error?.description ?? "Suppression impossible : des éléments dépendent encore de cette unité.")
-          : "Erreur lors de la suppression";
+          ? (err.error?.description ?? 'Suppression impossible : des éléments dépendent encore de cette unité.')
+          : 'Erreur lors de la suppression';
         this.toast.error(message);
       },
     });
@@ -128,14 +136,20 @@ export class InformationUnitAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createInformationUnit({ name: val.name }).subscribe({
       next: () => {
         this.toast.success('Unité créée');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadUnits();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

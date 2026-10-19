@@ -63,7 +63,7 @@ export class LabActivityDataAdmin implements OnInit, OnDestroy {
         this.paginate();
       },
       error: () => {
-        this.toast.error("Erreur lors du chargement des données d'activité labo");
+        this.toast.error('Erreur lors du chargement des données d\'activité labo');
         this.loading = false;
       },
     });
@@ -94,14 +94,22 @@ export class LabActivityDataAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(row: any): void {
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateLabActivityData(row.id, this.editingData).subscribe({
       next: () => {
         this.toast.success('Donnée mise à jour');
         this.cancelEdit();
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la mise à jour'),
+      error: () => {
+        this.toast.error('Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -118,14 +126,20 @@ export class LabActivityDataAdmin implements OnInit, OnDestroy {
 
   submitAdd(): void {
     if (this.addForm.invalid) return;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createLabActivityData(this.addForm.value).subscribe({
       next: () => {
         this.toast.success('Donnée créée');
         this.addForm.reset();
         this.showAddForm = false;
         this.load();
+        this.isSubmitting = false;
       },
-      error: () => this.toast.error('Erreur lors de la création'),
+      error: () => {
+        this.toast.error('Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 

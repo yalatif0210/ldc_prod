@@ -88,15 +88,23 @@ export class MonthAdmin implements OnInit, OnDestroy {
     this.editingData = {};
   }
 
+  isSubmitting = false;
+
   saveEdit(month: any): void {
     const payload = { month: this.editingData.month };
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.updateMonth(month.id, payload).subscribe({
       next: () => {
         this.toast.success('Mois mis à jour');
         this.cancelEdit();
         this.loadMonths();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la mise à jour');
+        this.isSubmitting = false;
+      },
     });
   }
 
@@ -114,14 +122,20 @@ export class MonthAdmin implements OnInit, OnDestroy {
   submitAdd(): void {
     if (this.addForm.invalid) return;
     const val = this.addForm.value;
+    if (this.isSubmitting) { return; }
+    this.isSubmitting = true;
     this.service.createMonth({ month: val.month }).subscribe({
       next: () => {
         this.toast.success('Mois créé');
         this.addForm.reset();
         this.showAddForm = false;
         this.loadMonths();
+        this.isSubmitting = false;
       },
-      error: (err) => this.toast.error(err?.error?.description || 'Erreur lors de la création'),
+      error: (err) => {
+        this.toast.error(err?.error?.description || 'Erreur lors de la création');
+        this.isSubmitting = false;
+      },
     });
   }
 
